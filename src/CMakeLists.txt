@@ -1,4 +1,4 @@
-set(SOURCES main.cpp windowHandlers.cpp)
+set(SOURCES main.cpp windowHandlers.cpp shaderHelpers.cpp)
 
 target_sources(OpenGL_Study_Exe PRIVATE ${SOURCES})
 

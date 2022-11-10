@@ -8,10 +8,11 @@ project(OpenGL_Study
 
 add_executable(OpenGL_Study_Exe)
 
-set(HEADERS include/windowHandlers.h)
+set(HEADERS include/windowHandlers.h include/shaderHelpers.h)
 
 target_sources(OpenGL_Study_Exe PRIVATE ${HEADERS})
 target_include_directories(OpenGL_Study_Exe PRIVATE include/ libs/include)
+target_compile_features(OpenGL_Study_Exe PRIVATE cxx_std_20)
 
 # Find OpenGL
 find_package(OpenGL REQUIRED)
