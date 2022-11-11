@@ -9,18 +9,24 @@
 int main()
 {
     GLFWwindow* window = init();
+    glfwSwapInterval(3);
 
     if (!window) {
         return -1;
     }
 
     const float points[] = {
-        -0.5f, -0.5f,
-         0.0f,  0.5f,
-         0.5f, -0.5f
+        -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f, 1.0f, 0.0f, 0.0f,
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f,
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f
+    };
+    const unsigned int indices[] = {
+        0, 1, 2,
+        2, 3, 0
     };
 
-    // Configure VAO and VBO
+    // Configure VAO, VBO and EBO
     unsigned int VAO;
     GLCall(glGenVertexArrays(1, &VAO));
     GLCall(glBindVertexArray(VAO));
@@ -29,8 +35,16 @@ int main()
     GLCall(glGenBuffers(1, &VBO));
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
     GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW));
-    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, reinterpret_cast<void*>(0)));
+    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, reinterpret_cast<void*>(0)));
     GLCall(glEnableVertexAttribArray(0));
+    GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, reinterpret_cast<void*>(sizeof(float) * 3)));
+    GLCall(glEnableVertexAttribArray(1));
+
+    unsigned int EBO;
+    GLCall(glGenBuffers(1, &EBO));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW));
+
 
     // Configure shaders
     auto vShaderSource = readShaderFromFile("shaders/vs/vertexShader.vert");
@@ -58,13 +72,28 @@ int main()
     GLCall(glUseProgram(shaderProgram));
 
 
+    // Get location of uniform variable
+    GLCall(int kLocation = glGetUniformLocation(shaderProgram, "k"));
+    ASSERT(kLocation == -1);
+
+    float currentK = 0.0f;
+    float increment = 0.05f;
+
     // Render loop
     while (!glfwWindowShouldClose(window))
     {
         GLCall(glClearColor(0.1176f, 0.5647, 1.0f, 1.0f));
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
-        GLCall(glDrawArrays(GL_TRIANGLES, 0, 3));
+        if (currentK >= 1.0f)
+            increment = -0.05f;
+        if (currentK <= 0)
+            increment = 0.05f;
+
+        GLCall(glUniform1f(kLocation, currentK));
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+
+        currentK += increment;
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -72,6 +101,9 @@ int main()
 
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
     GLCall(glDeleteBuffers(1, &VBO));
+
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+    GLCall(glDeleteBuffers(1, &EBO));
 
     GLCall(glBindVertexArray(0));
     GLCall(glDeleteVertexArrays(1, &VAO));
