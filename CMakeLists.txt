@@ -8,7 +8,9 @@ project(OpenGL_Study
 
 add_executable(OpenGL_Study_Exe)
 
-set(HEADERS include/windowHandlers.h include/shaderHelpers.h)
+set(HEADERS include/windowHandlers.h
+	include/shaderHelpers.h
+	include/debugHelpers.h)
 
 target_sources(OpenGL_Study_Exe PRIVATE ${HEADERS})
 target_include_directories(OpenGL_Study_Exe PRIVATE include/ libs/include)

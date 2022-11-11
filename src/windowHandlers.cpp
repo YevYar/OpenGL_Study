@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <iostream>
 
+#include "debugHelpers.h"
 #include "windowHandlers.h"
 
 static constexpr int WIDTH = 800, HEIGHT = 600;
@@ -42,5 +43,5 @@ GLFWwindow* init()
 
 void windowFramebufferSizeCalback(GLFWwindow* window, int width, int height)
 {
-    glViewport(0, 0, width, height);
+    GLCall(glViewport(0, 0, width, height));
 }

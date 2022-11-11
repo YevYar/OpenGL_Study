@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 
+#include "debugHelpers.h"
 #include "shaderHelpers.h"
 
 std::string readShaderFromFile(std::string pathToShader)
@@ -43,18 +44,18 @@ GLuint createShader(GLenum shaderType, std::string shaderSource)
         return 0;
     }
 
-    glShaderSource(shader, 1, &c_shaderSource, nullptr);
-    glCompileShader(shader);
+    GLCall(glShaderSource(shader, 1, &c_shaderSource, nullptr));
+    GLCall(glCompileShader(shader));
 
     int compileResult = 0;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileResult);
+    GLCall(glGetShaderiv(shader, GL_COMPILE_STATUS, &compileResult));
 
     if (compileResult == GL_FALSE)
     {
         int logLength = 0;
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
+        GLCall(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength));
         char* errorLog = new char[logLength];
-        glGetShaderInfoLog(shader, logLength, &logLength, errorLog);
+        GLCall(glGetShaderInfoLog(shader, logLength, &logLength, errorLog));
         std::cerr << getShaderNameByType(shaderType) << " shader compilation error: " << errorLog << std::endl;
         delete[] errorLog;
         return 0;
@@ -78,36 +79,36 @@ std::string getShaderNameByType(GLenum shaderType)
 
 GLuint createShaderProgram(GLuint vertexShader, GLuint fragmentShader)
 {
-    GLuint program = glCreateProgram();
+    GLCall(GLuint program = glCreateProgram());
     if (program == 0)
     {
         std::cerr << "Shader program cannot be created" << std::endl;
         return 0;
     }
 
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
-    glLinkProgram(program);
-    glValidateProgram(program);
+    GLCall(glAttachShader(program, vertexShader));
+    GLCall(glAttachShader(program, fragmentShader));
+    GLCall(glLinkProgram(program));
+    GLCall(glValidateProgram(program));
 
     int validationResult = 0;
-    glGetProgramiv(program, GL_VALIDATE_STATUS, &validationResult);
+    GLCall(glGetProgramiv(program, GL_VALIDATE_STATUS, &validationResult));
     int linkingResult = 0;
-    glGetProgramiv(program, GL_LINK_STATUS, &linkingResult);
+    GLCall(glGetProgramiv(program, GL_LINK_STATUS, &linkingResult));
 
     if (linkingResult == GL_FALSE || validationResult == GL_FALSE)
     {
         int errorLength = 0;
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &errorLength);
+        GLCall(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &errorLength));
         char* errorLog = new char[errorLength];
-        glGetProgramInfoLog(program, errorLength, &errorLength, errorLog);
+        GLCall(glGetProgramInfoLog(program, errorLength, &errorLength, errorLog));
         std::cerr << "Shader program creation error: " << errorLog << std::endl;
         delete[] errorLog;
         return 0;
     }
 
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    GLCall(glDeleteShader(vertexShader));
+    GLCall(glDeleteShader(fragmentShader));
 
     return program;
 }

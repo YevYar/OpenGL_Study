@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#include "debugHelpers.h"
 #include "shaderHelpers.h"
 #include "windowHandlers.h"
 
@@ -21,19 +22,19 @@ int main()
 
     // Configure VAO and VBO
     unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+    GLCall(glGenVertexArrays(1, &VAO));
+    GLCall(glBindVertexArray(VAO));
 
     unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, reinterpret_cast<void*>(0));
-    glEnableVertexAttribArray(0);
+    GLCall(glGenBuffers(1, &VBO));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW));
+    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, reinterpret_cast<void*>(0)));
+    GLCall(glEnableVertexAttribArray(0));
 
     // Configure shaders
-    auto vShaderSource = readShaderFromFile("shaders/vs/vertexShader.shader");
-    auto fShaderSource = readShaderFromFile("shaders/fs/fragmentShader.shader");
+    auto vShaderSource = readShaderFromFile("shaders/vs/vertexShader.vert");
+    auto fShaderSource = readShaderFromFile("shaders/fs/fragmentShader.frag");
     if (vShaderSource.empty() || fShaderSource.empty())
     {
         glfwTerminate();
@@ -54,28 +55,28 @@ int main()
         glfwTerminate();
         return -4;
     }
-    glUseProgram(shaderProgram);
+    GLCall(glUseProgram(shaderProgram));
 
 
     // Render loop
     while (!glfwWindowShouldClose(window))
     {
-        glClearColor(0.1176f, 0.5647, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        GLCall(glClearColor(0.1176f, 0.5647, 1.0f, 1.0f));
+        GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        GLCall(glDrawArrays(GL_TRIANGLES, 0, 3));
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glDeleteBuffers(1, &VBO);
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    GLCall(glDeleteBuffers(1, &VBO));
 
-    glBindVertexArray(0);
-    glDeleteVertexArrays(1, &VAO);
+    GLCall(glBindVertexArray(0));
+    GLCall(glDeleteVertexArrays(1, &VAO));
 
-    glDeleteProgram(shaderProgram);
+    GLCall(glDeleteProgram(shaderProgram));
 
     glfwTerminate();
     
