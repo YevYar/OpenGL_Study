@@ -4,22 +4,32 @@
 
 #include "debugHelpers.h"
 #include "shaderHelpers.h"
-#include "windowHandlers.h"
+#include "vertexBuffer.h"
+#include "window.h"
+
+static constexpr int WIDTH = 800, HEIGHT = 600;
+static constexpr char TITLE[] = "OpenGL Study Project";
 
 int main()
 {
-    GLFWwindow* window = init();
-    glfwSwapInterval(3);
-
-    if (!window) {
+    Window window(WIDTH, HEIGHT, TITLE);
+    if (!window.isInitialized()) {
         return -1;
     }
+
+    glfwSwapInterval(4);
 
     const float points[] = {
         -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
         -0.5f,  0.5f, 1.0f, 0.0f, 0.0f,
          0.5f,  0.5f, 0.0f, 1.0f, 0.0f,
          0.5f, -0.5f, 0.0f, 0.0f, 1.0f
+    };
+    const float points2[] = {
+        -1.0f, -1.0f, 1.0f, 1.0f, 1.0f,
+        -1.0f,  1.0f, 1.0f, 0.0f, 0.0f,
+         1.0f,  1.0f, 0.0f, 1.0f, 0.0f,
+         1.0f, -1.0f, 0.0f, 0.0f, 1.0f
     };
     const unsigned int indices[] = {
         0, 1, 2,
@@ -31,10 +41,8 @@ int main()
     GLCall(glGenVertexArrays(1, &VAO));
     GLCall(glBindVertexArray(VAO));
 
-    unsigned int VBO;
-    GLCall(glGenBuffers(1, &VBO));
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW));
+    vertex::VertexBuffer vbo(vertex::VertexData(points, sizeof(points)), vertex::DataUsage::STATIC_DRAW);
+
     GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, reinterpret_cast<void*>(0)));
     GLCall(glEnableVertexAttribArray(0));
     GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, reinterpret_cast<void*>(sizeof(float) * 3)));
@@ -80,7 +88,7 @@ int main()
     float increment = 0.05f;
 
     // Render loop
-    while (!glfwWindowShouldClose(window))
+    while (!window.shouldClose())
     {
         GLCall(glClearColor(0.1176f, 0.5647, 1.0f, 1.0f));
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
@@ -95,12 +103,11 @@ int main()
 
         currentK += increment;
 
-        glfwSwapBuffers(window);
+        window.swapBuffers();
         glfwPollEvents();
     }
 
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    GLCall(glDeleteBuffers(1, &VBO));
+    vbo.unbind();
 
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
     GLCall(glDeleteBuffers(1, &EBO));
@@ -110,7 +117,5 @@ int main()
 
     GLCall(glDeleteProgram(shaderProgram));
 
-    glfwTerminate();
-    
     return 0;
 }

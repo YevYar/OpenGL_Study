@@ -1,7 +1,8 @@
 set(SOURCES main.cpp
-	windowHandlers.cpp
+	window.cpp
 	shaderHelpers.cpp
-	debugHelpers.cpp)
+	debugHelpers.cpp
+	vertexBuffer.cpp)
 
 target_sources(OpenGL_Study_Exe PRIVATE ${SOURCES})
 
