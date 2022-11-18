@@ -19,12 +19,12 @@ VertexBuffer::~VertexBuffer()
 	GLCall(glDeleteBuffers(1, &m_rendererId));
 }
 
-void VertexBuffer::bind() const
+void VertexBuffer::bind() const noexcept
 {
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_rendererId));
 }
 
-void VertexBuffer::unbind() const
+void VertexBuffer::unbind() const noexcept
 {
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
 }
@@ -36,7 +36,7 @@ void VertexBuffer::setData(const VertexData& data)
 	m_data = data;
 }
 
-const VertexData& VertexBuffer::getData() const
+const VertexData& VertexBuffer::getData() const noexcept
 {
 	return m_data;
 }

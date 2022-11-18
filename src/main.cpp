@@ -4,7 +4,10 @@
 
 #include "debugHelpers.h"
 #include "shaderHelpers.h"
+#include "vertexArray.h"
 #include "vertexBuffer.h"
+#include "vertexBufferLayout.h"
+#include "vertexHelpers.h"
 #include "window.h"
 
 static constexpr int WIDTH = 800, HEIGHT = 600;
@@ -37,16 +40,19 @@ int main()
     };
 
     // Configure VAO, VBO and EBO
-    unsigned int VAO;
-    GLCall(glGenVertexArrays(1, &VAO));
-    GLCall(glBindVertexArray(VAO));
+    vertex::VertexArray VAO;
 
-    vertex::VertexBuffer vbo(vertex::VertexData(points, sizeof(points)), vertex::DataUsage::STATIC_DRAW);
+    vertex::VertexBuffer VBO(vertex::VertexData(points, sizeof(points)), vertex::DataUsage::STATIC_DRAW);
 
-    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, reinterpret_cast<void*>(0)));
-    GLCall(glEnableVertexAttribArray(0));
-    GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, reinterpret_cast<void*>(sizeof(float) * 3)));
-    GLCall(glEnableVertexAttribArray(1));
+    vertex::VertexAttribute coordinateMap(0, 2, vertex::VertexAttrType::FLOAT, false, 0),
+        colorMap(1, 3, vertex::VertexAttrType::FLOAT, false,
+            vertex::getByteSizeOfType(vertex::VertexAttrType::FLOAT) * 3);
+
+    vertex::VertexBufferLayout layout;
+    layout.addVertexAttribute(coordinateMap);
+    layout.addVertexAttribute(colorMap);
+
+    VAO.addBuffer(VBO, layout);
 
     unsigned int EBO;
     GLCall(glGenBuffers(1, &EBO));
@@ -107,13 +113,12 @@ int main()
         glfwPollEvents();
     }
 
-    vbo.unbind();
+    VBO.unbind();
 
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
     GLCall(glDeleteBuffers(1, &EBO));
 
-    GLCall(glBindVertexArray(0));
-    GLCall(glDeleteVertexArrays(1, &VAO));
+    VAO.unbind();
 
     GLCall(glDeleteProgram(shaderProgram));
 

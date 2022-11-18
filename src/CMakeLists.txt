@@ -2,7 +2,10 @@ set(SOURCES main.cpp
 	window.cpp
 	shaderHelpers.cpp
 	debugHelpers.cpp
-	vertexBuffer.cpp)
+	vertexBuffer.cpp
+	vertexArray.cpp
+	vertexBufferLayout.cpp
+	vertexHelpers.cpp)
 
 target_sources(OpenGL_Study_Exe PRIVATE ${SOURCES})
 

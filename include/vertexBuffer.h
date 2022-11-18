@@ -1,7 +1,8 @@
 #ifndef VERTEX_BUFFER_H
 #define VERTEX_BUFFER_H
 
-namespace vertex {
+namespace vertex
+{
 	enum class DataUsage
 	{
 		STREAM_DRAW = 0x88E0, STREAM_READ = 0x88E1, STREAM_COPY = 0x88E2, STATIC_DRAW = 0x88E4,
@@ -15,19 +16,20 @@ namespace vertex {
 		unsigned int size;
 	};
 
-	class VertexBuffer {
+	class VertexBuffer
+	{
 		public:
 			VertexBuffer(const VertexData& data, DataUsage usage);
 			~VertexBuffer();
 
-			void bind() const;
-			void unbind() const;
+			void bind() const noexcept;
+			void unbind() const noexcept;
 
 			void setData(const VertexData& data);
-			const VertexData& getData() const;
+			const VertexData& getData() const noexcept;
 
 		private:
-			unsigned int m_rendererId;
+			unsigned int m_rendererId = 0;
 			VertexData m_data;
 			DataUsage m_usage = DataUsage::STATIC_DRAW;
 		
