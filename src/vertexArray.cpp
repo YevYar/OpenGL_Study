@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 
 #include "debugHelpers.h"
-#include "vertexBuffer.h"
+#include "buffer.h"
 #include "vertexBufferLayout.h"
 
 using namespace vertex;
@@ -29,7 +29,7 @@ void VertexArray::unbind() const noexcept
 	GLCall(glBindVertexArray(0));
 }
 
-void VertexArray::addBuffer(const VertexBuffer& vbo, const VertexBufferLayout& layout) const noexcept
+void VertexArray::addBuffer(const Buffer& vbo, const VertexBufferLayout& layout) const noexcept
 {
 	bind();
 	vbo.bind();

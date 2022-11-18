@@ -2,7 +2,7 @@ set(SOURCES main.cpp
 	window.cpp
 	shaderHelpers.cpp
 	debugHelpers.cpp
-	vertexBuffer.cpp
+	buffer.cpp
 	vertexArray.cpp
 	vertexBufferLayout.cpp
 	vertexHelpers.cpp)

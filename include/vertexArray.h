@@ -3,7 +3,7 @@
 
 namespace vertex
 {
-	class VertexBuffer;
+	class Buffer;
 	class VertexBufferLayout;
 
 	class VertexArray
@@ -15,7 +15,7 @@ namespace vertex
 			void bind() const noexcept;
 			void unbind() const noexcept;
 
-			void addBuffer(const VertexBuffer& vbo, const VertexBufferLayout& layout) const noexcept;
+			void addBuffer(const Buffer& vbo, const VertexBufferLayout& layout) const noexcept;
 			void enableAttribute(unsigned int index) const noexcept;
 			void disableAttribute(unsigned int index) const noexcept;
 

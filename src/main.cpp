@@ -3,9 +3,10 @@
 #include <iostream>
 
 #include "debugHelpers.h"
+#include "generalTypes.h"
 #include "shaderHelpers.h"
 #include "vertexArray.h"
-#include "vertexBuffer.h"
+#include "buffer.h"
 #include "vertexBufferLayout.h"
 #include "vertexHelpers.h"
 #include "window.h"
@@ -42,7 +43,8 @@ int main()
     // Configure VAO, VBO and EBO
     vertex::VertexArray VAO;
 
-    vertex::VertexBuffer VBO(vertex::VertexData(points, sizeof(points)), vertex::DataUsage::STATIC_DRAW);
+    vertex::Buffer VBO(vertex::BufferTarget::ARRAY_BUFFER,
+        ArrayData(points, sizeof(points)), vertex::BufferDataUsage::STATIC_DRAW);
 
     vertex::VertexAttribute coordinateMap(0, 2, vertex::VertexAttrType::FLOAT, false, 0),
         colorMap(1, 3, vertex::VertexAttrType::FLOAT, false,
@@ -54,11 +56,8 @@ int main()
 
     VAO.addBuffer(VBO, layout);
 
-    unsigned int EBO;
-    GLCall(glGenBuffers(1, &EBO));
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO));
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW));
-
+    vertex::Buffer EBO(vertex::BufferTarget::ELEMENT_ARRAY_BUFFER,
+        ArrayData(indices, sizeof(indices)), vertex::BufferDataUsage::STATIC_DRAW);
 
     // Configure shaders
     auto vShaderSource = readShaderFromFile("shaders/vs/vertexShader.vert");
@@ -114,10 +113,7 @@ int main()
     }
 
     VBO.unbind();
-
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-    GLCall(glDeleteBuffers(1, &EBO));
-
+    EBO.unbind();
     VAO.unbind();
 
     GLCall(glDeleteProgram(shaderProgram));
