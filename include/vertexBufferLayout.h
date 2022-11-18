@@ -37,6 +37,9 @@ namespace vertex
 			unsigned int m_stride = 0;
 
 	};
+
+	unsigned int getByteSizeOfType(VertexAttrType type) noexcept;
+
 }
 
 #endif

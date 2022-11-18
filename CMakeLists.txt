@@ -14,7 +14,6 @@ set(HEADERS include/window.h
 	include/buffer.h
 	include/vertexArray.h
 	include/vertexBufferLayout.h
-	include/vertexHelpers.h
 	include/generalTypes.h)
 
 target_sources(OpenGL_Study_Exe PRIVATE ${HEADERS})

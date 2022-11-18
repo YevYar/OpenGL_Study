@@ -8,7 +8,6 @@
 #include "vertexArray.h"
 #include "buffer.h"
 #include "vertexBufferLayout.h"
-#include "vertexHelpers.h"
 #include "window.h"
 
 static constexpr int WIDTH = 800, HEIGHT = 600;

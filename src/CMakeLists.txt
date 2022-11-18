@@ -4,8 +4,7 @@ set(SOURCES main.cpp
 	debugHelpers.cpp
 	buffer.cpp
 	vertexArray.cpp
-	vertexBufferLayout.cpp
-	vertexHelpers.cpp)
+	vertexBufferLayout.cpp)
 
 target_sources(OpenGL_Study_Exe PRIVATE ${SOURCES})
 
