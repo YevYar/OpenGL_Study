@@ -2,8 +2,9 @@
 
 #include <glad/glad.h>
 
-#include "debugHelpers.h"
 #include "buffer.h"
+#include "debugHelpers.h"
+#include "helpers.h"
 #include "vertexBufferLayout.h"
 
 using namespace vertex;
@@ -38,7 +39,7 @@ void VertexArray::addBuffer(const Buffer& vbo, const VertexBufferLayout& layout)
 
 	for (const auto& attr : layout.getAttributes())
 	{
-		GLCall(glVertexAttribPointer(attr.index, attr.count, static_cast<int>(attr.type),
+		GLCall(glVertexAttribPointer(attr.index, attr.count, helpers::toUType(attr.type),
 			attr.normalized ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<void*>(attr.byteOffset)));
 		enableAttribute(attr.index);
 	}	

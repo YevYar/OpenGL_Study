@@ -7,5 +7,5 @@ uniform float k;
 
 void main()
 {
-	FragColor = k * fColor;
+	FragColor = fColor; // k * fColor;
 }

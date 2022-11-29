@@ -4,10 +4,11 @@
 
 #include "debugHelpers.h"
 #include "generalTypes.h"
-#include "shaderHelpers.h"
+#include "helpers.h"
 #include "vertexArray.h"
 #include "buffer.h"
 #include "vertexBufferLayout.h"
+#include "shaderProgram.h"
 #include "window.h"
 
 static constexpr int WIDTH = 800, HEIGHT = 600;
@@ -59,34 +60,32 @@ int main()
         ArrayData(indices, sizeof(indices)), vertex::BufferDataUsage::STATIC_DRAW);
 
     // Configure shaders
-    auto vShaderSource = readShaderFromFile("shaders/vs/vertexShader.vert");
-    auto fShaderSource = readShaderFromFile("shaders/fs/fragmentShader.frag");
+    auto vShaderSource = helpers::readStringFromFile("shaders/vs/vertexShader.vert");
+    auto fShaderSource = helpers::readStringFromFile("shaders/fs/fragmentShader.frag");
     if (vShaderSource.empty() || fShaderSource.empty())
     {
-        glfwTerminate();
         return -2;
     }
 
-    auto vShader = createShader(GL_VERTEX_SHADER, vShaderSource);
-    auto fShader = createShader(GL_FRAGMENT_SHADER, fShaderSource);
-    if (vShader == 0 || fShader == 0)
+    shader::Shader vShader(shader::ShaderType::VERTEX_SHADER, vShaderSource),
+        fShader(shader::ShaderType::FRAGMENT_SHADER, fShaderSource);
+
+    if (!vShader.isValid() || !fShader.isValid())
     {
-        glfwTerminate();
         return -3;
     }
 
-    auto shaderProgram = createShaderProgram(vShader, fShader);
-    if (shaderProgram == 0)
+    shader::ShaderProgram shaderProgram(vShader, fShader);
+    if (!shaderProgram.isValid())
     {
-        glfwTerminate();
         return -4;
     }
-    GLCall(glUseProgram(shaderProgram));
+    shaderProgram.use();
 
 
     // Get location of uniform variable
-    GLCall(int kLocation = glGetUniformLocation(shaderProgram, "k"));
-    ASSERT(kLocation == -1);
+    // GLCall(int kLocation = glGetUniformLocation(shaderProgram, "k"));
+    // ASSERT(kLocation == -1);
 
     float currentK = 0.0f;
     float increment = 0.05f;
@@ -102,7 +101,7 @@ int main()
         if (currentK <= 0)
             increment = 0.05f;
 
-        GLCall(glUniform1f(kLocation, currentK));
+        // GLCall(glUniform1f(kLocation, currentK));
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
         currentK += increment;
@@ -114,8 +113,6 @@ int main()
     VBO.unbind();
     EBO.unbind();
     VAO.unbind();
-
-    GLCall(glDeleteProgram(shaderProgram));
 
     return 0;
 }
