@@ -9,6 +9,7 @@
 #include "buffer.h"
 #include "vertexBufferLayout.h"
 #include "shaderProgram.h"
+#include "uniforms.h"
 #include "window.h"
 
 static constexpr int WIDTH = 800, HEIGHT = 600;
@@ -22,6 +23,14 @@ int main()
     }
 
     glfwSwapInterval(4);
+
+    uniforms::Uniform<float, 1> U("test");
+    uniforms::Uniform<int, 2> U2("test");
+    uniforms::Uniform<unsigned int, 3> U3("test");
+    uniforms::Uniform<double, 4> U4("test");
+    //uniforms::Uniform<int, 2> U5("test");
+    //uniforms::Uniform<double, 5> U6("test");
+    //uniforms::Uniform<double, 0> U7("test");
 
     const float points[] = {
         -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
@@ -82,10 +91,9 @@ int main()
     }
     shaderProgram.use();
 
-
-    // Get location of uniform variable
-    // GLCall(int kLocation = glGetUniformLocation(shaderProgram, "k"));
-    // ASSERT(kLocation == -1);
+    // Create uniform
+    uniforms::Uniform<float, 1> k("k");
+    shaderProgram.attachUniform(k);
 
     float currentK = 0.0f;
     float increment = 0.05f;
@@ -101,7 +109,7 @@ int main()
         if (currentK <= 0)
             increment = 0.05f;
 
-        // GLCall(glUniform1f(kLocation, currentK));
+        k.setData(&currentK);
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
         currentK += increment;

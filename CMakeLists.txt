@@ -15,7 +15,8 @@ set(HEADERS include/window.h
 	include/vertexArray.h
 	include/vertexBufferLayout.h
 	include/generalTypes.h
-	include/shaderProgram.h)
+	include/shaderProgram.h
+	include/uniforms.h)
 
 target_sources(OpenGL_Study_Exe PRIVATE ${HEADERS})
 target_include_directories(OpenGL_Study_Exe PRIVATE include/ libs/include)

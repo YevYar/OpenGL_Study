@@ -5,7 +5,8 @@ set(SOURCES main.cpp
 	buffer.cpp
 	vertexArray.cpp
 	vertexBufferLayout.cpp
-	shaderProgram.cpp)
+	shaderProgram.cpp
+	uniforms.cpp)
 
 target_sources(OpenGL_Study_Exe PRIVATE ${SOURCES})
 

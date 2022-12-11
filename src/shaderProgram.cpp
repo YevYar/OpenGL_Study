@@ -5,6 +5,7 @@
 
 #include "debugHelpers.h"
 #include "helpers.h"
+#include "uniforms.h"
 
 using namespace shader;
 
@@ -84,6 +85,12 @@ ShaderProgram::~ShaderProgram()
 void ShaderProgram::use() const noexcept
 {
     GLCall(glUseProgram(m_rendererId));
+}
+
+bool ShaderProgram::attachUniform(uniforms::BaseUniform& uniform) const noexcept
+{
+    GLCall(uniform.m_location = glGetUniformLocation(m_rendererId, uniform.m_name.c_str()));
+    return uniform.m_location >= 0;
 }
 
 std::string shader::getShaderNameByType(ShaderType type)

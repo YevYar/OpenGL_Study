@@ -3,6 +3,11 @@
 
 #include <string>
 
+namespace uniforms
+{
+	class BaseUniform;
+}
+
 namespace shader
 {
 	enum class ShaderType : unsigned int
@@ -34,6 +39,8 @@ namespace shader
 
 			void use() const noexcept;
 			inline bool isValid() const noexcept { return m_rendererId != 0; }
+
+			bool attachUniform(uniforms::BaseUniform& uniform) const noexcept;
 
 		private:
 			unsigned int m_rendererId = 0;
