@@ -3,8 +3,8 @@
 #include <glad/glad.h>
 #include <iostream>
 
-#include "debugHelpers.h"
-#include "helpers.h"
+#include "helpers/debugHelpers.h"
+#include "helpers/helpers.h"
 #include "uniforms.h"
 
 using namespace shader;

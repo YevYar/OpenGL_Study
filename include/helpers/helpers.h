@@ -1,3 +1,6 @@
+#ifndef HELPERS_H
+#define HELPERS_H
+
 #include <string>
 
 namespace helpers
@@ -10,3 +13,5 @@ namespace helpers
 		return static_cast<std::underlying_type_t<E>>(enumeration);
 	}
 }
+
+#endif

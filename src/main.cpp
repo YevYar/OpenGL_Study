@@ -2,9 +2,9 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-#include "debugHelpers.h"
 #include "generalTypes.h"
-#include "helpers.h"
+#include "helpers/debugHelpers.h"
+#include "helpers/helpers.h"
 #include "vertexArray.h"
 #include "buffer.h"
 #include "vertexBufferLayout.h"

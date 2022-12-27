@@ -1,3 +1,6 @@
+#ifndef DEBUG_HELPERS_H
+#define DEBUG_HELPERS_H
+
 #define ASSERT(x) if (x) __debugbreak();
 
 #define GLCall(x) clearGlError();\
@@ -7,3 +10,5 @@
 void clearGlError();
 
 bool checkAndLogGLErrors(const char* file, const char* function, int line);
+
+#endif

@@ -9,14 +9,14 @@ project(OpenGL_Study
 add_executable(OpenGL_Study_Exe)
 
 set(HEADERS include/window.h
-	include/helpers.h
-	include/debugHelpers.h
 	include/buffer.h
 	include/vertexArray.h
 	include/vertexBufferLayout.h
 	include/generalTypes.h
 	include/shaderProgram.h
-	include/uniforms.h)
+	include/uniforms.h
+	include/helpers/helpers.h
+	include/helpers/debugHelpers.h)
 
 target_sources(OpenGL_Study_Exe PRIVATE ${HEADERS})
 target_include_directories(OpenGL_Study_Exe PRIVATE include/ libs/include)

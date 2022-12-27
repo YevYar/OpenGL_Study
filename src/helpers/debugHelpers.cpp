@@ -1,7 +1,7 @@
+#include "helpers/debugHelpers.h"
+
 #include <glad/glad.h>
 #include <iostream>
-
-#include "debugHelpers.h"
 
 void clearGlError()
 {

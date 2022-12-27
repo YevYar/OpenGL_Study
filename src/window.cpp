@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-#include "debugHelpers.h"
+#include "helpers/debugHelpers.h"
 
 void windowFramebufferSizeCalback(GLFWwindow* window, int width, int height)
 {

@@ -2,8 +2,8 @@
 
 #include <glad/glad.h>
 
-#include "debugHelpers.h"
-#include "helpers.h"
+#include "helpers/debugHelpers.h"
+#include "helpers/helpers.h"
 
 using namespace vertex;
 
