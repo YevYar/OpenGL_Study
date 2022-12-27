@@ -2,8 +2,12 @@
 #define UNIFORMS_H
 
 #include <glad/glad.h>
+#include <iostream>
 #include <string>
 #include <type_traits>
+
+#include "exceptions.h"
+#include "helpers/macros.h"
 
 namespace shader
 {
@@ -13,18 +17,27 @@ namespace shader
 namespace uniforms
 {
 	using BaseUniformSetter = void (*)(GLint, GLsizei, const void*);
+
 	BaseUniformSetter getUniformSetter(const char* typeName, unsigned int count) noexcept;
 
 	class BaseUniform
 	{
 		public:
-			BaseUniform(std::string name) : m_name{ std::move(name) } { }
+			virtual ~BaseUniform() = default;
+
+			virtual void setData(const void* data) = 0;
 
 		protected:
-			int m_location = -1;
-			std::string m_name;
+			BaseUniform(int location, std::string name);
+
+			NOT_COPYABLE_MOVABLE(BaseUniform)
+			
+		protected:
+			const int m_location = -1;
+			const std::string m_name;			
 
 			friend class shader::ShaderProgram;
+
 	};
 
 	template<typename T, unsigned int Count>
@@ -40,24 +53,28 @@ namespace uniforms
 			using ConcreteUniformSetter = void (*)(GLint, GLsizei, const T*);
 
 		public:
-			Uniform(std::string name) :
-				BaseUniform{ std::move(name) },
-				m_setter { reinterpret_cast<ConcreteUniformSetter>(getUniformSetter(typeid(T).name(), Count)) }
-			{ }
-
-			void setData(const T* data) const
+			void setData(const void* data) override
 			{
-				if (m_location < 0)
-				{
-					throw std::exception("Uniform is not attached to a shader program.");
-				}
+				GLCall(m_setter(m_location, Count, reinterpret_cast<const T*>(data)));
+			}
 
-				m_setter(m_location, Count, data);
+		protected:
+			Uniform(int location, std::string name) :
+				BaseUniform{ location, std::move(name) },
+				m_setter{ reinterpret_cast<ConcreteUniformSetter>(getUniformSetter(typeid(T).name(), Count)) }
+			{
+				if (m_setter == nullptr)
+				{
+					throw exceptions::GLRecAcquisitionException(
+						"No uniform setter function for specified template arguments.");
+				}
 			}
 
 		private:
 			const unsigned int count = Count;			
 			const ConcreteUniformSetter m_setter = nullptr;			
+
+			friend class shader::ShaderProgram;
 
 	};
 }

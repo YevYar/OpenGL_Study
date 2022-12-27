@@ -24,10 +24,10 @@ int main()
 
     glfwSwapInterval(4);
 
-    uniforms::Uniform<float, 1> U("test");
-    uniforms::Uniform<int, 2> U2("test");
+    // uniforms::Uniform<float, 1> U(1, "test");
+    /*uniforms::Uniform<int, 2> U2("test");
     uniforms::Uniform<unsigned int, 3> U3("test");
-    uniforms::Uniform<double, 4> U4("test");
+    uniforms::Uniform<double, 4> U4("test");*/
     //uniforms::Uniform<int, 2> U5("test");
     //uniforms::Uniform<double, 5> U6("test");
     //uniforms::Uniform<double, 0> U7("test");
@@ -90,10 +90,7 @@ int main()
         return -4;
     }
     shaderProgram.use();
-
-    // Create uniform
-    uniforms::Uniform<float, 1> k("k");
-    shaderProgram.attachUniform(k);
+    auto& k = shaderProgram.findUniform<float, 1>("k");
 
     float currentK = 0.0f;
     float increment = 0.05f;

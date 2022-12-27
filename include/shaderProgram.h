@@ -1,12 +1,15 @@
 #ifndef SHADER_PROGRAM_H
 #define SHADER_PROGRAM_H
 
+#include <glad/glad.h>
+#include <format>
+#include <map>
 #include <string>
 
-namespace uniforms
-{
-	class BaseUniform;
-}
+#include "exceptions.h"
+#include "helpers/debugHelpers.h"
+#include "helpers/macros.h"
+#include "uniforms.h"
 
 namespace shader
 {
@@ -18,14 +21,16 @@ namespace shader
 	class Shader
 	{
 		public:
-			Shader(ShaderType type, std::string shaderSource);
+			Shader(ShaderType type, const std::string& shaderSource);
 			~Shader();
 
-			inline bool isValid() const noexcept { return m_rendererId != 0; }
+			NOT_COPYABLE_MOVABLE(Shader);
+
+			bool isValid() const noexcept { return m_rendererId != 0; }
 
 		private:
-			unsigned int m_rendererId = 0;
-			ShaderType m_type = ShaderType::VERTEX_SHADER;
+			unsigned int m_rendererId;
+			const ShaderType m_type = ShaderType::VERTEX_SHADER;
 
 			friend class ShaderProgram;
 
@@ -34,16 +39,37 @@ namespace shader
 	class ShaderProgram
 	{
 		public:
-			ShaderProgram(Shader vertexShader, Shader fragmentShader);
+			ShaderProgram(const Shader& vertexShader, const Shader& fragmentShader);
 			~ShaderProgram();
 
-			void use() const noexcept;
-			inline bool isValid() const noexcept { return m_rendererId != 0; }
+			NOT_COPYABLE_MOVABLE(ShaderProgram)
 
-			bool attachUniform(uniforms::BaseUniform& uniform) const noexcept;
+			void use() const noexcept;
+			bool isValid() const noexcept { return m_rendererId != 0; }
+
+			template<typename T, unsigned int Count>
+			uniforms::BaseUniform& findUniform(std::string name)
+			{
+				GLCall(auto location = glGetUniformLocation(m_rendererId, name.c_str()));
+				if (location < 0)
+				{
+					auto excMes = std::format(
+						"Cannot find location of uniform variable '{}'."
+						" Check the name and is this uniform used in the shader",
+						name
+					);
+					throw exceptions::GLRecAcquisitionException(excMes);
+				}
+
+				auto uniform = new uniforms::Uniform<T, Count>(location, name);
+				m_uniforms.insert({ std::move(name), std::unique_ptr<uniforms::BaseUniform>(uniform) });
+				return *uniform;
+			}
+			uniforms::BaseUniform& getUniform(const std::string& name) const;
 
 		private:
 			unsigned int m_rendererId = 0;
+			std::map<std::string, std::unique_ptr<uniforms::BaseUniform>> m_uniforms;
 
 	};
 

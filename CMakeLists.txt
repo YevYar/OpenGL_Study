@@ -15,10 +15,10 @@ set(HEADERS include/window.h
 	include/generalTypes.h
 	include/shaderProgram.h
 	include/uniforms.h
+	include/exceptions.h
 	include/helpers/helpers.h
 	include/helpers/debugHelpers.h
-	include/helpers/macros.h
-	include/exceptions.h)
+	include/helpers/macros.h)
 
 target_sources(OpenGL_Study_Exe PRIVATE ${HEADERS})
 target_include_directories(OpenGL_Study_Exe PRIVATE include/ libs/include)

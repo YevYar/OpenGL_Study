@@ -49,3 +49,12 @@ BaseUniformSetter uniforms::getUniformSetter(const char* typeName, unsigned int 
 
 	return nullptr;
 }
+
+BaseUniform::BaseUniform(int location, std::string name) :
+	m_location{ location }, m_name{ std::move(name) }
+{
+	if (m_location < 0)
+	{
+		throw exceptions::GLRecAcquisitionException("Uniform is not attached to a shader program.");
+	}
+}

@@ -1,43 +1,43 @@
 #include "shaderProgram.h"
 
-#include <glad/glad.h>
 #include <iostream>
+#include <vector>
 
-#include "helpers/debugHelpers.h"
 #include "helpers/helpers.h"
-#include "uniforms.h"
 
 using namespace shader;
 
-Shader::Shader(ShaderType type, std::string shaderSource) :
-    m_type {type}
+Shader::Shader(ShaderType type, const std::string& shaderSource) :
+    m_type{ type }
 {
-    const char* c_shaderSource = shaderSource.c_str();
+    auto c_shaderSource = shaderSource.c_str();
 
-    m_rendererId = glCreateShader(helpers::toUType(type));
+    GLCall(m_rendererId = glCreateShader(helpers::toUType(type)));
     if (m_rendererId == 0)
     {
-        std::cerr << getShaderNameByType(type) << " shader cannot be created" << std::endl;
+        auto excMes = std::format("{} shader cannot be created", getShaderNameByType(type));
+        throw exceptions::GLRecAcquisitionException(excMes);
     }
-    else
-    {
-        GLCall(glShaderSource(m_rendererId, 1, &c_shaderSource, nullptr));
-        GLCall(glCompileShader(m_rendererId));
 
-        int compileResult = 0;
-        GLCall(glGetShaderiv(m_rendererId, GL_COMPILE_STATUS, &compileResult));
+	GLCall(glShaderSource(m_rendererId, 1, &c_shaderSource, nullptr));
+	GLCall(glCompileShader(m_rendererId));
 
-        if (compileResult == GL_FALSE)
-        {
-            int logLength = 0;
-            GLCall(glGetShaderiv(m_rendererId, GL_INFO_LOG_LENGTH, &logLength));
-            char* errorLog = new char[logLength];
-            GLCall(glGetShaderInfoLog(m_rendererId, logLength, &logLength, errorLog));
-            std::cerr << getShaderNameByType(type) << " shader compilation error: " << errorLog << std::endl;
-            delete[] errorLog;
-            m_rendererId = 0;
-        }
-    }
+	int compileResult = 0;
+	GLCall(glGetShaderiv(m_rendererId, GL_COMPILE_STATUS, &compileResult));
+
+	if (compileResult == GL_FALSE)
+	{
+		int logLength = 0;
+		GLCall(glGetShaderiv(m_rendererId, GL_INFO_LOG_LENGTH, &logLength));
+		std::vector<GLchar> errorLog(logLength);
+		GLCall(glGetShaderInfoLog(m_rendererId, logLength, &logLength, &errorLog[0]));
+
+		GLCall(glDeleteShader(m_rendererId));
+
+		auto excMes = std::format("{} shader compilation error: {}",
+			getShaderNameByType(type), errorLog.data());
+		throw exceptions::GLRecAcquisitionException(excMes);
+	}
 }
 
 Shader::~Shader()
@@ -45,36 +45,39 @@ Shader::~Shader()
     GLCall(glDeleteShader(m_rendererId));
 }
 
-ShaderProgram::ShaderProgram(Shader vertexShader, Shader fragmentShader)
+ShaderProgram::ShaderProgram(const Shader& vertexShader, const Shader& fragmentShader)
 {
     GLCall(m_rendererId = glCreateProgram());
     if (m_rendererId == 0)
     {
-        std::cerr << "Shader program cannot be created" << std::endl;
+        throw exceptions::GLRecAcquisitionException("Shader program cannot be created");
     }
-    else
-    {
-        GLCall(glAttachShader(m_rendererId, vertexShader.m_rendererId));
-        GLCall(glAttachShader(m_rendererId, fragmentShader.m_rendererId));
-        GLCall(glLinkProgram(m_rendererId));
-        GLCall(glValidateProgram(m_rendererId));
 
-        int validationResult = 0;
-        GLCall(glGetProgramiv(m_rendererId, GL_VALIDATE_STATUS, &validationResult));
-        int linkingResult = 0;
-        GLCall(glGetProgramiv(m_rendererId, GL_LINK_STATUS, &linkingResult));
+	GLCall(glAttachShader(m_rendererId, vertexShader.m_rendererId));
+	GLCall(glAttachShader(m_rendererId, fragmentShader.m_rendererId));
+	GLCall(glLinkProgram(m_rendererId));
+	GLCall(glValidateProgram(m_rendererId));
 
-        if (linkingResult == GL_FALSE || validationResult == GL_FALSE)
-        {
-            int errorLength = 0;
-            GLCall(glGetProgramiv(m_rendererId, GL_INFO_LOG_LENGTH, &errorLength));
-            char* errorLog = new char[errorLength];
-            GLCall(glGetProgramInfoLog(m_rendererId, errorLength, &errorLength, errorLog));
-            std::cerr << "Shader program creation error: " << errorLog << std::endl;
-            delete[] errorLog;
-            m_rendererId = 0;
-        }
-    }
+	int validationResult = 0;
+	GLCall(glGetProgramiv(m_rendererId, GL_VALIDATE_STATUS, &validationResult));
+	int linkingResult = 0;
+	GLCall(glGetProgramiv(m_rendererId, GL_LINK_STATUS, &linkingResult));
+
+	if (linkingResult == GL_FALSE || validationResult == GL_FALSE)
+	{
+		int errorLength = 0;
+		GLCall(glGetProgramiv(m_rendererId, GL_INFO_LOG_LENGTH, &errorLength));
+		std::vector<GLchar> errorLog(errorLength);
+		GLCall(glGetProgramInfoLog(m_rendererId, errorLength, &errorLength, &errorLog[0]));
+
+		GLCall(glDeleteProgram(m_rendererId));
+
+		auto excMes = std::format("Shader program creation error: {}", errorLog.data());
+		throw exceptions::GLRecAcquisitionException(excMes);
+	}
+
+	GLCall(glDetachShader(m_rendererId, vertexShader.m_rendererId));
+	GLCall(glDetachShader(m_rendererId, fragmentShader.m_rendererId));
 }
 
 ShaderProgram::~ShaderProgram()
@@ -87,10 +90,9 @@ void ShaderProgram::use() const noexcept
     GLCall(glUseProgram(m_rendererId));
 }
 
-bool ShaderProgram::attachUniform(uniforms::BaseUniform& uniform) const noexcept
+uniforms::BaseUniform& ShaderProgram::getUniform(const std::string& name) const
 {
-    GLCall(uniform.m_location = glGetUniformLocation(m_rendererId, uniform.m_name.c_str()));
-    return uniform.m_location >= 0;
+    return *(m_uniforms.at(name).get());
 }
 
 std::string shader::getShaderNameByType(ShaderType type)
