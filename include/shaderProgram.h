@@ -29,7 +29,7 @@ namespace shader
 			bool isValid() const noexcept { return m_rendererId != 0; }
 
 		private:
-			unsigned int m_rendererId;
+			unsigned int m_rendererId = 0;
 			const ShaderType m_type = ShaderType::VERTEX_SHADER;
 
 			friend class ShaderProgram;
