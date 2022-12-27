@@ -48,7 +48,7 @@ namespace shader
 			bool isValid() const noexcept { return m_rendererId != 0; }
 
 			template<typename T, unsigned int Count>
-			uniforms::BaseUniform& findUniform(std::string name)
+			BaseUniform& findUniform(std::string name)
 			{
 				GLCall(auto location = glGetUniformLocation(m_rendererId, name.c_str()));
 				if (location < 0)
@@ -61,15 +61,15 @@ namespace shader
 					throw exceptions::GLRecAcquisitionException(excMes);
 				}
 
-				auto uniform = new uniforms::Uniform<T, Count>(location, name);
-				m_uniforms.insert({ std::move(name), std::unique_ptr<uniforms::BaseUniform>(uniform) });
+				auto uniform = new Uniform<T, Count>(location, name);
+				m_uniforms.insert({ std::move(name), std::unique_ptr<BaseUniform>(uniform) });
 				return *uniform;
 			}
-			uniforms::BaseUniform& getUniform(const std::string& name) const;
+			BaseUniform& getUniform(const std::string& name) const;
 
 		private:
 			unsigned int m_rendererId = 0;
-			std::map<std::string, std::unique_ptr<uniforms::BaseUniform>> m_uniforms;
+			std::map<std::string, std::unique_ptr<BaseUniform>> m_uniforms;
 
 	};
 

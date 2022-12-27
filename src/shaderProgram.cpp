@@ -90,7 +90,7 @@ void ShaderProgram::use() const noexcept
     GLCall(glUseProgram(m_rendererId));
 }
 
-uniforms::BaseUniform& ShaderProgram::getUniform(const std::string& name) const
+BaseUniform& ShaderProgram::getUniform(const std::string& name) const
 {
     return *(m_uniforms.at(name).get());
 }

@@ -12,10 +12,7 @@
 namespace shader
 {
 	class ShaderProgram;
-}
 
-namespace uniforms
-{
 	using BaseUniformSetter = void (*)(GLint, GLsizei, const void*);
 
 	BaseUniformSetter getUniformSetter(const char* typeName, unsigned int count) noexcept;
@@ -36,7 +33,7 @@ namespace uniforms
 			const int m_location = -1;
 			const std::string m_name;			
 
-			friend class shader::ShaderProgram;
+			friend class ShaderProgram;
 
 	};
 
@@ -74,7 +71,7 @@ namespace uniforms
 			const unsigned int count = Count;			
 			const ConcreteUniformSetter m_setter = nullptr;			
 
-			friend class shader::ShaderProgram;
+			friend class ShaderProgram;
 
 	};
 }

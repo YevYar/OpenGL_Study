@@ -2,9 +2,9 @@
 
 #include <cstring>
 
-using namespace uniforms;
+using namespace shader;
 
-BaseUniformSetter uniforms::getUniformSetter(const char* typeName, unsigned int count) noexcept
+BaseUniformSetter shader::getUniformSetter(const char* typeName, unsigned int count) noexcept
 {
 	if (strcmp(typeName, "float") == 0)
 	{
