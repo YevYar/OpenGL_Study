@@ -6,7 +6,8 @@ set(SOURCES main.cpp
 	shaderProgram.cpp
 	uniforms.cpp
 	helpers/helpers.cpp
-	helpers/debugHelpers.cpp)
+	helpers/debugHelpers.cpp
+	generalTypes.cpp)
 
 target_sources(OpenGL_Study_Exe PRIVATE ${SOURCES})
 
