@@ -10,6 +10,7 @@ namespace exceptions
 		public:
 			GLRecAcquisitionException(const char* const message) : std::exception(message)
 			{ }
+
 			GLRecAcquisitionException(const std::string& message) : std::exception(message.c_str())
 			{ }
 
