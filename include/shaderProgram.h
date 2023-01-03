@@ -55,7 +55,7 @@ namespace shader
 				{
 					auto excMes = std::format(
 						"Cannot find location of uniform variable '{}'."
-						" Check the name and is this uniform used in the shader",
+						" Check the name and is this uniform used in the shader.",
 						name
 					);
 					throw exceptions::GLRecAcquisitionException(excMes);

@@ -15,7 +15,7 @@ Shader::Shader(ShaderType type, const std::string& shaderSource) :
     GLCall(m_rendererId = glCreateShader(helpers::toUType(type)));
     if (m_rendererId == 0)
     {
-        auto excMes = std::format("{} shader cannot be created", getShaderNameByType(type));
+        auto excMes = std::format("{} shader cannot be created.", getShaderNameByType(type));
         throw exceptions::GLRecAcquisitionException(excMes);
     }
 
@@ -50,7 +50,7 @@ ShaderProgram::ShaderProgram(const Shader& vertexShader, const Shader& fragmentS
     GLCall(m_rendererId = glCreateProgram());
     if (m_rendererId == 0)
     {
-        throw exceptions::GLRecAcquisitionException("Shader program cannot be created");
+        throw exceptions::GLRecAcquisitionException("Shader program cannot be created.");
     }
 
 	GLCall(glAttachShader(m_rendererId, vertexShader.m_rendererId));
