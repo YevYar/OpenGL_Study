@@ -6,6 +6,9 @@ project(OpenGL_Study
 	HOMEPAGE_URL "https://github.com/YevYarWolf/OpenGL_Study"
 	LANGUAGES CXX C)
 
+# Set options
+option(BUILD_DOC "Build documentation" ON)
+
 add_executable(OpenGL_Study_Exe)
 
 set(HEADERS include/window.h
@@ -36,3 +39,7 @@ source_group(
 	FILES ${HEADERS})
 
 target_link_libraries(OpenGL_Study_Exe PRIVATE OpenGL::GL ${GLFW3} glad)
+
+if(BUILD_DOC)
+	add_subdirectory(docs)
+endif()
