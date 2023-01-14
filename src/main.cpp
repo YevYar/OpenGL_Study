@@ -52,8 +52,8 @@ int main()
     // Configure VAO, VBO and EBO
     vertex::VertexArray VAO;
 
-    vertex::Buffer VBO(vertex::BufferTarget::ARRAY_BUFFER,
-        ArrayData(points, sizeof(points)), vertex::BufferDataUsage::STATIC_DRAW);
+    ArrayData data{ reinterpret_cast<const void*>(points), sizeof(points)};
+    vertex::Buffer VBO(vertex::BufferTarget::ARRAY_BUFFER, data, vertex::BufferDataUsage::STATIC_DRAW);
 
     vertex::VertexAttribute coordinateMap(0, 2, vertex::VertexAttrType::FLOAT, false, 0),
         colorMap(1, 3, vertex::VertexAttrType::FLOAT, false,
@@ -66,7 +66,8 @@ int main()
     VAO.addBuffer(VBO, layout);
 
     vertex::Buffer EBO(vertex::BufferTarget::ELEMENT_ARRAY_BUFFER,
-        ArrayData(indices, sizeof(indices)), vertex::BufferDataUsage::STATIC_DRAW);
+        ArrayData{ reinterpret_cast<const void*>(indices), sizeof(indices) }, vertex::BufferDataUsage::STATIC_DRAW);
+    EBO.bind();
 
     // Configure shaders
     auto vShaderSource = helpers::readStringFromFile("shaders/vs/vertexShader.vert");
