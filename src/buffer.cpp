@@ -9,7 +9,7 @@
 using namespace vertex;
 
 Buffer::Buffer(BufferTarget target, ArrayData data, BufferDataUsage usage,
-	std::shared_ptr<VertexBufferLayout> bufferLayout) :
+	std::optional<VertexBufferLayout> bufferLayout) :
 	m_target{ target }, m_data{ std::move(data) },
 	m_usage{ usage }, m_layout{ std::move(bufferLayout) }
 {
@@ -94,6 +94,11 @@ void Buffer::setData(ArrayData data)
 const ArrayData& Buffer::getData() const noexcept
 {
 	return m_data;
+}
+
+std::optional<VertexBufferLayout> vertex::Buffer::getLayout() const noexcept
+{
+	return m_layout;
 }
 
 void Buffer::genBuffer()

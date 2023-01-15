@@ -1,15 +1,14 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
-#include <memory>
+#include <optional>
 #include <vector>
 
 #include "generalTypes.h"
+#include "vertexBufferLayout.h"
 
 namespace vertex
 {
-	class VertexBufferLayout;
-
 	/**
 	 * Enum to represent 'target' parameter of [glBindBuffer](https://docs.gl/gl3/glBindBuffer).
 	 */
@@ -46,13 +45,13 @@ namespace vertex
 			 * \param target - target to bind buffer to
 			 * \param data - data, which must be set in OpenGL buffer
 			 * \param usage - usage of data
-			 * \param bufferLayout - pointer on VertexBufferLayout.
-			 * Use only for buffer, which is intended to be vertex buffer object
+			 * \param bufferLayout - VertexBufferLayout.
+			 * Use only for buffer, which is intended to be vertex buffer object. Otherwise must be std::nullopt.
 			 * 
 			 * \throw exceptions::GLRecAcquisitionException 
 			 */
 			Buffer(BufferTarget target, ArrayData data, BufferDataUsage usage,
-				std::shared_ptr<VertexBufferLayout> bufferLayout = nullptr);
+				std::optional<VertexBufferLayout> bufferLayout = std::nullopt);
 			/**
 			 * \brief Destructor, which deletes buffer object in OpenGL state machine.
 			 */
@@ -126,6 +125,11 @@ namespace vertex
 			 */
 			const ArrayData& getData() const noexcept;
 
+			/**
+			 * \brief Returns layout of the buffer.
+			 */
+			std::optional<VertexBufferLayout> getLayout() const noexcept;
+
 		private:
 			void genBuffer();
 			void updateData() const noexcept;
@@ -138,7 +142,7 @@ namespace vertex
 			BufferTarget m_target = BufferTarget::ARRAY_BUFFER;
 			ArrayData m_data;
 			BufferDataUsage m_usage = BufferDataUsage::STATIC_DRAW;
-			std::shared_ptr<VertexBufferLayout> m_layout = nullptr;
+			std::optional<VertexBufferLayout> m_layout = std::nullopt;
 			mutable bool m_isDataSet = false;
 		
 	};

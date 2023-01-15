@@ -30,19 +30,26 @@ void VertexArray::unbind() const noexcept
 	GLCall(glBindVertexArray(0));
 }
 
-void VertexArray::addBuffer(const Buffer& vbo, const VertexBufferLayout& layout) const noexcept
+void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
 {
 	bind();
-	vbo.bind();
+	buffer->bind();
 
-	const auto stride = layout.getStride();
+	const auto layout = buffer->getLayout();
 
-	for (const auto& attr : layout.getAttributes())
+	if (layout != std::nullopt)
 	{
-		GLCall(glVertexAttribPointer(attr.index, attr.count, helpers::toUType(attr.type),
-			attr.normalized ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<void*>(attr.byteOffset)));
-		enableAttribute(attr.index);
+		const auto stride = layout->getStride();
+
+		for (const auto& attr : layout->getAttributes())
+		{
+			GLCall(glVertexAttribPointer(attr.index, attr.count, helpers::toUType(attr.type),
+				attr.normalized ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<void*>(attr.byteOffset)));
+			enableAttribute(attr.index);
+		}
 	}	
+
+	m_buffers.push_back(std::move(buffer));
 }
 
 void VertexArray::enableAttribute(unsigned int index) const noexcept

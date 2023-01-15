@@ -52,9 +52,6 @@ int main()
     // Configure VAO, VBO and EBO
     vertex::VertexArray VAO;
 
-    ArrayData data{ reinterpret_cast<const void*>(points), sizeof(points)};
-    vertex::Buffer VBO(vertex::BufferTarget::ARRAY_BUFFER, data, vertex::BufferDataUsage::STATIC_DRAW);
-
     vertex::VertexAttribute coordinateMap(0, 2, vertex::VertexAttrType::FLOAT, false, 0),
         colorMap(1, 3, vertex::VertexAttrType::FLOAT, false,
             vertex::getByteSizeOfType(vertex::VertexAttrType::FLOAT) * 3);
@@ -63,11 +60,14 @@ int main()
     layout.addVertexAttribute(coordinateMap);
     layout.addVertexAttribute(colorMap);
 
-    VAO.addBuffer(VBO, layout);
+    ArrayData data{ reinterpret_cast<const void*>(points), sizeof(points)};
+    auto VBO = std::make_shared<vertex::Buffer>(vertex::BufferTarget::ARRAY_BUFFER, data, vertex::BufferDataUsage::STATIC_DRAW, layout);
 
-    vertex::Buffer EBO(vertex::BufferTarget::ELEMENT_ARRAY_BUFFER,
+    VAO.addBuffer(VBO);
+
+    auto EBO = std::make_shared<vertex::Buffer>(vertex::BufferTarget::ELEMENT_ARRAY_BUFFER,
         ArrayData{ reinterpret_cast<const void*>(indices), sizeof(indices) }, vertex::BufferDataUsage::STATIC_DRAW);
-    EBO.bind();
+    VAO.addBuffer(EBO);
 
     // Configure shaders
     auto vShaderSource = helpers::readStringFromFile("shaders/vs/vertexShader.vert");
@@ -116,8 +116,8 @@ int main()
         glfwPollEvents();
     }
 
-    VBO.unbind();
-    EBO.unbind();
+    VBO->unbind();
+    EBO->unbind();
     VAO.unbind();
 
     return 0;

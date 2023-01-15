@@ -11,8 +11,8 @@
 
 #define DEFAULT_COPYABLE_MOVABLE(ClassX) \
 	ClassX(const ClassX&) = default;\
-	ClassX& operator=(const ClassX&) = default;\
 	ClassX(ClassX&&) = default;\
+	ClassX& operator=(const ClassX&) = default;\
 	ClassX& operator=(ClassX&&) = default;
 
 #define NOT_COPYABLE(ClassX) \
@@ -25,8 +25,8 @@
 
 #define NOT_COPYABLE_MOVABLE(ClassX) \
 	ClassX(const ClassX&) = delete;\
-	ClassX& operator=(const ClassX&) = delete;\
 	ClassX(ClassX&&) = delete;\
+	ClassX& operator=(const ClassX&) = delete;\
 	ClassX& operator=(ClassX&&) = delete;
 
 #endif

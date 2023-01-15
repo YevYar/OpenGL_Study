@@ -6,6 +6,7 @@ using namespace vertex;
 
 void VertexBufferLayout::addVertexAttribute(const VertexAttribute& va)
 {
+	// TODO: Check if index is less than max number of allowed vertex attributes. 
 	if (va.index < 0)
 	{
 		throw std::invalid_argument("Index must be equal to 0 or be greater.");
