@@ -52,6 +52,11 @@ void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
 	m_buffers.push_back(std::move(buffer));
 }
 
+const std::vector<std::shared_ptr<Buffer>>& vertex::VertexArray::getBuffers() const noexcept
+{
+	return m_buffers;
+}
+
 void VertexArray::enableAttribute(unsigned int index) const noexcept
 {
 	bind();

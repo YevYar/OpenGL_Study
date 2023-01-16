@@ -9,6 +9,9 @@
 
 void clearGlError();
 
+/**
+ * \brief Print OpenGL error in std::cerr.
+ */
 bool checkAndLogGLErrors(const char* file, const char* function, int line);
 
 #endif

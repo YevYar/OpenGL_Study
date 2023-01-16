@@ -6,6 +6,9 @@
 
 namespace exceptions
 {
+	/**
+	 * \brief GLRecAcquisitionException is an exception to indicate error while generating some resources in OpenGL state machine.
+	 */
 	class GLRecAcquisitionException : public std::exception
 	{
 		public:

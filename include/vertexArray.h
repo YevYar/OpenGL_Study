@@ -12,6 +12,14 @@ namespace vertex
 	
 	/*!
 	 * \brief VertexArray is a wrapper for OpenGL vertex array object.
+	 * 
+	 * This class is not copyable or movable. This is as it is, because OpenGL vertex array object is intended to be used
+	 * to save settings to render the same objects. If objects of this class would be copyable, the first call of destructor
+	 * of one of copied objects cause deletion of OpenGL vertex array object, specified by m_rendererId, and next renders
+	 * would fail. Implementing the same logic as in Buffer class, when all constructors generate new OpenGL buffer,
+	 * conflicts with the purpose of using OpenGL vertex array object.
+	 * 
+	 * So, VertexArray should be stored as std::shared_ptr.
 	 */
 	class VertexArray
 	{
@@ -48,6 +56,11 @@ namespace vertex
 			 * by calling Buffer::bind(). However, it is not recommended approach, addBuffer() is preferred. 
 			 */
 			void addBuffer(std::shared_ptr<Buffer> buffer) noexcept;
+
+			/**
+			 * \brief Returns all bound buffers.
+			 */
+			const std::vector<std::shared_ptr<Buffer>>& getBuffers() const noexcept;
 
 			/**
 			 * \brief Wrapper for [glEnableVertexAttribArray](https://docs.gl/gl3/glEnableVertexAttribArray).
