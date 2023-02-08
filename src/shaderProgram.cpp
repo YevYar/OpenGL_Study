@@ -7,6 +7,8 @@
 
 using namespace shader;
 
+static std::string getShaderNameByType(ShaderType type);
+
 Shader::Shader(ShaderType type, const std::string& shaderSource) :
     m_type{ type }
 {
@@ -95,7 +97,7 @@ BaseUniform& ShaderProgram::getUniform(const std::string& name) const
     return *(m_uniforms.at(name).get());
 }
 
-std::string shader::getShaderNameByType(ShaderType type)
+static std::string getShaderNameByType(ShaderType type)
 {
     switch (type)
     {
@@ -106,4 +108,20 @@ std::string shader::getShaderNameByType(ShaderType type)
     case ShaderType::GEOMETRY_SHADER:
         return "GEOMETRY";
     };
+}
+
+std::unique_ptr<shader::ShaderProgram> shader::makeShaderProgram(const std::string& pathToVertexShader,
+	const std::string& pathToFragmentShader)
+{
+	auto vShaderSource = helpers::readStringFromFile(pathToVertexShader);
+	auto fShaderSource = helpers::readStringFromFile(pathToFragmentShader);
+	if (vShaderSource.empty() || fShaderSource.empty())
+	{
+		throw std::runtime_error("Vertex or fragment shader source is empty.");
+	}
+
+	Shader vShader(ShaderType::VERTEX_SHADER, vShaderSource),
+		fShader(ShaderType::FRAGMENT_SHADER, fShaderSource);
+
+	return std::make_unique<ShaderProgram>(vShader, fShader);
 }
