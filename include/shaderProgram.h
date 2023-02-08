@@ -88,7 +88,8 @@ namespace shader
 			template<typename T, unsigned int Count>
 			BaseUniform& findUniform(std::string name)
 			{
-				GLCall(auto location = glGetUniformLocation(m_rendererId, name.c_str()));
+				int location = 0;
+				GLCall(location = glGetUniformLocation(m_rendererId, name.c_str()));
 				if (location < 0)
 				{
 					auto excMes = std::format(

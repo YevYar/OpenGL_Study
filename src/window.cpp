@@ -6,6 +6,8 @@
 
 #include "helpers/debugHelpers.h"
 
+bool Window::isTerminated = false;
+
 void windowFramebufferSizeCalback(GLFWwindow* window, int width, int height)
 {
     GLCall(glViewport(0, 0, width, height));
@@ -13,10 +15,13 @@ void windowFramebufferSizeCalback(GLFWwindow* window, int width, int height)
 
 Window::Window(int width, int height, std::string title)
 {
+    // TODO: throw error, no return
     if (!glfwInit())
     {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         glfwTerminate();
+        Window::isTerminated = true;
+        return;
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -28,6 +33,7 @@ Window::Window(int width, int height, std::string title)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
+        Window::isTerminated = true;
         return;
     }
 
@@ -38,6 +44,7 @@ Window::Window(int width, int height, std::string title)
     {
         std::cerr << "Failed to initialize GLAD" << std::endl;
         glfwTerminate();
+        Window::isTerminated = true;
         return;
     }
 
@@ -47,6 +54,12 @@ Window::Window(int width, int height, std::string title)
 Window::~Window()
 {
     glfwTerminate();
+    Window::isTerminated = true;
+}
+
+bool Window::isGLFWTerminated()
+{
+    return Window::isTerminated;
 }
 
 void Window::swapBuffers() const

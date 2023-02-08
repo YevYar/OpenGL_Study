@@ -5,11 +5,21 @@
 
 void clearGlError()
 {
+	if (Window::isGLFWTerminated())
+	{
+		return;
+	}
+
 	while (glGetError());
 }
 
 bool checkAndLogGLErrors(const char* file, const char* function, int line)
 {
+	if (Window::isGLFWTerminated())
+	{
+		return false;
+	}
+
 	bool isErrorRaised = false;
 
 	while (auto errorCode = glGetError())

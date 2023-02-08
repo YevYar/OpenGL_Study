@@ -11,12 +11,16 @@ class Window
 		Window(int width, int height, std::string title);
 		~Window();
 
+		static bool isGLFWTerminated();
+
 		void swapBuffers() const;
 		bool shouldClose() const;
 		bool isInitialized() const;
 
 	private:
 		GLFWwindow* m_window = nullptr;
+
+		static bool isTerminated;
 
 };
 

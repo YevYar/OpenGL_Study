@@ -7,7 +7,6 @@
 #include "buffer.h"
 #include "generalTypes.h"
 #include "helpers/debugHelpers.h"
-#include "helpers/helpers.h"
 #include "shaderProgram.h"
 #include "vertexBufferLayout.h"
 
@@ -37,9 +36,6 @@ void MulticoloredRectangle::setColorCoefficient(const float* k)
 
 std::unique_ptr<MulticoloredRectangle> renderer::makeMulticoloredRectangle()
 {
-	// TODO: Make variable static to not create it every time for the same objects
-
-	using namespace helpers;
 	using namespace shader;
 	using namespace vertex;
 
@@ -54,47 +50,30 @@ std::unique_ptr<MulticoloredRectangle> renderer::makeMulticoloredRectangle()
 		2, 3, 0
 	};
 
-	// Configure VAO, VBO and EBO
-	auto VAO = std::make_shared<VertexArray>();
+	// Configure VAO, VBO and EBO only once
+	static auto VAO = std::make_shared<VertexArray>();
 
-	VertexAttribute coordinateMap(0, 2, VertexAttrType::FLOAT, false, 0),
+	static VertexAttribute coordinateMap(0, 2, VertexAttrType::FLOAT, false, 0),
 		colorMap(1, 3, VertexAttrType::FLOAT, false, getByteSizeOfType(VertexAttrType::FLOAT) * 3);
 
-	VertexBufferLayout layout;
+	static VertexBufferLayout layout;
 	layout.addVertexAttribute(coordinateMap);
 	layout.addVertexAttribute(colorMap);
 
-	ArrayData data{ reinterpret_cast<const void*>(points), sizeof(points) };
-	auto VBO = std::make_shared<Buffer>(BufferTarget::ARRAY_BUFFER, data, BufferDataUsage::STATIC_DRAW, layout);
+	static ArrayData data{ reinterpret_cast<const void*>(points), sizeof(points) };
+	static auto VBO = std::make_shared<Buffer>(BufferTarget::ARRAY_BUFFER, data, BufferDataUsage::STATIC_DRAW, layout);
 
 	VAO->addBuffer(VBO);
 
-	auto EBO = std::make_shared<Buffer>(BufferTarget::ELEMENT_ARRAY_BUFFER,
+	static auto EBO = std::make_shared<Buffer>(BufferTarget::ELEMENT_ARRAY_BUFFER,
 		ArrayData{ reinterpret_cast<const void*>(indices), sizeof(indices) }, BufferDataUsage::STATIC_DRAW);
 	VAO->addBuffer(EBO);
 
-	// Configure shaders
-	auto vShaderSource = readStringFromFile("shaders/vs/vertexShader.vert");
-	auto fShaderSource = readStringFromFile("shaders/fs/fragmentShader.frag");
-	if (vShaderSource.empty() || fShaderSource.empty())
-	{
-		throw std::runtime_error("Vertex or fragment shader source is empty.");
-	}
+	// Create shader program only once
+	static std::shared_ptr<ShaderProgram> shaderProgram = makeShaderProgram("shaders/vs/vertexShader.vert",
+		"shaders/fs/fragmentShader.frag");
 
-	Shader vShader(ShaderType::VERTEX_SHADER, vShaderSource),
-		fShader(ShaderType::FRAGMENT_SHADER, fShaderSource);
-
-	if (!vShader.isValid() || !fShader.isValid())
-	{
-		throw std::runtime_error("Vertex or fragment shader cannot be created.");
-	}
-
-	auto shaderProgram = std::make_shared<ShaderProgram>(vShader, fShader);
-	if (!shaderProgram->isValid())
-	{
-		throw std::runtime_error("Shader program cannot be compiled.");
-	}
-
+	// Create new MulticoloredRectangle
 	auto rect = new MulticoloredRectangle(VAO, shaderProgram);
 	return std::unique_ptr<MulticoloredRectangle>(rect);
 }
