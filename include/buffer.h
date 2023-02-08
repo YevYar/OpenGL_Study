@@ -30,7 +30,7 @@ namespace vertex
 	};
 
 	/*!
-	 * \brief Buffer is a wrapper for OpenGL buffer object. 	
+	 * \brief Buffer is a wrapper over OpenGL buffer object. 	
 	 */
 	class Buffer
 	{

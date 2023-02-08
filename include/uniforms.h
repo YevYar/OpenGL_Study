@@ -33,7 +33,7 @@ namespace shader
 			const int m_location = -1;
 			const std::string m_name;			
 
-			friend class ShaderProgram;
+		friend class ShaderProgram;
 
 	};
 
@@ -71,7 +71,7 @@ namespace shader
 			const unsigned int count = Count;			
 			const ConcreteUniformSetter m_setter = nullptr;			
 
-			friend class ShaderProgram;
+		friend class ShaderProgram;
 
 	};
 }
