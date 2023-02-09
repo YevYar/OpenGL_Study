@@ -1,15 +1,18 @@
 #include "helpers/helpers.h"
 
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <iostream>
 
-std::string helpers::readStringFromFile(std::string pathToFile)
+#include "exceptions.h"
+
+std::string helpers::readStringFromFile(const std::string& pathToFile)
 {
     if (!std::filesystem::exists(pathToFile))
     {
-        std::cerr << "File does not exist at path " << pathToFile << std::endl;
-        return "";
+        const auto excMes = std::format("File does not exist at path {}", pathToFile);
+        throw exceptions::FileOpeningException(excMes);
     }
 
     std::ifstream file;
@@ -24,8 +27,8 @@ std::string helpers::readStringFromFile(std::string pathToFile)
     catch (std::exception exc)
     {
         file.close();
-        std::cerr << "File loading error (path: " << pathToFile << "): " << exc.what() << std::endl;
-        return "";
+        const auto excMes = std::format("File loading error (path: {}): {}", pathToFile, exc.what());
+        throw exceptions::FileReadingException(excMes);
     }
 
     return stream.str();
