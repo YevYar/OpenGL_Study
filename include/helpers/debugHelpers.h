@@ -3,7 +3,7 @@
 
 #include "window.h"
 
-#define ASSERT(x) if (!x) __debugbreak();
+#define ASSERT(x) if (!(x)) __debugbreak();
 
 /**
  * \brief GLCall macros checks if the GLFW is not terminated and checks error after call of OpenGL functions.
@@ -27,7 +27,9 @@
 void clearGlError();
 
 /**
- * \brief Print OpenGL error in std::cerr.
+ * \brief Checks OpenGL error and prints OpenGL error in std::cerr.
+ * 
+ * \return false if is no error and true otherwise
  */
 bool checkAndLogGLErrors(const char* file, const char* function, int line);
 
