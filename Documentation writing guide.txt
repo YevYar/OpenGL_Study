@@ -1,0 +1,16 @@
+Struct or class
+	\brief <class/struct name> description.
+
+	Detailed description.
+	
+
+
+
+Function, method, macros
+	\brief AddS, findS ...
+
+	Detailed description.
+
+	\param <param name> - description.
+	\return description.
+	\throw
