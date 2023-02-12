@@ -7,6 +7,7 @@
 #include <type_traits>
 
 #include "exceptions.h"
+#include "helpers/debugHelpers.h"
 #include "helpers/macros.h"
 
 namespace shader

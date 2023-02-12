@@ -98,7 +98,11 @@ namespace shader
 			template<typename T, unsigned int Count>
 			BaseUniform& findUniform(std::string name)
 			{
-                // TODO: check, if the uniform wasn't located before
+                if (m_uniforms.contains(name))
+                {
+                    return getUniform(name);
+                }
+                
 				int location = 0;
 				GLCall(location = glGetUniformLocation(m_rendererId, name.c_str()));
 				if (location < 0)
