@@ -11,10 +11,13 @@
 #include "helpers/macros.h"
 #include "uniforms.h"
 
+/**
+ * \brief shader namespace contains types, related to OpenGL shaders, shader programs, uniforms etc.
+ */
 namespace shader
 {
 	/**
-	 * \brief Enum to represent type of the shader.
+	 * \brief ShaderType represents 'shaderType' parameter of [glCreateShader()](https://docs.gl/gl3/glCreateShader).
 	 */
 	enum class ShaderType : unsigned int
 	{
@@ -30,20 +33,23 @@ namespace shader
 			/**
 			 * \brief Constructs new Shader object and generates new 1 shader in OpenGL state machine.
 			 * 
-			 * \param type specifies the type of created shader
-			 * \param shaderSource is a source code of the shader
-			 * \throw exceptions::GLRecAcquisitionException
+			 * \param type - the type of created shader.
+			 * \param shaderSource - a source code of the shader.
+			 * \throw exceptions::GLRecAcquisitionException().
 			 */
 			Shader(ShaderType type, const std::string& shaderSource);
 
 			/**
-			 * \brief Destructor, which deletes shader in OpenGL state machine.
+			 * \brief Deletes shader in OpenGL state machine.
 			 */
 			~Shader();
 
 			NOT_COPYABLE_MOVABLE(Shader);
 
 		private:
+            /**
+             * \brief Id of referenced OpenGL shader object.
+             */
 			unsigned int m_rendererId = 0;
 			const ShaderType m_type = ShaderType::VERTEX_SHADER;
 
@@ -58,41 +64,46 @@ namespace shader
 	{
 		public:
 			/**
-			 * \brief Constructs new ShaderProgram object, generates and compiles new 1 shader program in OpenGL state machine.
+			 * \brief Constructs new ShaderProgram object, generates and compiles new 1 shader program
+			 * in OpenGL state machine.
 			 *
-			 * \param vertexShader is an object of Shader class with the type ShaderType::VERTEX_SHADER
-			 * \param fragmentShader is an object of Shader class with the type ShaderType::FRAGMENT_SHADER
-			 * \throw exceptions::GLRecAcquisitionException
+			 * \param vertexShader - an object of Shader class with the type ShaderType::VERTEX_SHADER.
+			 * \param fragmentShader - an object of Shader class with the type ShaderType::FRAGMENT_SHADER.
+			 * \throw exceptions::GLRecAcquisitionException().
 			 */
 			ShaderProgram(const Shader& vertexShader, const Shader& fragmentShader);
 
 			/**
-			 * \brief Destructor, which deletes shader program in OpenGL state machine.
+			 * \brief Deletes shader program in OpenGL state machine.
 			 */
 			~ShaderProgram();
 
 			NOT_COPYABLE_MOVABLE(ShaderProgram)
 
 			/**
-			 * \brief Wrapper over [glUseProgram](https://docs.gl/gl3/glUseProgram).
+			 * \brief Wraps [glUseProgram()](https://docs.gl/gl3/glUseProgram).
 			 */
 			void use() const noexcept;
 			
 			/**
-			 * \brief Find uniform location and creates BaseUniform object,
+			 * \brief Finds uniform location and creates BaseUniform object,
 			 * which wraps the OpenGL uniform variable with specified name.
 			 * 
-			 * \param name is a name of uniform variable, which is used in OpenGL shader program
-			 * \throw exceptions::GLRecAcquisitionException
+			 * \param T - one of the list: float, double, int, unsigned int.
+			 * \param Count - the integer value in the range [1, 4].
+			 * \param name - a name of uniform variable, which is used in OpenGL shader program.
+			 * \return created BaseUniform object or throws an exception if nothing is found.
+			 * \throw exceptions::GLRecAcquisitionException().
 			 */
 			template<typename T, unsigned int Count>
 			BaseUniform& findUniform(std::string name)
 			{
+                // TODO: check, if the uniform wasn't located before
 				int location = 0;
 				GLCall(location = glGetUniformLocation(m_rendererId, name.c_str()));
 				if (location < 0)
 				{
-					auto excMes = std::format(
+					const auto excMes = std::format(
 						"Cannot find location of uniform variable '{}'."
 						" Check the name and is this uniform used in the shader.",
 						name
@@ -111,12 +122,16 @@ namespace shader
 			 * To get BaseUniform for specified uniform variable this uniform must be previously found and created
 			 * by calling findUniform().
 			 * 
-			 * \param name is a name of uniform variable, which is used in OpenGL shader program
-			 * \throw std::out_of_range
+			 * \param name - a name of uniform variable, which is used in OpenGL shader program.
+			 * \return found BaseUniform object or throws an exception if nothing is found.
+			 * \throw std::out_of_range.
 			 */
 			BaseUniform& getUniform(const std::string& name) const;
 
 		private:
+            /**
+             * \brief Id of referenced OpenGL shader program.
+             */
 			unsigned int m_rendererId = 0;
 			std::map<std::string, std::unique_ptr<BaseUniform>> m_uniforms;
 
@@ -125,10 +140,11 @@ namespace shader
 	/**
 	 * \brief Creates object of ShaderProgram class, which uses specified shader sources.
 	 * 
-	 * \param pathToVertexShader relative to the root folder path to vertex shader source code
-	 * \param pathToFragmentShader relative to the root folder path to fragment shader source code
-	 * \throw std::runtime_error
-	 * \throw exceptions, which can be thrown by constructors of Shader and ShaderProgram classes 
+	 * \param pathToVertexShader - relative to the root folder path to vertex shader source code.
+	 * \param pathToFragmentShader - relative to the root folder path to fragment shader source code.
+	 * \return created ShaderProgram object.
+	 * \throw std::runtime_error, 
+	 * exceptions, which can be thrown by constructors of Shader and ShaderProgram classes. 
 	 */
 	std::unique_ptr<shader::ShaderProgram> makeShaderProgram(const std::string& pathToVertexShader,
 		const std::string& pathToFragmentShader);

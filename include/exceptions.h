@@ -14,10 +14,15 @@ namespace exceptions
      * and defines additional constructor, which get error string as std::string.
      */
     class BaseException : public std::exception
-    {
-        using std::exception::exception;
-        
+    {        
         public:
+            using std::exception::exception;
+
+            /**
+             * \brief Constructs new std::exception and passes message to its constructor.
+             * 
+             * \param message - error message.
+             */
             BaseException(const std::string& message) : std::exception(message.c_str())
             { }
     };
@@ -27,7 +32,8 @@ namespace exceptions
      */
     class GLRecAcquisitionException : public BaseException
     {
-        using BaseException::BaseException;
+        public:
+            using BaseException::BaseException;
     };
 
     /**
@@ -35,7 +41,8 @@ namespace exceptions
      */
     class FileException : public BaseException
     {
-        using BaseException::BaseException;
+        public:
+            using BaseException::BaseException;
     };
 
     /**
@@ -43,7 +50,8 @@ namespace exceptions
      */
     class FileOpeningException : public FileException
     {
-        using FileException::FileException;
+        public:
+            using FileException::FileException;
     };
 
     /**
@@ -51,7 +59,8 @@ namespace exceptions
      */
     class FileReadingException : public FileException
     {
-        using FileException::FileException;
+        public:
+            using FileException::FileException;
     };
 }
 

@@ -13,7 +13,7 @@ void windowFramebufferSizeCalback(GLFWwindow* window, int width, int height)
     GLCall(glViewport(0, 0, width, height));
 }
 
-Window::Window(int width, int height, std::string title)
+Window::Window(int width, int height, const std::string& title)
 {
     // TODO: throw error, no return
     if (!glfwInit())

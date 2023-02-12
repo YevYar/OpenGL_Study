@@ -62,6 +62,11 @@ Buffer& Buffer::operator=(Buffer&& obj) noexcept
 	return *this;
 }
 
+void Buffer::unbindTarget(BufferTarget target) noexcept
+{
+    GLCall(glBindBuffer(helpers::toUType(target), 0));
+}
+
 void Buffer::bind() const noexcept
 {
 	GLCall(glBindBuffer(helpers::toUType(m_target), m_rendererId));
@@ -73,7 +78,7 @@ void Buffer::bind() const noexcept
 
 void Buffer::unbind() const noexcept
 {
-	GLCall(glBindBuffer(helpers::toUType(m_target), 0));
+	Buffer::unbindTarget(m_target);
 }
 
 void Buffer::setData(ArrayData data)

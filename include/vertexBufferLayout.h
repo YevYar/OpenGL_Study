@@ -8,7 +8,8 @@
 namespace vertex
 {
 	/**
-	 * Enum to represent 'type' parameter of [glVertexAttribPointer](https://docs.gl/gl3/glVertexAttribPointer).
+	 * VertexAttrType represents 'type' parameter of 
+	 * [glVertexAttribPointer()](https://docs.gl/gl3/glVertexAttribPointer).
 	 */
 	enum class VertexAttrType : unsigned int
 	{
@@ -18,29 +19,32 @@ namespace vertex
 	};
 
 	/**
-	 * \brief VertexAttribute represents one vertex attribute and contains all arguments, which are needed to call function [glVertexAttribPointer](https://docs.gl/gl3/glVertexAttribPointer).
+	 * \brief VertexAttribute represents one vertex attribute and contains all arguments,
+	 * which are needed to call function [glVertexAttribPointer()](https://docs.gl/gl3/glVertexAttribPointer).
 	 */
 	struct VertexAttribute
 	{
 		/**
-		 * \brief Specifies the index of the generic vertex attribute to be modified.
+		 * \brief The index of the generic vertex attribute to be modified.
 		 */
 		unsigned int index = 0;
 		/**
-		 * \brief Specifies the number of components per generic vertex attribute. Must be 1, 2, 3, 4.
+		 * \brief The number of components per generic vertex attribute. Must be 1, 2, 3, 4.
 		 */
 		int count = 1;
 		/**
-		 * \brief Specifies the data type of each component in the array.
+		 * \brief The data type of each component in the array.
 		 */
 		VertexAttrType type = VertexAttrType::FLOAT;
 		/**
-		 * \brief Specifies whether fixed-point data values should be normalized or converted directly as fixed-point values when they are accessed.
+		 * \brief Specification whether fixed-point data values should be normalized or converted directly 
+		 * as fixed-point values when they are accessed.
 		 */
 		bool normalized = false;
 		/**
-		 * \brief Is a 'pointer' parameter of the function. Specifies an offset of the first component of the first generic vertex attribute
-		 * in the array in the data store of the buffer currently bound to the GL_ARRAY_BUFFER target.
+		 * \brief The 'pointer' parameter of the function. Specifies an offset of the first component 
+		 * of the first generic vertex attribute in the array in the data store of the buffer currently bound 
+		 * to the GL_ARRAY_BUFFER target.
 		 */
 		int byteOffset = 0;
 	};
@@ -57,7 +61,10 @@ namespace vertex
 			DEFAULT_COPYABLE_MOVABLE(VertexBufferLayout)
 
 			/**
-			 * \brief Add new VertexAttribute in layout.
+			 * \brief Adds new VertexAttribute in layout.
+			 * 
+			 * \param vertexAttribute - vertex attribute, which must be added to the vertex buffer layout.
+			 * \throw std::invalid_argument
 			 */
 			void addVertexAttribute(const VertexAttribute& vertexAttribute);
 
@@ -67,7 +74,8 @@ namespace vertex
 			const std::vector<VertexAttribute>& getAttributes() const noexcept;
 
 			/**
-			 * \brief Returns automatically calculated 'stride' parameter, which is needed by [glVertexAttribPointer](https://docs.gl/gl3/glVertexAttribPointer).
+			 * \brief Returns automatically calculated 'stride' parameter, which is needed by 
+			 * [glVertexAttribPointer()](https://docs.gl/gl3/glVertexAttribPointer).
 			 */
 			unsigned int getStride() const noexcept;
 
@@ -75,12 +83,19 @@ namespace vertex
 			std::vector<VertexAttribute> m_vertexAttributes;
 
 			/**
-			 * \brief See getStride(). It is automatically calculated, when new VertexAttribute is added via addVertexAttribute().
+			 * \brief See getStride(). It is automatically calculated value, when new VertexAttribute is added via addVertexAttribute().
 			 */
 			unsigned int m_stride = 0;
 
 	};
 
+    /**
+     * \brief Returns the size in bytes of the type accordingly to 
+     * [table of OpenGL types](https://www.khronos.org/opengl/wiki/OpenGL_Type).
+     * 
+     * \param type - type to get the size of.
+     * \return size in bytes of the type.
+     */
 	unsigned int getByteSizeOfType(VertexAttrType type) noexcept;
 
 }

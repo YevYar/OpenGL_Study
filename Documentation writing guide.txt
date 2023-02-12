@@ -1,8 +1,12 @@
-Struct or class
-	\brief <class/struct name> description.
+Struct, class, enum, namespace, using declaration
+	\brief <Name> description.
 
 	Detailed description.
-	
+
+
+
+Field of class/struct
+    \brief Noun (what is it)
 
 
 
@@ -13,4 +17,4 @@ Function, method, macros
 
 	\param <param name> - description.
 	\return description.
-	\throw
+	\throw list of exceptions.

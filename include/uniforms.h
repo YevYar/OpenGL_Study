@@ -13,30 +13,73 @@ namespace shader
 {
 	class ShaderProgram;
 
+    /**
+     * \brief BaseUniformSetter is a pointer to an OpenGL function to set value of uniform variable.
+     */
 	using BaseUniformSetter = void (*)(GLint, GLsizei, const void*);
 
+    /**
+     * \brief Returns a pointer to an OpenGL function, which satisfies to passed type name and count.
+     * 
+     * \param typeName - one of the list: "float", "double", "int", "unsigned int".
+     * \param count - the integer value in the range [1, 4].
+     * \return pointer to the OpenGL function or nullptr.
+     */
 	BaseUniformSetter getUniformSetter(const char* typeName, unsigned int count) noexcept;
 
+    /**
+     * \brief BaseUniform is a base class for unifrom classes.
+     * 
+     * By design, object of BaseUniform class can be created only by ShaderProgram class.
+     * Such architecture simulates how uniforms are used in OpenGL: 
+     * OpenGL shader program must be used, after that location of the specified uniform must be received
+     * and in the result the value of the uniform can be set using found location. 
+     */
 	class BaseUniform
 	{
 		public:
 			virtual ~BaseUniform() = default;
 
+            /**
+             * \brief Sets the data of OpenGL uniform variable.
+             * 
+             * \param data - pointer to a data, which must be set in uniform.
+             */
 			virtual void setData(const void* data) = 0;
 
 		protected:
+            /**
+             * \brief Constructs new object.
+             * 
+             * \param location - a location of the uniform in a shader program.
+             * \param name - a name of the uniform variable. 
+             * \throw exceptions::GLRecAcquisitionException(), if location is 0
+             */
 			BaseUniform(int location, std::string name);
 
 			NOT_COPYABLE_MOVABLE(BaseUniform)
 			
 		protected:
+            /**
+             * \brief Location (id) of the referenced OpenGL uniform variable in a shader program.
+             */
 			const int m_location = -1;
+
+            /**
+             * \brief Name of the referenced OpenGL uniform variable, which is used in a code of a shader.
+             */
 			const std::string m_name;			
 
 		friend class ShaderProgram;
 
 	};
 
+    /**
+     * \brief Uniform represents one dimensional uniform variable, which contains [1, 4] elements.
+     * 
+     * \param T - one of the list: float, double, int, unsigned int.
+     * \param Count - the integer value in the range [1, 4].
+     */
 	template<typename T, unsigned int Count>
 	class Uniform : public BaseUniform
 	{
@@ -56,6 +99,13 @@ namespace shader
 			}
 
 		protected:
+            /**
+             * \brief Constructs new object.
+             *
+             * \param location - a location of the uniform in a shader program.
+             * \param name - a name of the uniform variable.
+             * \throw exceptions::GLRecAcquisitionException(), if location is 0
+             */
 			Uniform(int location, std::string name) :
 				BaseUniform{ location, std::move(name) },
 				m_setter{ reinterpret_cast<ConcreteUniformSetter>(getUniformSetter(typeid(T).name(), Count)) }
@@ -68,7 +118,14 @@ namespace shader
 			}
 
 		private:
-			const unsigned int count = Count;			
+            /**
+             * \brief The number of elements in the uniform variable.
+             */
+			const unsigned int m_count = Count;
+
+            /**
+             * \brief The pointer to OpenGL function to set value of this uniform in OpenGL state machine.
+             */
 			const ConcreteUniformSetter m_setter = nullptr;			
 
 		friend class ShaderProgram;

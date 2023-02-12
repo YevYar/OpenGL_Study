@@ -20,14 +20,14 @@ VertexArray::~VertexArray()
 	GLCall(glDeleteVertexArrays(1, &m_rendererId));
 }
 
+void VertexArray::unbind() noexcept
+{
+    GLCall(glBindVertexArray(0));
+}
+
 void VertexArray::bind() const noexcept
 {
 	GLCall(glBindVertexArray(m_rendererId));
-}
-
-void VertexArray::unbind() const noexcept
-{
-	GLCall(glBindVertexArray(0));
 }
 
 void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept

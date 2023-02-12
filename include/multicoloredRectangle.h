@@ -38,6 +38,9 @@ namespace renderer
 
 	/**
 	 * \brief Creates new MulticoloredRectangle object.
+	 * 
+	 * \return std::unique_ptr on created MulticoloredRectangle.
+	 * \throw exceptions::GLRecAcquisitionException(), see shader::makeShaderProgram().
 	 */
 	std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle();
 

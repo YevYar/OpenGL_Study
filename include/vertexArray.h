@@ -6,6 +6,10 @@
 
 #include "helpers/macros.h"
 
+/**
+ * \brief vertex namespace contains types and functions, which are related to vertex array objects,
+ * vertex buffer objects etc.
+ */
 namespace vertex
 {
 	class Buffer;
@@ -14,10 +18,10 @@ namespace vertex
 	 * \brief VertexArray is a wrapper over OpenGL vertex array object.
 	 * 
 	 * This class is not copyable or movable. This is as it is, because OpenGL vertex array object is intended to be used
-	 * to save settings to render the same objects. If objects of this class would be copyable, the first call of destructor
-	 * of one of copied objects cause deletion of OpenGL vertex array object, specified by m_rendererId, and next renders
-	 * would fail. Implementing the same logic as in Buffer class, when all constructors generate new OpenGL buffer,
-	 * conflicts with the purpose of using OpenGL vertex array object.
+	 * to save settings to render the same objects. If objects of this class would be copyable, 
+	 * the first call of destructor of one of copied objects cause deletion of OpenGL vertex array object, 
+	 * specified by m_rendererId, and next renders would fail. Implementing the same logic as in Buffer class, 
+	 * when all constructors generate new OpenGL buffer, conflicts with the purpose of using OpenGL vertex array object.
 	 * 
 	 * So, VertexArray should be stored as std::shared_ptr.
 	 */
@@ -32,17 +36,21 @@ namespace vertex
 			VertexArray();
 
 			/**
-			 * \brief Destructor, which deletes vertex array object in OpenGL state machine.
+			 * \brief Deletes vertex array object in OpenGL state machine.
 			 */
 			~VertexArray();
 
 			NOT_COPYABLE_MOVABLE(VertexArray)
 
+            /**
+             * \brief Unbinds current vertex array object.
+             */
+            static void unbind() noexcept;
+
 			/**
-			 * \brief Wrapper for [glBindVertexArray](https://docs.gl/gl3/glBindVertexArray).
+			 * \brief Wraps [glBindVertexArray()](https://docs.gl/gl3/glBindVertexArray).
 			 */
 			void bind() const noexcept;
-			void unbind() const noexcept;
 
 			/**
 			 * \brief Binds the buffer to OpenGL vertex array object.
@@ -53,7 +61,9 @@ namespace vertex
 			 * Every attribute is automatically enabled (see enableAttribute()).
 			 * 
 			 * OpenGL buffer, which is wrapped in Buffer class, can be bound to currently bound vertex array object
-			 * by calling Buffer::bind(). However, it is not recommended approach, addBuffer() is preferred. 
+			 * by calling Buffer::bind(). However, it is not recommended approach, addBuffer() is preferred.
+			 * 
+			 * \param buffer - buffer to be bound to this VertexArray.
 			 */
 			void addBuffer(std::shared_ptr<Buffer> buffer) noexcept;
 
@@ -63,16 +73,20 @@ namespace vertex
 			const std::vector<std::shared_ptr<Buffer>>& getBuffers() const noexcept;
 
 			/**
-			 * \brief Wrapper for [glEnableVertexAttribArray](https://docs.gl/gl3/glEnableVertexAttribArray).
+			 * \brief Wraps [glEnableVertexAttribArray()](https://docs.gl/gl3/glEnableVertexAttribArray).
 			 * 
 			 * This vertex array object is bound to become active vertex array object (see bind()).
+			 * 
+			 * \param index - the index of the generic vertex attribute to be enabled.
 			 */
 			void enableAttribute(unsigned int index) const noexcept;
 
 			/**
-			 * \brief Wrapper for [glDisableVertexAttribArray](https://docs.gl/gl3/glDisableVertexAttribArray).
+			 * \brief Wraps [glDisableVertexAttribArray()](https://docs.gl/gl3/glDisableVertexAttribArray).
 			 *
 			 * This vertex array object is bound to become active vertex array object (see bind()).
+			 * 
+			 * \param index - the index of the generic vertex attribute to be disabled.
 			 */
 			void disableAttribute(unsigned int index) const noexcept;
 
