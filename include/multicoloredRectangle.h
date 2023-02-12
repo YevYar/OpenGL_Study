@@ -23,6 +23,8 @@ namespace renderer
 
 			/**
 			 * \brief Sets the color coefficient.
+			 * 
+			 * \param k - is a number in the range [0, 1].
 			 */
 			void setColorCoefficient(const float* k);
 

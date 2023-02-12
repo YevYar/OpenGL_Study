@@ -30,8 +30,11 @@ void MulticoloredRectangle::draw()
 
 void MulticoloredRectangle::setColorCoefficient(const float* k)
 {
-	m_shaderProgram->use();
-	m_colorCoefficient.setData(k);
+    if (*k >= 0 && *k <= 1.0)
+    {
+        m_shaderProgram->use();
+        m_colorCoefficient.setData(k);
+    }	
 }
 
 std::unique_ptr<MulticoloredRectangle> renderer::makeMulticoloredRectangle()
