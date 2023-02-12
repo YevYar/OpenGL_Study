@@ -18,7 +18,7 @@ class Window
          * \param width - width of the window in pixels.
          * \param height - height of the window in pixels.
          * \param title - title of the window.
-         * \throw TODO: update the list!
+         * \throw exceptions::WindowInitializationException().
          */
 		Window(int width, int height, const std::string& title);
 
@@ -47,8 +47,8 @@ class Window
          */
 		bool shouldClose() const;
 
-        // TODO: Remove this
-		bool isInitialized() const;
+    private:
+        void cleanAndThrowOnInitException(const std::string& errorMessage);
 
 	private:
         /**

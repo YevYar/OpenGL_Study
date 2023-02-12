@@ -62,6 +62,24 @@ namespace exceptions
         public:
             using FileException::FileException;
     };
+
+    /**
+     * \brief WindowException is a base exception to indicate error from the Window.
+     */
+    class WindowException : public BaseException
+    {
+        public:
+            using BaseException::BaseException;
+    };
+
+    /**
+     * \brief WindowInitializationException is an exception to indicate error while Window construction.
+     */
+    class WindowInitializationException : public WindowException
+    {
+        public:
+            using WindowException::WindowException;
+    };
 }
 
 #endif

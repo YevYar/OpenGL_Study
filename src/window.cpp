@@ -4,24 +4,23 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#include "exceptions.h"
 #include "helpers/debugHelpers.h"
 
 bool Window::isTerminated = false;
 
-void windowFramebufferSizeCalback(GLFWwindow* window, int width, int height)
-{
-    GLCall(glViewport(0, 0, width, height));
+namespace {
+    void windowFramebufferSizeCalback(GLFWwindow* window, int width, int height)
+    {
+        GLCall(glViewport(0, 0, width, height));
+    }
 }
 
 Window::Window(int width, int height, const std::string& title)
 {
-    // TODO: throw error, no return
     if (!glfwInit())
     {
-        std::cerr << "Failed to initialize GLFW" << std::endl;
-        glfwTerminate();
-        Window::isTerminated = true;
-        return;
+        cleanAndThrowOnInitException("Failed to initialize GLFW.");
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -31,21 +30,15 @@ Window::Window(int width, int height, const std::string& title)
     auto window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
     if (!window)
     {
-        std::cerr << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        Window::isTerminated = true;
-        return;
+        cleanAndThrowOnInitException("Failed to create GLFW window.");
     }
 
     glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, windowFramebufferSizeCalback);
+    glfwSetFramebufferSizeCallback(window, ::windowFramebufferSizeCalback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::cerr << "Failed to initialize GLAD" << std::endl;
-        glfwTerminate();
-        Window::isTerminated = true;
-        return;
+        cleanAndThrowOnInitException("Failed to initialize GLAD.");
     }
 
     m_window = window;
@@ -72,7 +65,9 @@ bool Window::shouldClose() const
     return glfwWindowShouldClose(m_window);
 }
 
-bool Window::isInitialized() const
+void Window::cleanAndThrowOnInitException(const std::string& errorMessage)
 {
-    return m_window != nullptr;
+    glfwTerminate();
+    Window::isTerminated = true;
+    throw exceptions::WindowInitializationException(errorMessage);
 }

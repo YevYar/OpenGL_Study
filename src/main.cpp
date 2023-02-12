@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <memory>
 
 #include "multicoloredRectangle.h"
 #include "window.h"
@@ -10,11 +11,17 @@ static constexpr char TITLE[] = "OpenGL Study Project";
 
 int main()
 {
-    Window window(WIDTH, HEIGHT, TITLE);
-    if (!window.isInitialized()) {
+    std::unique_ptr<Window> window;
+    try
+    {
+        window = std::make_unique<Window>(WIDTH, HEIGHT, TITLE);
+    }
+    catch (exceptions::WindowInitializationException& exc)
+    {
+        std::cerr << exc.what() << std::endl;
         return -1;
     }
-
+    
     glfwSwapInterval(4);
 
     std::unique_ptr<renderer::MulticoloredRectangle> mColoredRectangle = nullptr;
@@ -32,7 +39,7 @@ int main()
     float increment = 0.05f;
 
     // Render loop
-    while (!window.shouldClose())
+    while (!window->shouldClose())
     {
         GLCall(glClearColor(0.1176f, 0.5647, 1.0f, 1.0f));
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
@@ -47,7 +54,7 @@ int main()
         
         currentK += increment;
 
-        window.swapBuffers();
+        window->swapBuffers();
         glfwPollEvents();
     }
 
