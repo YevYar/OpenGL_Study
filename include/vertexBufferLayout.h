@@ -42,11 +42,11 @@ namespace vertex
 		 */
 		bool normalized = false;
 		/**
-		 * \brief The 'pointer' parameter of the function. Specifies an offset of the first component 
+		 * \brief The 'pointer' parameter of the function. Specifies an offset in bytes of the first component 
 		 * of the first generic vertex attribute in the array in the data store of the buffer currently bound 
 		 * to the GL_ARRAY_BUFFER target.
 		 */
-		int byteOffset = 0;
+		unsigned int byteOffset = 0;
 	};
 
 	/**

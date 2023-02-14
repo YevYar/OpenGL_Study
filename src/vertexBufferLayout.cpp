@@ -1,16 +1,18 @@
  #include "vertexBufferLayout.h"
 
+#include <format>
+#include <glad/glad.h>
 #include <stdexcept>
 
 using namespace vertex;
 
 void VertexBufferLayout::addVertexAttribute(const VertexAttribute& va)
-{
-	// TODO: Check if index is less than max number of allowed vertex attributes. 
-	if (va.index < 0)
-	{
-		throw std::invalid_argument("Index must be equal to 0 or be greater.");
-	}
+{ 
+    if (va.index >= GL_MAX_VERTEX_ATTRIBS)
+    {
+        const auto errorMessage = std::format("Index must be less than {}.", GL_MAX_VERTEX_ATTRIBS);
+        throw std::invalid_argument(errorMessage);
+    }
 	if (va.count < 1 || va.count > 4)
 	{
 		throw std::invalid_argument("Count must be greater than 0 and less than 5.");
