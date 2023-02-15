@@ -43,8 +43,35 @@ void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
 
 		for (const auto& attr : layout->getAttributes())
 		{
-			GLCall(glVertexAttribPointer(attr.index, attr.count, helpers::toUType(attr.type),
-				attr.normalized ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<void*>(attr.byteOffset)));
+            switch (attr.type)
+            {
+                case VertexAttrType::BYTE:
+                case VertexAttrType::INT:
+                case VertexAttrType::INT_2_10_10_10_REV:
+                case VertexAttrType::SHORT:
+                case VertexAttrType::UNSIGNED_BYTE:
+                case VertexAttrType::UNSIGNED_INT:
+                case VertexAttrType::UNSIGNED_INT_2_10_10_10_REV:
+                case VertexAttrType::UNSIGNED_SHORT:
+                case VertexAttrType::FIXED:
+                case VertexAttrType::UNSIGNED_INT_10F_11F_11F_REV:
+                    GLCall(glVertexAttribIPointer(attr.index, attr.count, helpers::toUType(attr.type),
+                        stride, reinterpret_cast<void*>(attr.byteOffset)));
+                    break;
+                case VertexAttrType::FLOAT:
+                case VertexAttrType::HALF_FLOAT:
+                    GLCall(glVertexAttribPointer(attr.index, attr.count, helpers::toUType(attr.type),
+                        attr.normalized ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<void*>(attr.byteOffset)));
+                    break;
+                case VertexAttrType::DOUBLE:
+                    GLCall(glVertexAttribLPointer(attr.index, attr.count, helpers::toUType(attr.type),
+                        stride, reinterpret_cast<void*>(attr.byteOffset)));
+                    break;
+                default:
+                    GLCall(glVertexAttribPointer(attr.index, attr.count, helpers::toUType(attr.type),
+                        attr.normalized ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<void*>(attr.byteOffset)));
+            }
+			
 			enableAttribute(attr.index);
 		}
 	}	
