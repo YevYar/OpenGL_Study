@@ -9,18 +9,19 @@ namespace vertex
 {
 	/**
 	 * VertexAttrType represents 'type' parameter of 
-	 * [glVertexAttribPointer()](https://docs.gl/gl3/glVertexAttribPointer).
+	 * [glVertexAttribPointer()](https://docs.gl/gl4/glVertexAttribPointer).
 	 */
 	enum class VertexAttrType : unsigned int
 	{
 		BYTE = 0x1400, UNSIGNED_BYTE = 0x1401, SHORT = 0x1402, UNSIGNED_SHORT = 0x1403,
 		INT = 0x1404, UNSIGNED_INT = 0x1405, HALF_FLOAT = 0x140B, FLOAT = 0x1406,
-		DOUBLE = 0x140A, INT_2_10_10_10_REV = 0x8D9F, UNSIGNED_INT_2_10_10_10_REV = 0x8368,
+		DOUBLE = 0x140A, FIXED = 0x140C, INT_2_10_10_10_REV = 0x8D9F, UNSIGNED_INT_2_10_10_10_REV = 0x8368,
+        UNSIGNED_INT_10F_11F_11F_REV = 0x8C3B
 	};
 
 	/**
 	 * \brief VertexAttribute represents one vertex attribute and contains all arguments,
-	 * which are needed to call function [glVertexAttribPointer()](https://docs.gl/gl3/glVertexAttribPointer).
+	 * which are needed to call function [glVertexAttribPointer()](https://docs.gl/gl4/glVertexAttribPointer).
 	 */
 	struct VertexAttribute
 	{
@@ -75,7 +76,7 @@ namespace vertex
 
 			/**
 			 * \brief Returns automatically calculated 'stride' parameter, which is needed by 
-			 * [glVertexAttribPointer()](https://docs.gl/gl3/glVertexAttribPointer).
+			 * [glVertexAttribPointer()](https://docs.gl/gl4/glVertexAttribPointer).
 			 */
 			unsigned int getStride() const noexcept;
 

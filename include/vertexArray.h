@@ -32,11 +32,15 @@ namespace vertex
 			 * \brief Constructs new VertexArray object and generates new 1 vertex array object in OpenGL state machine.
 			 * 
 			 * This vertex array object is bound to become active vertex array object (see bind()).
+			 * 
+			 * Wraps [glGenVertexArrays()](https://docs.gl/gl4/glGenVertexArrays).
 			 */
 			VertexArray();
 
 			/**
 			 * \brief Deletes vertex array object in OpenGL state machine.
+			 * 
+			 * Wraps [glDeleteVertexArrays()](https://docs.gl/gl4/glDeleteVertexArrays).
 			 */
 			~VertexArray();
 
@@ -48,7 +52,7 @@ namespace vertex
             static void unbind() noexcept;
 
 			/**
-			 * \brief Wraps [glBindVertexArray()](https://docs.gl/gl3/glBindVertexArray).
+			 * \brief Wraps [glBindVertexArray()](https://docs.gl/gl4/glBindVertexArray).
 			 */
 			void bind() const noexcept;
 
@@ -57,7 +61,7 @@ namespace vertex
 			 * 
 			 * First of all this vertex array object is bound to become active vertex array object (see bind()).
 			 * After that the buffer is bound to this vertex array object (see Buffer::bind()).
-			 * If buffer has layout, [glVertexAttribPointer](https://docs.gl/gl3/glVertexAttribPointer) is called.
+			 * If buffer has layout, [glVertexAttribPointer()](https://docs.gl/gl4/glVertexAttribPointer) is called.
 			 * Every attribute is automatically enabled (see enableAttribute()).
 			 * 
 			 * OpenGL buffer, which is wrapped in Buffer class, can be bound to currently bound vertex array object
@@ -73,7 +77,7 @@ namespace vertex
 			const std::vector<std::shared_ptr<Buffer>>& getBuffers() const noexcept;
 
 			/**
-			 * \brief Wraps [glEnableVertexAttribArray()](https://docs.gl/gl3/glEnableVertexAttribArray).
+			 * \brief Wraps [glEnableVertexAttribArray()](https://docs.gl/gl4/glEnableVertexAttribArray).
 			 * 
 			 * This vertex array object is bound to become active vertex array object (see bind()).
 			 * 
@@ -82,7 +86,7 @@ namespace vertex
 			void enableAttribute(unsigned int index) const noexcept;
 
 			/**
-			 * \brief Wraps [glDisableVertexAttribArray()](https://docs.gl/gl3/glDisableVertexAttribArray).
+			 * \brief Wraps [glDisableVertexAttribArray()](https://docs.gl/gl4/glDisableVertexAttribArray).
 			 *
 			 * This vertex array object is bound to become active vertex array object (see bind()).
 			 * 

@@ -10,22 +10,23 @@
 namespace vertex
 {
 	/**
-	 * \brief BufferTarget represents 'target' parameter of [glBindBuffer()](https://docs.gl/gl3/glBindBuffer).
+	 * \brief BufferTarget represents 'target' parameter of [glBindBuffer()](https://docs.gl/gl4/glBindBuffer).
 	 */
 	enum class BufferTarget : unsigned int
 	{
-		ARRAY_BUFFER = 0x8892, COPY_READ_BUFFER = 0x8F36, COPY_WRITE_BUFFER = 0x8F37, ELEMENT_ARRAY_BUFFER = 0x8893,
-		PIXEL_PACK_BUFFER = 0x88EB, PIXEL_UNPACK_BUFFER = 0x88EC, TEXTURE_BUFFER = 0x8C2A, TRANSFORM_FEEDBACK_BUFFER = 0x8C8E,
-		UNIFORM_BUFFER = 0x8A11
+		ARRAY_BUFFER = 0x8892, ATOMIC_COUNTER_BUFFER = 0x92C0, COPY_READ_BUFFER = 0x8F36, COPY_WRITE_BUFFER = 0x8F37,
+        DISPATCH_INDIRECT_BUFFER = 0x90EE, DRAW_INDIRECT_BUFFER = 0x8F3F, ELEMENT_ARRAY_BUFFER = 0x8893,
+		PIXEL_PACK_BUFFER = 0x88EB, PIXEL_UNPACK_BUFFER = 0x88EC, QUERY_BUFFER = 0x9192, SHADER_STORAGE_BUFFER = 0x90D2,
+        TEXTURE_BUFFER = 0x8C2A, TRANSFORM_FEEDBACK_BUFFER = 0x8C8E, UNIFORM_BUFFER = 0x8A11
 	};
 
 	/**
-	 * \brief BufferDataUsage represents 'usage' parameter of [glBufferData()](https://docs.gl/gl3/glBufferData).
+	 * \brief BufferDataUsage represents 'usage' parameter of [glBufferData()](https://docs.gl/gl4/glBufferData).
 	 */
 	enum class BufferDataUsage : unsigned int
 	{
 		STREAM_DRAW = 0x88E0, STREAM_READ = 0x88E1, STREAM_COPY = 0x88E2, STATIC_DRAW = 0x88E4,
-		STATIC_READ = 0x88E1, STATIC_COPY = 0x88E6, DYNAMIC_DRAW = 0x88E8, DYNAMIC_READ = 0x88E9,
+		STATIC_READ = 0x88E5, STATIC_COPY = 0x88E6, DYNAMIC_DRAW = 0x88E8, DYNAMIC_READ = 0x88E9,
 		DYNAMIC_COPY = 0x88EA
 	};
 
@@ -55,6 +56,8 @@ namespace vertex
 
 			/**
 			 * \brief Deletes the object and the buffer object in OpenGL state machine.
+			 * 
+			 * Wraps [glDeleteBuffers()](https://docs.gl/gl4/glDeleteBuffers).
 			 */
 			~Buffer();
 
@@ -108,7 +111,7 @@ namespace vertex
             static void unbindTarget(BufferTarget target) noexcept;
 
 			/**
-			 * \brief Wraps [glBindBuffer()](https://docs.gl/gl3/glBindBuffer).
+			 * \brief Wraps [glBindBuffer()](https://docs.gl/gl4/glBindBuffer).
 			 * 
 			 * Also sets Buffer data in OpenGL buffer if it was not set before.
 			 */
@@ -147,7 +150,18 @@ namespace vertex
 			std::optional<VertexBufferLayout> getLayout() const noexcept;
 
 		private:
+            /**
+             * \brief Generates OpenGL buffer object.
+             * 
+             * Wraps [glGenBuffers()](https://docs.gl/gl4/glGenBuffers).
+             */
 			void genBuffer();
+
+            /**
+             * \brief Loads data in referenced OpenGL buffer.
+             * 
+             * Wraps [glBufferData()](https://docs.gl/gl4/glBufferData).
+             */
 			void updateData() const noexcept;
 
 		private:

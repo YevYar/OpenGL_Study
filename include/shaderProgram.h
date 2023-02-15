@@ -17,11 +17,12 @@
 namespace shader
 {
 	/**
-	 * \brief ShaderType represents 'shaderType' parameter of [glCreateShader()](https://docs.gl/gl3/glCreateShader).
+	 * \brief ShaderType represents 'shaderType' parameter of [glCreateShader()](https://docs.gl/gl4/glCreateShader).
 	 */
 	enum class ShaderType : unsigned int
 	{
-		VERTEX_SHADER = 0x8B31, GEOMETRY_SHADER = 0x8DD9, FRAGMENT_SHADER = 0x8B30
+        COMPUTE_SHADER = 0x91B9, VERTEX_SHADER = 0x8B31, TESS_CONTROL_SHADER = 0x8E88, TESS_EVALUATION_SHADER = 0x8E87,
+        GEOMETRY_SHADER = 0x8DD9, FRAGMENT_SHADER = 0x8B30
 	};
 
 	/**
@@ -33,6 +34,10 @@ namespace shader
 			/**
 			 * \brief Constructs new Shader object and generates new 1 shader in OpenGL state machine.
 			 * 
+			 * Wraps [glCreateShader()](https://docs.gl/gl4/glCreateShader), [glShaderSource()](https://docs.gl/gl4/glShaderSource), 
+			 * [glCompileShader()](https://docs.gl/gl4/glCompileShader), [glGetShaderiv()](https://docs.gl/gl4/glGetShader), 
+			 * [glGetShaderInfoLog()](https://docs.gl/gl4/glGetShaderInfoLog).
+			 * 
 			 * \param type - the type of created shader.
 			 * \param shaderSource - a source code of the shader.
 			 * \throw exceptions::GLRecAcquisitionException().
@@ -41,6 +46,8 @@ namespace shader
 
 			/**
 			 * \brief Deletes shader in OpenGL state machine.
+			 * 
+			 * Wraps [glDeleteShader()](https://docs.gl/gl4/glDeleteShader).
 			 */
 			~Shader();
 
@@ -66,6 +73,10 @@ namespace shader
 			/**
 			 * \brief Constructs new ShaderProgram object, generates and compiles new 1 shader program
 			 * in OpenGL state machine.
+			 * 
+			 * Wraps [glCreateProgram()](https://docs.gl/gl4/glCreateProgram), [glAttachShader()](https://docs.gl/gl4/glAttachShader), 
+			 * [glLinkProgram()](https://docs.gl/gl4/glLinkProgram), [glValidateProgram()](https://docs.gl/gl4/glValidateProgram), 
+			 * [glGetProgramiv()](https://docs.gl/gl4/glGetProgram), [glGetProgramInfoLog()](https://docs.gl/gl4/glGetProgramInfoLog).
 			 *
 			 * \param vertexShader - an object of Shader class with the type ShaderType::VERTEX_SHADER.
 			 * \param fragmentShader - an object of Shader class with the type ShaderType::FRAGMENT_SHADER.
@@ -75,19 +86,23 @@ namespace shader
 
 			/**
 			 * \brief Deletes shader program in OpenGL state machine.
+			 * 
+			 * Wraps [glDeleteProgram()](https://docs.gl/gl4/glDeleteProgram).
 			 */
 			~ShaderProgram();
 
 			NOT_COPYABLE_MOVABLE(ShaderProgram)
 
 			/**
-			 * \brief Wraps [glUseProgram()](https://docs.gl/gl3/glUseProgram).
+			 * \brief Wraps [glUseProgram()](https://docs.gl/gl4/glUseProgram).
 			 */
 			void use() const noexcept;
 			
 			/**
 			 * \brief Finds uniform location and creates BaseUniform object,
 			 * which wraps the OpenGL uniform variable with specified name.
+			 * 
+			 * Uses [glGetUniformLocation()](https://docs.gl/gl4/glGetUniformLocation).
 			 * 
 			 * \param T - one of the list: float, double, int, unsigned int.
 			 * \param Count - the integer value in the range [1, 4].
