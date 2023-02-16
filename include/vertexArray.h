@@ -14,7 +14,7 @@ namespace vertex
 {
 	class Buffer;
 	
-	/*!
+	/**
 	 * \brief VertexArray is a wrapper over OpenGL vertex array object.
 	 * 
 	 * This class is not copyable or movable. This is as it is, because OpenGL vertex array object is intended to be used

@@ -30,7 +30,7 @@ namespace vertex
 		DYNAMIC_COPY = 0x88EA
 	};
 
-	/*!
+	/**
 	 * \brief Buffer is a wrapper over OpenGL buffer object. 	
 	 */
 	class Buffer
