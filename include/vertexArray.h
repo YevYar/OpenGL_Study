@@ -37,14 +37,14 @@ namespace vertex
 			 */
 			VertexArray();
 
+            NOT_COPYABLE_MOVABLE(VertexArray)
+
 			/**
 			 * \brief Deletes vertex array object in OpenGL state machine.
 			 * 
 			 * Wraps [glDeleteVertexArrays()](https://docs.gl/gl4/glDeleteVertexArrays).
 			 */
-			~VertexArray();
-
-			NOT_COPYABLE_MOVABLE(VertexArray)
+			~VertexArray();	
 
             /**
              * \brief Unbinds current vertex array object.

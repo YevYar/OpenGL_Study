@@ -44,14 +44,14 @@ namespace shader
 			 */
 			Shader(ShaderType type, const std::string& shaderSource);
 
+            NOT_COPYABLE_MOVABLE(Shader)
+
 			/**
 			 * \brief Deletes shader in OpenGL state machine.
 			 * 
 			 * Wraps [glDeleteShader()](https://docs.gl/gl4/glDeleteShader).
 			 */
-			~Shader();
-
-			NOT_COPYABLE_MOVABLE(Shader);
+			~Shader();			
 
 		private:
             /**
@@ -84,14 +84,14 @@ namespace shader
 			 */
 			ShaderProgram(const Shader& vertexShader, const Shader& fragmentShader);
 
+            NOT_COPYABLE_MOVABLE(ShaderProgram)
+
 			/**
 			 * \brief Deletes shader program in OpenGL state machine.
 			 * 
 			 * Wraps [glDeleteProgram()](https://docs.gl/gl4/glDeleteProgram).
 			 */
 			~ShaderProgram();
-
-			NOT_COPYABLE_MOVABLE(ShaderProgram)
 
 			/**
 			 * \brief Wraps [glUseProgram()](https://docs.gl/gl4/glUseProgram).

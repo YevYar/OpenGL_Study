@@ -55,13 +55,6 @@ namespace vertex
 				std::optional<VertexBufferLayout> bufferLayout = std::nullopt);
 
 			/**
-			 * \brief Deletes the object and the buffer object in OpenGL state machine.
-			 * 
-			 * Wraps [glDeleteBuffers()](https://docs.gl/gl4/glDeleteBuffers).
-			 */
-			~Buffer();
-
-			/**
 			 * \brief Constructs new Buffer as copy of other Buffer.
 			 * 
 			 * However new 1 buffer in OpenGL state machine is generated.
@@ -83,6 +76,13 @@ namespace vertex
 			 * data is loaded in OpenGL buffer in first call of method bind().
 			 */
 			Buffer(Buffer&& obj) noexcept;
+
+            /**
+             * \brief Deletes the object and the buffer object in OpenGL state machine.
+             *
+             * Wraps [glDeleteBuffers()](https://docs.gl/gl4/glDeleteBuffers).
+             */
+            ~Buffer();
 
 			/**
 			 * \brief Copies state of other Buffer.

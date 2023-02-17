@@ -57,9 +57,10 @@ namespace vertex
 	{
 		public:
 			VertexBufferLayout() = default;
-			~VertexBufferLayout() = default;
 
-			DEFAULT_COPYABLE_MOVABLE(VertexBufferLayout)
+            DEFAULT_COPYABLE_MOVABLE(VertexBufferLayout)
+
+			~VertexBufferLayout() = default;			
 
 			/**
 			 * \brief Adds new VertexAttribute in layout.

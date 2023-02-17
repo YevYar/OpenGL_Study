@@ -16,11 +16,6 @@ Buffer::Buffer(BufferTarget target, ArrayData data, BufferDataUsage usage,
 	genBuffer();
 }
 
-Buffer::~Buffer()
-{
-	GLCall(glDeleteBuffers(1, &m_rendererId));
-}
-
 Buffer::Buffer(const Buffer& obj) :
 	m_target{ obj.m_target }, m_data{ obj.m_data },
 	m_usage{ obj.m_usage }, m_layout{ obj.m_layout }
@@ -35,6 +30,11 @@ Buffer::Buffer(Buffer&& obj) noexcept :
 {
 	obj.m_rendererId = 0;
 	obj.m_isDataSet = true;
+}
+
+Buffer::~Buffer()
+{
+    GLCall(glDeleteBuffers(1, &m_rendererId));
 }
 
 Buffer& Buffer::operator=(const Buffer& obj)

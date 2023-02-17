@@ -44,7 +44,7 @@ namespace shader
             /**
              * \brief Sets the data of OpenGL uniform variable.
              * 
-             * \param data - pointer to a data, which must be set in uniform.
+             * \param data - pointer to a data, which must be set in the uniform.
              */
 			virtual void setData(const void* data) = 0;
 

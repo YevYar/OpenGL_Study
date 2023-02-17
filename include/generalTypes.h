@@ -13,7 +13,7 @@ struct ArrayData
         /**
          * \brief Constructs new object.
          * 
-         * \param pointer - pointer to the data.
+         * \param pointer - pointer to the data. ArrayData doesn't take an ownership of the data.
          * \param size - size in bytes of the data.
          */
 		ArrayData(const void* pointer, unsigned int size);

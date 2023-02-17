@@ -11,7 +11,7 @@ std::string helpers::readStringFromFile(const std::string& pathToFile)
 {
     if (!std::filesystem::exists(pathToFile))
     {
-        const auto excMes = std::format("File does not exist at path {}", pathToFile);
+        const auto excMes = std::format("File does not exist at path {}.", pathToFile);
         throw exceptions::FileOpeningException(excMes);
     }
 

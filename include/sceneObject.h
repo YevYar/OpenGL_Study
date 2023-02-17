@@ -28,12 +28,12 @@ namespace renderer
 			SceneObject(std::shared_ptr<vertex::VertexArray> vao,
 				std::shared_ptr<shader::ShaderProgram> shaderProgram);
 
+            DEFAULT_COPYABLE_MOVABLE(SceneObject)
+
             /**
              * \brief Destructs the object.
              */
-			virtual ~SceneObject() = default;
-
-			DEFAULT_COPYABLE_MOVABLE(SceneObject)
+			virtual ~SceneObject() = default;			
 
 			/**
 			 * \brief Draws something on the scene.
