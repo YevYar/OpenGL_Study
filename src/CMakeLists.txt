@@ -9,7 +9,8 @@ set(SOURCES main.cpp
 	helpers/debugHelpers.cpp
 	sceneObject.cpp
 	generalTypes.cpp
-	multicoloredRectangle.cpp)
+	multicoloredRectangle.cpp
+    texture.cpp)
 
 target_sources(OpenGL_Study_Exe PRIVATE ${SOURCES})
 

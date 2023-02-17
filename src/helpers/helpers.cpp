@@ -3,7 +3,9 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
-#include <iostream>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 #include "exceptions.h"
 
@@ -32,4 +34,30 @@ std::string helpers::readStringFromFile(const std::string& pathToFile)
     }
 
     return stream.str();
+}
+
+std::unique_ptr<texture::TextureData> helpers::readTextureFromFile(const std::string& pathToFile)
+{
+    if (!std::filesystem::exists(pathToFile))
+    {
+        const auto excMes = std::format("Image does not exist at path {}.", pathToFile);
+        throw exceptions::FileOpeningException(excMes);
+    }
+
+    stbi_set_flip_vertically_on_load(true);
+    int width = 0, height = 0, nChannels = 0;
+    unsigned char* data = stbi_load(pathToFile.c_str(), &width, &height, &nChannels, 0);
+
+    if (!data)
+    {
+        const auto excMes = std::format("Cannot read an image at path {}.", pathToFile);
+        throw exceptions::FileReadingException(excMes);
+    }
+
+    return std::make_unique<texture::TextureData>(data, width, height, nChannels);
+}
+
+void helpers::freeTextureData(texture::TextureData& textureData)
+{
+    stbi_image_free(textureData.getData());
 }

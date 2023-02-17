@@ -1,7 +1,10 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
+#include <memory>
 #include <string>
+
+#include "texture.h"
 
 /**
  * \brief helpers namespace contains some helper types and functions.
@@ -16,6 +19,10 @@ namespace helpers
      * \throw exceptions::FileOpeningException(), exceptions::FileReadingException().
      */
 	std::string readStringFromFile(const std::string& pathToFile);
+
+    std::unique_ptr<texture::TextureData> readTextureFromFile(const std::string& pathToFile);
+
+    void freeTextureData(texture::TextureData& textureData);
 
     /**
      * \brief Casts an object to a type of elements of its enum type.

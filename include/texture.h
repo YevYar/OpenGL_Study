@@ -22,6 +22,25 @@ namespace texture
 		TEXTURE_2D_MULTISAMPLE_ARRAY = 0x9102
 	};
 
+    class TextureData
+    {
+        public:
+            TextureData(unsigned char* textureData, int width, int height, int nChannels);
+
+            NOT_COPYABLE_MOVABLE(TextureData)
+
+            ~TextureData();
+
+            unsigned char* getData() const noexcept;
+
+        private:
+            unsigned char* m_data = nullptr;
+            int m_height = 0;
+            int m_width = 0;
+            int m_nChannels = 0;
+
+    };
+
 	/**
 	 * \brief Texture is a wrapper over OpenGL texture.
 	 */
@@ -32,9 +51,13 @@ namespace texture
 
 			Texture(TextureTarget target, std::shared_ptr<TextureData> textureData);
 
-			NOT_COPYABLE_MOVABLE(Texture)
+            Texture(const Texture& obj);
+            Texture(Texture&& obj) noexcept;
 
 			~Texture();
+
+            Texture& operator=(const Texture& obj);
+            Texture& operator=(Texture&& obj) noexcept;
 
 			/**
 			 * \brief Unbinds current texture from the target.
@@ -49,8 +72,8 @@ namespace texture
 
 			void setData(std::shared_ptr<TextureData> textureData);
 
-			template
-			void setParameter
+			/*template
+			void setParameter*/
 
 			std::shared_ptr<TextureData> getData() const noexcept;
 
