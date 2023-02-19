@@ -7,8 +7,8 @@
 
 using namespace texture;
 
-TextureData::TextureData(unsigned char* textureData, int width, int height, int nChannels) :
-    m_data{ textureData }, m_height{ height }, m_width{ width }, m_nChannels{ nChannels }
+Texture::Texture(TextureBindingTarget target, std::shared_ptr<TextureData> textureData) : m_target{ target },
+    m_data{ std::move(textureData) }
 {
     ASSERT(m_data);
     ASSERT(m_height > 0);
