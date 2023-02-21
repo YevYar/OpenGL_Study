@@ -2,6 +2,7 @@
 #define TEXTURE_H
 
 #include <memory>
+#include <type_traits>
 
 #include "helpers/macros.h"
 #include "textureTypes.h"
@@ -11,6 +12,29 @@
  */
 namespace texture
 {
+    template<unsigned int DimensionsNumber>
+    struct TexDimensionSpecificTypesAndFunc
+    {
+    };
+
+    template<>
+    struct TexDimensionSpecificTypesAndFunc<1>
+    {
+        TexImage1DTarget texImageTarget;
+    };
+
+    template<>
+    struct TexDimensionSpecificTypesAndFunc<2>
+    {
+        TexImage2DTarget texImageTarget;
+    };
+
+    template<>
+    struct TexDimensionSpecificTypesAndFunc<3>
+    {
+        TexImage3DTarget texImageTarget;
+    };
+
 	/**
 	 * \brief Texture is a wrapper over OpenGL texture.
 	 */
@@ -19,6 +43,9 @@ namespace texture
 	{
         static_assert(DimensionsNumber >= 1 && DimensionsNumber <= 3,
             "The number of dimensions must be in range [1, 3].");
+
+        private:
+            TexDimensionSpecificTypesAndFunc<DimensionsNumber> typesAndFunc;
 
 		public:
 			Texture(TextureBindingTarget target, std::shared_ptr<TextureData> textureData);
@@ -42,7 +69,11 @@ namespace texture
 
 			void unbind() const noexcept;
 
-			void setData(std::shared_ptr<TextureData> textureData);
+            template<typename>
+            void setData(decltype(typesAndFunc.texImageTarget) target, std::shared_ptr<TextureData> textureData)
+            {
+
+            }
 
 			/*template
 			void setParameter*/
