@@ -53,11 +53,11 @@ std::unique_ptr<texture::TextureData> helpers::readTextureFromFile(const std::st
         const auto excMes = std::format("Cannot read an image at path {}.", pathToFile);
         throw exceptions::FileReadingException(excMes);
     }
-
-    return std::make_unique<texture::TextureData>(data, width, height, nChannels);
+    // TODO: image format auto detection
+    return std::make_unique<texture::TextureData>(data, width, height, nChannels, texture::TexturePixelFormat::RGB);
 }
 
 void helpers::freeTextureData(texture::TextureData& textureData)
 {
-    stbi_image_free(textureData.getData());
+    stbi_image_free(textureData.m_data);
 }
