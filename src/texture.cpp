@@ -15,7 +15,7 @@ namespace
 }
 
 template<unsigned int DimensionsNumber>
-Texture<DimensionsNumber>::Texture(TextureTarget target, std::shared_ptr<TextureData> textureData) :
+Texture<DimensionsNumber>::Texture(TextureTarget target) :
     m_target{ target }
 {
     if (m_dimensionsNumber == 1 && target != TextureTarget::TEXTURE_1D)
@@ -30,23 +30,24 @@ Texture<DimensionsNumber>::Texture(TextureTarget target, std::shared_ptr<Texture
     {
         throw std::invalid_argument("For DimensionsNumber = 3 only TextureTarget::TEXTURE_3D is supported.");
     }
+
     genTexture();
-    // setData(std::move(textureData));
+    bind();
 }
 
 template<unsigned int DimensionsNumber>
-Texture<DimensionsNumber>::Texture(const Texture& obj) : m_target{ obj.m_target }
+Texture<DimensionsNumber>::Texture(const Texture& obj) : m_target{ obj.m_target },
+    m_lastTexImageTarget{ obj.m_lastTexImageTarget }
 {
     genTexture();
-    // setData(typesAndFunc. obj.m_data);
+    setData(m_lastTexImageTarget, obj.m_data);
 }
 
 template<unsigned int DimensionsNumber>
 Texture<DimensionsNumber>::Texture(Texture&& obj) noexcept : m_rendererId{ obj.m_rendererId },
-    m_target{ obj.m_target }, m_data{ std::move(obj.m_data) }, m_isDataSet{ obj.m_isDataSet }
+    m_target{ obj.m_target }, m_data{ std::move(obj.m_data) }, m_lastTexImageTarget{ obj.m_lastTexImageTarget }
 {
     obj.m_rendererId = 0;
-    obj.m_isDataSet = true;
 }
 
 template<unsigned int DimensionsNumber>
@@ -66,18 +67,11 @@ template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::bind() const noexcept
 {
     GLuint boundTexture = 0;
-    GLCall(glGetIntegerv(helpers::toUType(::getTargetAssociatedGetParameter(m_target)), static_cast<GLint*>(&boundTexture)));
-    GLCall(glBindTexture(helpers::toUType(m_target), textureID));
+    GLCall(glGetIntegerv(helpers::toUType(getTargetAssociatedGetParameter(m_target)),
+        reinterpret_cast<GLint*>(&boundTexture)));
+    GLCall(glBindTexture(helpers::toUType(m_target), m_rendererId));
     GLCall(glBindTexture(helpers::toUType(m_target), boundTexture));
 }
-
-// Texture::Texture(TextureTarget target, std::shared_ptr<TextureData> textureData)
-
-//template<typename>
-//void Texture<DimensionsNumber>::setData(std::shared_ptr<TextureData> textureData)
-//{
-//
-//}
 
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::genTexture()
@@ -117,10 +111,12 @@ void Texture<DimensionsNumber>::setTextureDataInTarget(TexImage3DTarget target,
         textureData->m_data));
 }
 
-TextureBindingTarget getTargetAssociatedGetParameter(TextureTarget target) noexcept
+namespace
 {
-    switch (target)
+    TextureBindingTarget getTargetAssociatedGetParameter(TextureTarget target) noexcept
     {
+        switch (target)
+        {
         case TextureTarget::TEXTURE_1D:
             return TextureBindingTarget::TEXTURE_BINDING_1D;
         case TextureTarget::TEXTURE_1D_ARRAY:
@@ -143,6 +139,7 @@ TextureBindingTarget getTargetAssociatedGetParameter(TextureTarget target) noexc
             return TextureBindingTarget::TEXTURE_BINDING_CUBE_MAP_ARRAY;
         case TextureTarget::TEXTURE_RECTANGLE:
             return TextureBindingTarget::TEXTURE_BINDING_RECTANGLE;
+        }
     }
 }
 

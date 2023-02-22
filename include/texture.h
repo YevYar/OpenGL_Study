@@ -44,11 +44,19 @@ namespace texture
         static_assert(DimensionsNumber >= 1 && DimensionsNumber <= 3,
             "The number of dimensions must be in range [1, 3].");
 
-        // private:
-            
+        private:
+            TexDimensionSpecificTypesAndFunc<DimensionsNumber> m_dimensionTypesAndFunc;
+
+        public:
+            using TexImageTarget = decltype(m_dimensionTypesAndFunc.texImageTarget);
 
 		public:
-			Texture(TextureTarget target, std::shared_ptr<TextureData> textureData);
+            Texture(TextureTarget target);
+            Texture(TextureTarget target, TexImageTarget texImageTarget, std::shared_ptr<TextureData> textureData) :
+                Texture(target)
+            {
+                setData(texImageTarget, std::move(textureData));
+            }
 
             Texture(const Texture& obj);
             Texture(Texture&& obj) noexcept;
@@ -69,10 +77,13 @@ namespace texture
 
 			void unbind() const noexcept;
 
-            template<typename>
-            void setData(decltype(m_dimensionTypesAndFunc.texImageTarget) target, std::shared_ptr<TextureData> textureData)
+            void setData(TexImageTarget texImageTarget,
+                std::shared_ptr<TextureData> textureData)
             {
-                setTextureDataInTarget(target, std::move(textureData));
+                bind();
+                setTextureDataInTarget(texImageTarget, textureData);
+                m_data = std::move(textureData);
+                m_lastTexImageTarget = texImageTarget;
             }
 
 			/*template
@@ -91,11 +102,10 @@ namespace texture
 			 * \brief Id of referenced OpenGL texture.
 			 */
 			unsigned int m_rendererId = 0;
+            unsigned int m_dimensionsNumber = DimensionsNumber;
             TextureTarget m_target = TextureTarget::TEXTURE_2D;
-			std::shared_ptr<TextureData> m_data;
-            bool m_isDataSet = false;
-            TexDimensionSpecificTypesAndFunc<DimensionsNumber> m_dimensionTypesAndFunc;
-            const unsigned int m_dimensionsNumber = DimensionsNumber;
+			std::shared_ptr<TextureData> m_data;            
+            TexImageTarget m_lastTexImageTarget;
 
 	};
 }
