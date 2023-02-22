@@ -43,9 +43,11 @@ namespace texture
              * \param level - the level-of-detail number.
              * \param format - the format of pixel data.
              * \param internalFormat - specify how the texture shall be stored in the GPU.
+             * \param pixelType - the type of the pixel data.
              */
             TextureData(unsigned char* textureData, GLsizei width, GLsizei height, GLsizei depth,
-                unsigned int nChannels, GLint level, TexturePixelFormat format, TextureInternalFormat internalFormat);
+                unsigned int nChannels, GLint level, TexturePixelFormat format, TextureInternalFormat internalFormat,
+                TexturePixelType pixelType);
 
             NOT_COPYABLE_MOVABLE(TextureData)
 
@@ -89,6 +91,10 @@ namespace texture
              * \brief The internal format, in which the texture shall be stored in the GPU.
              */
             TextureInternalFormat m_internalFormat = TextureInternalFormat::RGB;
+            /**
+             * \brief The type of the pixel data.
+             */
+            TexturePixelType m_type = TexturePixelType::UNSIGNED_BYTE;
 
     };
 
@@ -96,12 +102,24 @@ namespace texture
      * \brief TextureTarget is a type of the texture, which represents 'target' parameter of
      * [glBindTexture()](https://docs.gl/gl4/glBindTexture).
      */
-    enum class TextureBindingTarget : GLenum
+    enum class TextureTarget : GLenum
     {
         TEXTURE_1D = 0x0DE0, TEXTURE_2D = 0x0DE1, TEXTURE_3D = 0x806F, TEXTURE_1D_ARRAY = 0x8C18,
         TEXTURE_2D_ARRAY = 0x8C1A, TEXTURE_RECTANGLE = 0x84F5, TEXTURE_CUBE_MAP = 0x8513,
         TEXTURE_CUBE_MAP_ARRAY = 0x9009, TEXTURE_BUFFER = 0x8C2A, TEXTURE_2D_MULTISAMPLE = 0x9100,
         TEXTURE_2D_MULTISAMPLE_ARRAY = 0x9102
+    };
+
+    /**
+     * \brief TextureBindingTarget is a parameter by which the current bound texture to specific texture target
+     * can be got. See 'Associated Gets' section of [glBindTexture()](https://docs.gl/gl4/glBindTexture).
+     */
+    enum class TextureBindingTarget : GLenum
+    {
+        TEXTURE_BINDING_1D = 0x8068, TEXTURE_BINDING_2D = 0x8069, TEXTURE_BINDING_3D = 0x806A,
+        TEXTURE_BINDING_1D_ARRAY = 0x8C1C, TEXTURE_BINDING_2D_ARRAY = 0x8C1D, TEXTURE_BINDING_RECTANGLE = 0x84F6,
+        TEXTURE_BINDING_BUFFER = 0x8C2C, TEXTURE_BINDING_CUBE_MAP = 0x8514, TEXTURE_BINDING_CUBE_MAP_ARRAY = 0x900A,
+        TEXTURE_BINDING_2D_MULTISAMPLE = 0x9104, TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY = 0x9105
     };
 
     /**

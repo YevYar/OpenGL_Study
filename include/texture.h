@@ -44,11 +44,11 @@ namespace texture
         static_assert(DimensionsNumber >= 1 && DimensionsNumber <= 3,
             "The number of dimensions must be in range [1, 3].");
 
-        private:
-            TexDimensionSpecificTypesAndFunc<DimensionsNumber> typesAndFunc;
+        // private:
+            
 
 		public:
-			Texture(TextureBindingTarget target, std::shared_ptr<TextureData> textureData);
+			Texture(TextureTarget target, std::shared_ptr<TextureData> textureData);
 
             Texture(const Texture& obj);
             Texture(Texture&& obj) noexcept;
@@ -63,16 +63,16 @@ namespace texture
 			 *
 			 * \param target - target texture to be unbound from.
 			 */
-			static void unbindTarget(TextureBindingTarget target) noexcept;
+			static void unbindTarget(TextureTarget target) noexcept;
 
 			void bind() const noexcept;
 
 			void unbind() const noexcept;
 
             template<typename>
-            void setData(decltype(typesAndFunc.texImageTarget) target, std::shared_ptr<TextureData> textureData)
+            void setData(decltype(m_dimensionTypesAndFunc.texImageTarget) target, std::shared_ptr<TextureData> textureData)
             {
-
+                setTextureDataInTarget(target, std::move(textureData));
             }
 
 			/*template
@@ -82,15 +82,20 @@ namespace texture
 
         private:
             void genTexture();
+            void setTextureDataInTarget(TexImage1DTarget target, std::shared_ptr<TextureData> textureData);
+            void setTextureDataInTarget(TexImage2DTarget target, std::shared_ptr<TextureData> textureData);
+            void setTextureDataInTarget(TexImage3DTarget target, std::shared_ptr<TextureData> textureData);
 
 		private:
 			/**
 			 * \brief Id of referenced OpenGL texture.
 			 */
 			unsigned int m_rendererId = 0;
-            TextureBindingTarget m_target = TextureBindingTarget::TEXTURE_2D;
+            TextureTarget m_target = TextureTarget::TEXTURE_2D;
 			std::shared_ptr<TextureData> m_data;
             bool m_isDataSet = false;
+            TexDimensionSpecificTypesAndFunc<DimensionsNumber> m_dimensionTypesAndFunc;
+            const unsigned int m_dimensionsNumber = DimensionsNumber;
 
 	};
 }

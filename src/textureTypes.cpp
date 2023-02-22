@@ -17,9 +17,10 @@ TextureData::TextureData(unsigned char* textureData, GLsizei width, GLsizei heig
 }
 
 TextureData::TextureData(unsigned char* textureData, GLsizei width, GLsizei height, GLsizei depth,
-    unsigned int nChannels, GLint level, TexturePixelFormat format, TextureInternalFormat internalFormat) :
+    unsigned int nChannels, GLint level, TexturePixelFormat format, TextureInternalFormat internalFormat,
+    TexturePixelType pixelType) :
     m_data{ textureData }, m_depth{ depth }, m_height{ height }, m_width{ width }, m_nChannels{ nChannels },
-    m_level{ level }, m_format{ format }, m_internalFormat{ internalFormat }
+    m_level{ level }, m_format{ format }, m_internalFormat{ internalFormat }, m_type{ pixelType }
 {
     ASSERT(m_data);
     ASSERT(m_height > 0);
