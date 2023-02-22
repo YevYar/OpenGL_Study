@@ -5,8 +5,21 @@
 
 using namespace texture;
 
-TextureData::TextureData(unsigned char* textureData, int width, int height, int nChannels) :
-    m_data{ textureData }, m_height{ height }, m_width{ width }, m_nChannels{ nChannels }
+TextureData::TextureData(unsigned char* textureData, GLsizei width, GLsizei height, unsigned int nChannels, 
+    TexturePixelFormat format) : 
+    m_data{ textureData }, m_height{ height }, m_width{ width }, m_nChannels{ nChannels }, 
+    m_format{ format }
+{
+    ASSERT(m_data);
+    ASSERT(m_height > 0);
+    ASSERT(m_width > 0);
+    ASSERT(m_nChannels > 0);
+}
+
+TextureData::TextureData(unsigned char* textureData, GLsizei width, GLsizei height, GLsizei depth,
+    unsigned int nChannels, GLint level, TexturePixelFormat format, TextureInternalFormat internalFormat) :
+    m_data{ textureData }, m_depth{ depth }, m_height{ height }, m_width{ width }, m_nChannels{ nChannels },
+    m_level{ level }, m_format{ format }, m_internalFormat{ internalFormat }
 {
     ASSERT(m_data);
     ASSERT(m_height > 0);
@@ -17,24 +30,4 @@ TextureData::TextureData(unsigned char* textureData, int width, int height, int 
 TextureData::~TextureData()
 {
     helpers::freeTextureData(*this);
-}
-
-unsigned char* TextureData::getData() const noexcept
-{
-    return m_data;
-}
-
-int TextureData::getHeight() const noexcept
-{
-    return m_height;
-}
-
-int TextureData::getWidth() const noexcept
-{
-    return m_width;
-}
-
-int TextureData::getNChannels() const noexcept
-{
-    return m_nChannels;
 }
