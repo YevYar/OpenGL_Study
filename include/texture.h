@@ -2,39 +2,14 @@
 #define TEXTURE_H
 
 #include <memory>
-#include <type_traits>
 
-#include "helpers/macros.h"
-#include "textureTypes.h"
+#include "textureImpl.h"
 
 /**
  * \brief texture namespace contains types, related to OpenGL textures.  
  */
 namespace texture
 {
-    template<unsigned int DimensionsNumber>
-    struct TexDimensionSpecificTypesAndFunc
-    {
-    };
-
-    template<>
-    struct TexDimensionSpecificTypesAndFunc<1>
-    {
-        TexImage1DTarget texImageTarget;
-    };
-
-    template<>
-    struct TexDimensionSpecificTypesAndFunc<2>
-    {
-        TexImage2DTarget texImageTarget;
-    };
-
-    template<>
-    struct TexDimensionSpecificTypesAndFunc<3>
-    {
-        TexImage3DTarget texImageTarget;
-    };
-
 	/**
 	 * \brief Texture is a wrapper over OpenGL texture.
 	 */
@@ -81,7 +56,7 @@ namespace texture
                 std::shared_ptr<TextureData> textureData)
             {
                 bind();
-                setTextureDataInTarget(texImageTarget, textureData);
+                m_dimensionTypesAndFunc.setTexImageInTarget(texImageTarget, textureData);
                 m_data = std::move(textureData);
                 m_lastTexImageTarget = texImageTarget;
             }
@@ -93,9 +68,6 @@ namespace texture
 
         private:
             void genTexture();
-            void setTextureDataInTarget(TexImage1DTarget target, std::shared_ptr<TextureData> textureData);
-            void setTextureDataInTarget(TexImage2DTarget target, std::shared_ptr<TextureData> textureData);
-            void setTextureDataInTarget(TexImage3DTarget target, std::shared_ptr<TextureData> textureData);
 
 		private:
 			/**

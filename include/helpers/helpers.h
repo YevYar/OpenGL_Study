@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-#include "texture.h"
+#include "textureTypes.h"
 
 /**
  * \brief helpers namespace contains some helper types and functions.

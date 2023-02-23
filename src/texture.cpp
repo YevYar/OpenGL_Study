@@ -4,8 +4,6 @@
 #include <stdexcept>
 
 #include "exceptions.h"
-#include "helpers/helpers.h"
-#include "helpers/debugHelpers.h"
 
 using namespace texture;
 
@@ -59,18 +57,37 @@ Texture<DimensionsNumber>::~Texture()
 template<unsigned int DimensionsNumber>
 Texture<DimensionsNumber>& Texture<DimensionsNumber>::operator=(const Texture& obj)
 {
-   // m_
+    m_target = obj.m_target;
+    m_data = obj.m_data;
+    m_lastTexImageTarget = obj.m_lastTexImageTarget;
+
+
+
     return *this;
+}
+
+template<unsigned int DimensionsNumber>
+void Texture<DimensionsNumber>::unbindTarget(TextureTarget target) noexcept
+{
+    GLCall(glBindTexture(helpers::toUType(m_target), 0));
 }
 
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::bind() const noexcept
 {
+    using namespace helpers;
+
     GLuint boundTexture = 0;
-    GLCall(glGetIntegerv(helpers::toUType(getTargetAssociatedGetParameter(m_target)),
+    GLCall(glGetIntegerv(toUType(getTargetAssociatedGetParameter(m_target)),
         reinterpret_cast<GLint*>(&boundTexture)));
-    GLCall(glBindTexture(helpers::toUType(m_target), m_rendererId));
-    GLCall(glBindTexture(helpers::toUType(m_target), boundTexture));
+    GLCall(glBindTexture(toUType(m_target), m_rendererId));
+    GLCall(glBindTexture(toUType(m_target), boundTexture));
+}
+
+template<unsigned int DimensionsNumber>
+void Texture<DimensionsNumber>::unbind() const noexcept
+{
+    Texture::unbindTarget(m_target);
 }
 
 template<unsigned int DimensionsNumber>
@@ -81,34 +98,6 @@ void Texture<DimensionsNumber>::genTexture()
     {
         throw exceptions::GLRecAcquisitionException("Texture cannot be generated.");
     }
-}
-
-template<unsigned int DimensionsNumber>
-void Texture<DimensionsNumber>::setTextureDataInTarget(TexImage1DTarget target,
-    std::shared_ptr<TextureData> textureData)
-{
-    using namespace helpers;
-    GLCall(glTexImage1D(toUType(target), textureData->m_level, toUType(textureData->m_internalFormat),
-        textureData->m_width, 0, toUType(textureData->m_format), toUType(textureData->m_type), textureData->m_data));
-}
-
-template<unsigned int DimensionsNumber>
-void Texture<DimensionsNumber>::setTextureDataInTarget(TexImage2DTarget target,
-    std::shared_ptr<TextureData> textureData)
-{
-    using namespace helpers;
-    GLCall(glTexImage2D(toUType(target), textureData->m_level, toUType(textureData->m_internalFormat), textureData->m_width,
-        textureData->m_height, 0, toUType(textureData->m_format), toUType(textureData->m_type), textureData->m_data));
-}
-
-template<unsigned int DimensionsNumber>
-void Texture<DimensionsNumber>::setTextureDataInTarget(TexImage3DTarget target,
-    std::shared_ptr<TextureData> textureData)
-{
-    using namespace helpers;
-    GLCall(glTexImage3D(toUType(target), textureData->m_level, toUType(textureData->m_internalFormat), textureData->m_width,
-        textureData->m_height, textureData->m_depth, 0, toUType(textureData->m_format), toUType(textureData->m_type),
-        textureData->m_data));
 }
 
 namespace

@@ -50,6 +50,7 @@ Buffer& Buffer::operator=(const Buffer& obj)
 
 Buffer& Buffer::operator=(Buffer&& obj) noexcept
 {
+	// TODO: delete one of the buffers
 	m_target = obj.m_target;
 	m_usage = obj.m_usage;
 	m_layout = std::move(obj.m_layout);
