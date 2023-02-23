@@ -30,7 +30,14 @@ Texture<DimensionsNumber>::Texture(TextureTarget target) :
     }
 
     genTexture();
-    bind();
+    bindForAMomentAndExecute();
+}
+
+template<unsigned int DimensionsNumber>
+Texture<DimensionsNumber>::Texture(TextureTarget target, TexImageTarget texImageTarget,
+    std::shared_ptr<TextureData> textureData) : Texture(target)
+{
+    setData(texImageTarget, std::move(textureData));
 }
 
 template<unsigned int DimensionsNumber>
@@ -43,25 +50,32 @@ Texture<DimensionsNumber>::Texture(const Texture& obj) : m_target{ obj.m_target 
 
 template<unsigned int DimensionsNumber>
 Texture<DimensionsNumber>::Texture(Texture&& obj) noexcept : m_rendererId{ obj.m_rendererId },
-    m_target{ obj.m_target }, m_data{ std::move(obj.m_data) }, m_lastTexImageTarget{ obj.m_lastTexImageTarget }
+    m_target{ obj.m_target }, m_data{ std::move(obj.m_data) }, m_lastTexImageTarget{ obj.m_lastTexImageTarget },
+    m_isBound{ obj.m_isBound }
 {
     obj.m_rendererId = 0;
+    obj.m_isBound = false;
 }
 
 template<unsigned int DimensionsNumber>
 Texture<DimensionsNumber>::~Texture()
 {
-    GLCall(glDeleteTextures(1, &m_rendererId));
+    deleteTexture();
 }
 
 template<unsigned int DimensionsNumber>
-Texture<DimensionsNumber>& Texture<DimensionsNumber>::operator=(const Texture& obj)
+Texture<DimensionsNumber>& Texture<DimensionsNumber>::operator=(Texture&& obj) noexcept
 {
+    deleteTexture();
+
+    m_rendererId = obj.m_rendererId;
     m_target = obj.m_target;
-    m_data = obj.m_data;
+    m_data = std::move(obj.m_data);
     m_lastTexImageTarget = obj.m_lastTexImageTarget;
+    m_isBound = obj.m_isBound;
 
-
+    obj.m_rendererId = 0;
+    obj.m_isBound = false;
 
     return *this;
 }
@@ -69,25 +83,42 @@ Texture<DimensionsNumber>& Texture<DimensionsNumber>::operator=(const Texture& o
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::unbindTarget(TextureTarget target) noexcept
 {
-    GLCall(glBindTexture(helpers::toUType(m_target), 0));
+    GLCall(glBindTexture(helpers::toUType(target), 0));
 }
 
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::bind() const noexcept
 {
-    using namespace helpers;
-
-    GLuint boundTexture = 0;
-    GLCall(glGetIntegerv(toUType(getTargetAssociatedGetParameter(m_target)),
-        reinterpret_cast<GLint*>(&boundTexture)));
-    GLCall(glBindTexture(toUType(m_target), m_rendererId));
-    GLCall(glBindTexture(toUType(m_target), boundTexture));
+    GLCall(glBindTexture(helpers::toUType(m_target), m_rendererId));
+    m_isBound = true;
 }
 
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::unbind() const noexcept
 {
-    Texture::unbindTarget(m_target);
+    if (m_isBound)
+    {
+        Texture::unbindTarget(m_target);
+        m_isBound = false;
+    }    
+}
+
+template<unsigned int DimensionsNumber>
+void Texture<DimensionsNumber>::setData(TexImageTarget texImageTarget,
+    std::shared_ptr<TextureData> textureData)
+{
+    bindForAMomentAndExecute([&]() {
+        m_dimensionTypesAndFunc.setTexImageInTarget(texImageTarget, textureData);
+    });  
+
+    m_data = std::move(textureData);
+    m_lastTexImageTarget = texImageTarget;
+}
+
+template<unsigned int DimensionsNumber>
+std::shared_ptr<TextureData> Texture<DimensionsNumber>::getData() const noexcept
+{
+    return m_data;
 }
 
 template<unsigned int DimensionsNumber>
@@ -98,6 +129,28 @@ void Texture<DimensionsNumber>::genTexture()
     {
         throw exceptions::GLRecAcquisitionException("Texture cannot be generated.");
     }
+}
+
+template<unsigned int DimensionsNumber>
+void Texture<DimensionsNumber>::bindForAMomentAndExecute(const std::function<void()>& funcToExecute)
+{
+    using namespace helpers;
+
+    GLuint boundTexture = 0;
+    GLCall(glGetIntegerv(toUType(getTargetAssociatedGetParameter(m_target)),
+        reinterpret_cast<GLint*>(&boundTexture)));
+    GLCall(glBindTexture(toUType(m_target), m_rendererId));
+
+    funcToExecute();
+
+    GLCall(glBindTexture(toUType(m_target), boundTexture));
+}
+
+template<unsigned int DimensionsNumber>
+void Texture<DimensionsNumber>::deleteTexture() noexcept
+{
+    GLCall(glDeleteTextures(1, &m_rendererId));
+    m_rendererId = 0;
 }
 
 namespace

@@ -1,6 +1,7 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
+#include <functional>
 #include <memory>
 
 #include "textureImpl.h"
@@ -27,18 +28,13 @@ namespace texture
 
 		public:
             Texture(TextureTarget target);
-            Texture(TextureTarget target, TexImageTarget texImageTarget, std::shared_ptr<TextureData> textureData) :
-                Texture(target)
-            {
-                setData(texImageTarget, std::move(textureData));
-            }
-
+            Texture(TextureTarget target, TexImageTarget texImageTarget, std::shared_ptr<TextureData> textureData);
             Texture(const Texture& obj);
             Texture(Texture&& obj) noexcept;
 
 			~Texture();
 
-            Texture& operator=(const Texture& obj);
+            Texture& operator=(const Texture& obj) = delete;
             Texture& operator=(Texture&& obj) noexcept;
 
 			/**
@@ -52,14 +48,7 @@ namespace texture
 
 			void unbind() const noexcept;
 
-            void setData(TexImageTarget texImageTarget,
-                std::shared_ptr<TextureData> textureData)
-            {
-                bind();
-                m_dimensionTypesAndFunc.setTexImageInTarget(texImageTarget, textureData);
-                m_data = std::move(textureData);
-                m_lastTexImageTarget = texImageTarget;
-            }
+            void setData(TexImageTarget texImageTarget, std::shared_ptr<TextureData> textureData);
 
 			/*template
 			void setParameter*/
@@ -68,16 +57,19 @@ namespace texture
 
         private:
             void genTexture();
+            void bindForAMomentAndExecute(const std::function<void()>& funcToExecute = []() { });
+            void deleteTexture() noexcept;
 
 		private:
 			/**
 			 * \brief Id of referenced OpenGL texture.
 			 */
 			unsigned int m_rendererId = 0;
-            unsigned int m_dimensionsNumber = DimensionsNumber;
+            const unsigned int m_dimensionsNumber = DimensionsNumber;
             TextureTarget m_target = TextureTarget::TEXTURE_2D;
 			std::shared_ptr<TextureData> m_data;            
             TexImageTarget m_lastTexImageTarget;
+            mutable bool m_isBound = false;
 
 	};
 }
