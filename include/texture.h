@@ -50,8 +50,47 @@ namespace texture
 
             void setData(TexImageTarget texImageTarget, std::shared_ptr<TextureData> textureData);
 
-			/*template
-			void setParameter*/
+			template<typename Type, typename = std::enable_if_t<std::is_same_v<GLfloat, Type> ||
+                                                                std::is_same_v<GLint, Type>>>
+            void setParameter(TexParameterName parameter, Type value)
+            {
+                if constexpr (std::is_same_v<GLfloat, Type>)
+                {
+                    GLCall(glTextureParameterf(m_rendererId, helpers::toUType(parameter), value));
+                }
+                else
+                {
+                    GLCall(glTextureParameteri(m_rendererId, helpers::toUType(parameter), value));
+                }
+            }
+
+            template<typename Type, typename = std::enable_if_t<std::is_same_v<GLfloat, Type> ||
+                                                                std::is_same_v<GLint, Type>>>
+            void setParameterV(TexParameterName parameter, const Type* values)
+            {
+                if constexpr (std::is_same_v<GLfloat, Type>)
+                {
+                    GLCall(glTextureParameterfv(m_rendererId, helpers::toUType(parameter), values));
+                }
+                else
+                {
+                    GLCall(glTextureParameteriv(m_rendererId, helpers::toUType(parameter), values));
+                }
+            }
+
+            template<typename Type, typename = std::enable_if_t<std::is_same_v<GLint, Type> ||
+                                                                std::is_same_v<GLuint, Type>>>
+            void setParameterIV(TexParameterName parameter, const Type* values)
+            {
+                if constexpr (std::is_same_v<GLint, Type>)
+                {
+                    GLCall(glTextureParameterIiv(m_rendererId, helpers::toUType(parameter), values));
+                }
+                else
+                {
+                    GLCall(glTextureParameterIuiv(m_rendererId, helpers::toUType(parameter), values));
+                }
+            }
 
 			std::shared_ptr<TextureData> getData() const noexcept;
 
