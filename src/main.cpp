@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "multicoloredRectangle.h"
+#include "openglLimits.h"
 #include "window.h"
 
 static constexpr int WIDTH = 800, HEIGHT = 600;
@@ -23,6 +24,8 @@ int main()
     }
     
     glfwSwapInterval(4);
+
+    initOpenglLimits();
 
     std::unique_ptr<renderer::MulticoloredRectangle> mColoredRectangle = nullptr;
     try

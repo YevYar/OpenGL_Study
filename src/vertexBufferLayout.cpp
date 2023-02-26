@@ -4,13 +4,16 @@
 #include <glad/glad.h>
 #include <stdexcept>
 
+#include "openglLimits.h"
+
 using namespace vertex;
 
 void VertexBufferLayout::addVertexAttribute(const VertexAttribute& va)
-{ 
-    if (va.index >= GL_MAX_VERTEX_ATTRIBS)
+{
+    const GLint maxVertexAttribs = getOpenglLimit(LimitName::MAX_VERTEX_ATTRIBS);
+    if (va.index >= maxVertexAttribs)
     {
-        const auto errorMessage = std::format("Index must be less than {}.", GL_MAX_VERTEX_ATTRIBS);
+        const auto errorMessage = std::format("Index must be less than {}.", maxVertexAttribs);
         throw std::invalid_argument(errorMessage);
     }
 	if (va.count < 1 || va.count > 4)

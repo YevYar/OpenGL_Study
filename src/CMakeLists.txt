@@ -11,7 +11,8 @@ set(SOURCES main.cpp
 	generalTypes.cpp
 	multicoloredRectangle.cpp
     texture.cpp
-    textureTypes.cpp)
+    textureTypes.cpp
+    openglLimits.cpp)
 
 target_sources(OpenGL_Study_Exe PRIVATE ${SOURCES})
 
