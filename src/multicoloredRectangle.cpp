@@ -73,8 +73,8 @@ std::unique_ptr<MulticoloredRectangle> renderer::makeMulticoloredRectangle()
 	VAO->addBuffer(EBO);
 
 	// Create shader program only once
-	static std::shared_ptr<ShaderProgram> shaderProgram = makeShaderProgram("shaders/vs/vertexShader.vert",
-		"shaders/fs/fragmentShader.frag");
+	static std::shared_ptr<ShaderProgram> shaderProgram = makeShaderProgram("resources/shaders/vs/vertexShader.vert",
+		"resources/shaders/fs/fragmentShader.frag");
 
 	// Create new MulticoloredRectangle
 	auto rect = new MulticoloredRectangle(VAO, shaderProgram);
