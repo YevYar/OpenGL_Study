@@ -78,25 +78,25 @@ namespace shader
     /**
      * \brief Uniform represents one dimensional uniform variable, which contains [1, 4] elements.
      * 
-     * \param T - one of the list: float, double, int, unsigned int.
+     * \param Type - one of the list: float, double, int, unsigned int.
      * \param Count - the integer value in the range [1, 4].
      */
-	template<typename T, unsigned int Count>
+	template<typename Type, unsigned int Count>
 	class Uniform : public BaseUniform
 	{
-		static_assert(std::is_same_v<float, T> || std::is_same_v<double, T>
-			|| std::is_same_v<int, T> || std::is_same_v<unsigned, T>,
+		static_assert(std::is_same_v<float, Type> || std::is_same_v<double, Type>
+			|| std::is_same_v<int, Type> || std::is_same_v<unsigned, Type>,
 			"A Uniform can be of the following types: float, double, int or unsigned int.");
 		static_assert(Count >= 1 && Count <= 4, "Count must be in range [1, 4].");
 
 
 		private:
-			using ConcreteUniformSetter = void (*)(GLint, GLsizei, const T*);
+			using ConcreteUniformSetter = void (*)(GLint, GLsizei, const Type*);
 
 		public:
 			void setData(const void* data) override
 			{
-				GLCall(m_setter(m_location, Count, reinterpret_cast<const T*>(data)));
+				GLCall(m_setter(m_location, Count, reinterpret_cast<const Type*>(data)));
 			}
 
 		protected:
@@ -109,7 +109,7 @@ namespace shader
              */
 			Uniform(int location, std::string name) :
 				BaseUniform{ location, std::move(name) },
-				m_setter{ reinterpret_cast<ConcreteUniformSetter>(getUniformSetter(typeid(T).name(), Count)) }
+				m_setter{ reinterpret_cast<ConcreteUniformSetter>(getUniformSetter(typeid(Type).name(), Count)) }
 			{
 				if (m_setter == nullptr)
 				{

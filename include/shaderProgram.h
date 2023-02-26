@@ -104,13 +104,13 @@ namespace shader
 			 * 
 			 * Uses [glGetUniformLocation()](https://docs.gl/gl4/glGetUniformLocation).
 			 * 
-			 * \param T - one of the list: float, double, int, unsigned int.
+			 * \param Type - one of the list: float, double, int, unsigned int.
 			 * \param Count - the integer value in the range [1, 4].
 			 * \param name - a name of uniform variable, which is used in OpenGL shader program.
 			 * \return created BaseUniform object or throws an exception if nothing is found.
 			 * \throw exceptions::GLRecAcquisitionException().
 			 */
-			template<typename T, unsigned int Count>
+			template<typename Type, unsigned int Count>
 			BaseUniform& findUniform(std::string name)
 			{
                 if (m_uniforms.contains(name))
@@ -130,7 +130,7 @@ namespace shader
 					throw exceptions::GLRecAcquisitionException(excMes);
 				}
 
-				auto uniform = new Uniform<T, Count>(location, name);
+				auto uniform = new Uniform<Type, Count>(location, name);
 				m_uniforms.insert({ std::move(name), std::unique_ptr<BaseUniform>(uniform) });
 				return *uniform;
 			}

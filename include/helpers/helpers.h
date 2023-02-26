@@ -30,10 +30,10 @@ namespace helpers
      * \param enumeration - object of enum type.
      * \return object, casted to the type of elements of its enum type.
      */
-	template<typename E>
-	constexpr auto toUType(E enumeration) noexcept
+	template<typename Enumeration>
+	constexpr auto toUType(Enumeration enumeration) noexcept
 	{
-		return static_cast<std::underlying_type_t<E>>(enumeration);
+		return static_cast<std::underlying_type_t<Enumeration>>(enumeration);
 	}
 }
 
