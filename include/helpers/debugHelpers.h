@@ -26,7 +26,7 @@
  * \param x - statement to execute.
  */
 #define GLCall(x) \
-	if (!Window::isGLFWTerminated());\
+	if (!Window::isGLFWTerminated())\
 	{\
 		clearGlError();\
 		x;\
