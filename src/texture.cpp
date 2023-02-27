@@ -89,8 +89,7 @@ Texture<DimensionsNumber>& Texture<DimensionsNumber>::operator=(Texture&& obj) n
 }
 
 template<unsigned int DimensionsNumber>
-void Texture<DimensionsNumber>::bindTextureToTextureUnit(GLuint textureUnitId, TextureTarget textureTarget,
-    const Texture<DimensionsNumber>& textureObj)
+void Texture<DimensionsNumber>::bindTextureToTextureUnit(GLuint textureUnitId, const Texture<DimensionsNumber>& textureObj)
 {
     const auto maxTUnitIndex = getOpenglLimit(LimitName::MAX_COMBINED_TEXTURE_IMAGE_UNITS);
     if (textureUnitId > maxTUnitIndex - 1)
@@ -102,19 +101,19 @@ void Texture<DimensionsNumber>::bindTextureToTextureUnit(GLuint textureUnitId, T
     const auto textureUnit = textureUnits.find(textureUnitId);
     if (textureUnit != textureUnits.end())
     {
-        const auto texture = textureUnit->second.find(textureTarget);
+        const auto texture = textureUnit->second.find(textureObj.m_target);
         if (texture != textureUnit->second.end() && texture->second == textureObj.m_rendererId)
         {
             return;
         }
 
-        textureUnit->second.insert_or_assign(textureTarget, textureObj.m_rendererId);
+        textureUnit->second.insert_or_assign(textureObj.m_target, textureObj.m_rendererId);
         glBindTextureUnit(textureUnitId, textureObj.m_rendererId);
     }
     else
     {
         textureUnits.insert(
-            { textureUnitId, std::map<TextureTarget, GLuint>({ { textureTarget, textureObj.m_rendererId } }) });
+            { textureUnitId, std::map<TextureTarget, GLuint>({ { textureObj.m_target, textureObj.m_rendererId } }) });
         glBindTextureUnit(textureUnitId, textureObj.m_rendererId);
     }
 }

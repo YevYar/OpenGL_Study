@@ -37,8 +37,7 @@ namespace texture
             Texture& operator=(const Texture& obj) = delete;
             Texture& operator=(Texture&& obj) noexcept;
 
-            static void bindTextureToTextureUnit(GLuint textureUnit, TextureTarget textureTarget,
-                const Texture<DimensionsNumber>& texture);
+            static void bindTextureToTextureUnit(GLuint textureUnit, const Texture<DimensionsNumber>& texture);
             
 			/**
 			 * \brief Unbinds current texture from the target.
