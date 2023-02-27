@@ -162,7 +162,7 @@ std::shared_ptr<TextureData> Texture<DimensionsNumber>::getData() const noexcept
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::genTexture()
 {
-    GLCall(glGenTextures(1, &m_rendererId));
+    GLCall(glCreateTextures(helpers::toUType(m_target), 1, &m_rendererId));
     if (m_rendererId == 0)
     {
         throw exceptions::GLRecAcquisitionException("Texture cannot be generated.");
