@@ -14,11 +14,11 @@ void VertexBufferLayout::addVertexAttribute(const VertexAttribute& va)
     if (va.index >= maxVertexAttribs)
     {
         const auto errorMessage = std::format("Index must be less than {}.", maxVertexAttribs);
-        throw std::invalid_argument(errorMessage);
+        throw std::out_of_range(errorMessage);
     }
 	if (va.count < 1 || va.count > 4)
 	{
-		throw std::invalid_argument("Count must be greater than 0 and less than 5.");
+		throw std::out_of_range("Count must be greater than 0 and less than 5.");
 	}
 
 	m_vertexAttributes.push_back(va);

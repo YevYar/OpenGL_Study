@@ -66,7 +66,7 @@ namespace vertex
 			 * \brief Adds new VertexAttribute in layout.
 			 * 
 			 * \param vertexAttribute - vertex attribute, which must be added to the vertex buffer layout.
-			 * \throw std::invalid_argument
+			 * \throw std::out_of_range
 			 */
 			void addVertexAttribute(const VertexAttribute& vertexAttribute);
 
