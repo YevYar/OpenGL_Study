@@ -17,11 +17,14 @@ namespace texture
     {
         TexImage1DTarget texImageTarget;
 
-        void setTexImageInTarget(TexImage1DTarget target, std::shared_ptr<TextureData> textureData)
+        void setTexImageInTarget(GLuint textureId, TexImage1DTarget target, std::shared_ptr<TextureData> textureData)
         {
             using namespace helpers;
-            GLCall(glTexImage1D(toUType(target), textureData->m_level, toUType(textureData->m_internalFormat),
-                textureData->m_width, 0, toUType(textureData->m_format), toUType(textureData->m_type), textureData->m_data));
+
+            GLCall(glTextureStorage1D(textureId, textureData->m_level, toUType(textureData->m_internalFormat),
+                textureData->m_width));
+            GLCall(glTextureSubImage1D(textureId, 0, 0, textureData->m_width, toUType(textureData->m_format),
+                toUType(textureData->m_type), textureData->m_data));
         }
     };
 
@@ -30,11 +33,14 @@ namespace texture
     {
         TexImage2DTarget texImageTarget;
 
-        void setTexImageInTarget(TexImage2DTarget target, std::shared_ptr<TextureData> textureData)
+        void setTexImageInTarget(GLuint textureId, TexImage2DTarget target, std::shared_ptr<TextureData> textureData)
         {
             using namespace helpers;
-            GLCall(glTexImage2D(toUType(target), textureData->m_level, toUType(textureData->m_internalFormat), textureData->m_width,
-                textureData->m_height, 0, toUType(textureData->m_format), toUType(textureData->m_type), textureData->m_data));
+            
+            GLCall(glTextureStorage2D(textureId, textureData->m_level, toUType(textureData->m_internalFormat),
+                textureData->m_width, textureData->m_height));
+            GLCall(glTextureSubImage2D(textureId, 0, 0, 0, textureData->m_width, textureData->m_height,
+                toUType(textureData->m_format), toUType(textureData->m_type), textureData->m_data));
         }
     };
 
@@ -43,11 +49,14 @@ namespace texture
     {
         TexImage3DTarget texImageTarget;
 
-        void setTexImageInTarget(TexImage3DTarget target, std::shared_ptr<TextureData> textureData)
+        void setTexImageInTarget(GLuint textureId, TexImage3DTarget target, std::shared_ptr<TextureData> textureData)
         {
             using namespace helpers;
-            GLCall(glTexImage3D(toUType(target), textureData->m_level, toUType(textureData->m_internalFormat), textureData->m_width,
-                textureData->m_height, textureData->m_depth, 0, toUType(textureData->m_format), toUType(textureData->m_type),
+            
+            GLCall(glTextureStorage3D(textureId, textureData->m_level, toUType(textureData->m_internalFormat),
+                textureData->m_width, textureData->m_height, textureData->m_depth));
+            GLCall(glTextureSubImage3D(textureId, 0, 0, 0, 0, textureData->m_width, textureData->m_height,
+                textureData->m_depth, toUType(textureData->m_format), toUType(textureData->m_type),
                 textureData->m_data));
         }
     };

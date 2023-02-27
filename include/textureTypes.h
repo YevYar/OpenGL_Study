@@ -137,7 +137,7 @@ namespace texture
             /**
              * \brief The level-of-detail number.
              */
-            GLint m_level = 0;
+            GLint m_level = 1;
             /**
              * \brief A number of color channels of the image.
              */
@@ -149,7 +149,7 @@ namespace texture
             /**
              * \brief The internal format, in which the texture shall be stored in the GPU.
              */
-            TextureInternalFormat m_internalFormat = TextureInternalFormat::RGB;
+            TextureInternalFormat m_internalFormat = TextureInternalFormat::RGB8;
             /**
              * \brief The type of the pixel data.
              */

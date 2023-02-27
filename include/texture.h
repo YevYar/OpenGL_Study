@@ -105,7 +105,7 @@ namespace texture
 			/**
 			 * \brief Id of referenced OpenGL texture.
 			 */
-			unsigned int m_rendererId = 0;
+            GLuint m_rendererId = 0;
             const unsigned int m_dimensionsNumber = DimensionsNumber;
             TextureTarget m_target = TextureTarget::TEXTURE_2D;
 			std::shared_ptr<TextureData> m_data;            

@@ -38,7 +38,6 @@ Texture<DimensionsNumber>::Texture(TextureTarget target) :
     }
 
     genTexture();
-    bindForAMomentAndExecute();
 }
 
 template<unsigned int DimensionsNumber>
@@ -145,10 +144,7 @@ template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::setData(TexImageTarget texImageTarget,
     std::shared_ptr<TextureData> textureData)
 {
-    bindForAMomentAndExecute([&]() {
-        m_dimensionTypesAndFunc.setTexImageInTarget(texImageTarget, textureData);
-    });  
-
+    m_dimensionTypesAndFunc.setTexImageInTarget(m_rendererId, texImageTarget, textureData);
     m_data = std::move(textureData);
     m_lastTexImageTarget = texImageTarget;
 }
