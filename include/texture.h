@@ -50,6 +50,7 @@ namespace texture
 
 			void unbind() const noexcept;
 
+            void specifyTextureStorageFormat(const std::shared_ptr<TextureData>& textureData) const noexcept;
             void setData(TexImageTarget texImageTarget, std::shared_ptr<TextureData> textureData);
 
 			template<typename Type, typename = std::enable_if_t<std::is_same_v<GLfloat, Type> ||
@@ -94,6 +95,7 @@ namespace texture
                 }
             }
 
+            TextureTarget getTarget() const noexcept;
 			std::shared_ptr<TextureData> getData() const noexcept;
 
         private:
@@ -111,6 +113,7 @@ namespace texture
 			std::shared_ptr<TextureData> m_data;            
             TexImageTarget m_lastTexImageTarget;
             mutable bool m_isBound = false;
+            mutable bool m_isStorageFormatSpecified = false;
 
 	};
 }

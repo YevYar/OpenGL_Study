@@ -58,7 +58,7 @@ Texture<DimensionsNumber>::Texture(const Texture& obj) : m_target{ obj.m_target 
 template<unsigned int DimensionsNumber>
 Texture<DimensionsNumber>::Texture(Texture&& obj) noexcept : m_rendererId{ obj.m_rendererId },
     m_target{ obj.m_target }, m_data{ std::move(obj.m_data) }, m_lastTexImageTarget{ obj.m_lastTexImageTarget },
-    m_isBound{ obj.m_isBound }
+    m_isBound{ obj.m_isBound }, m_isStorageFormatSpecified{ obj.m_isStorageFormatSpecified }
 {
     obj.m_rendererId = 0;
     obj.m_isBound = false;
@@ -80,6 +80,7 @@ Texture<DimensionsNumber>& Texture<DimensionsNumber>::operator=(Texture&& obj) n
     m_data = std::move(obj.m_data);
     m_lastTexImageTarget = obj.m_lastTexImageTarget;
     m_isBound = obj.m_isBound;
+    m_isStorageFormatSpecified = obj.m_isStorageFormatSpecified;
 
     obj.m_rendererId = 0;
     obj.m_isBound = false;
@@ -107,14 +108,14 @@ void Texture<DimensionsNumber>::bindTextureToTextureUnit(GLuint textureUnitId, c
         }
 
         textureUnit->second.insert_or_assign(textureObj.m_target, textureObj.m_rendererId);
-        glBindTextureUnit(textureUnitId, textureObj.m_rendererId);
     }
     else
     {
         textureUnits.insert(
             { textureUnitId, std::map<TextureTarget, GLuint>({ { textureObj.m_target, textureObj.m_rendererId } }) });
-        glBindTextureUnit(textureUnitId, textureObj.m_rendererId);
     }
+
+    GLCall(glBindTextureUnit(textureUnitId, textureObj.m_rendererId));
 }
 
 template<unsigned int DimensionsNumber>
@@ -141,12 +142,32 @@ void Texture<DimensionsNumber>::unbind() const noexcept
 }
 
 template<unsigned int DimensionsNumber>
+void Texture<DimensionsNumber>::specifyTextureStorageFormat(const std::shared_ptr<TextureData>& textureData) const noexcept
+{
+    ASSERT(!m_isStorageFormatSpecified);
+
+    m_dimensionTypesAndFunc.setTexStorageFormat(m_rendererId, textureData);
+    m_isStorageFormatSpecified = true;
+}
+
+template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::setData(TexImageTarget texImageTarget,
     std::shared_ptr<TextureData> textureData)
 {
+    if (!m_isStorageFormatSpecified)
+    {
+        specifyTextureStorageFormat(textureData);
+    }
+
     m_dimensionTypesAndFunc.setTexImageInTarget(m_rendererId, texImageTarget, textureData);
     m_data = std::move(textureData);
     m_lastTexImageTarget = texImageTarget;
+}
+
+template<unsigned int DimensionsNumber>
+TextureTarget texture::Texture<DimensionsNumber>::getTarget() const noexcept
+{
+    return m_target;
 }
 
 template<unsigned int DimensionsNumber>
