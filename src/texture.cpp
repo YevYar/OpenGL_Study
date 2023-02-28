@@ -160,6 +160,8 @@ void Texture<DimensionsNumber>::setData(TexImageTarget texImageTarget,
     }
 
     m_dimensionTypesAndFunc.setTexImageInTarget(m_rendererId, texImageTarget, textureData);
+    GLCall(glGenerateTextureMipmap(m_rendererId));
+
     m_data = std::move(textureData);
     m_lastTexImageTarget = texImageTarget;
 }
