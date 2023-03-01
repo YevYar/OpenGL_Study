@@ -1,30 +1,52 @@
 #ifndef TEXTURE_UNIT_H
 #define TEXTURE_UNIT_H
 
-#include <functional>
+#include <glad/glad.h>
+#include <map>
 #include <memory>
 #include <vector>
 
+#include "helpers/macros.h"
+
 namespace texture
 {
-    class Texture;
+    class BaseTexture;
+    class TextureUnit;
+    enum class TextureTarget : GLenum;
+
+    using TexturesConfiguration = std::map<std::shared_ptr<TextureUnit>, std::vector<std::shared_ptr<BaseTexture>>>;
+
+    namespace TextureUnitsManager
+    {
+        std::shared_ptr<TextureUnit> get(GLuint index);
+        void activateTextureUnit(GLuint index);
+        void activateTextureUnit(const std::shared_ptr<TextureUnit>& textureUnit);
+        std::shared_ptr<TextureUnit> getActiveTextureUnit();
+    };
 
     class TextureUnit
     {
         public:
-            TextureUnit();
+            TextureUnit() = delete;
+            NOT_COPYABLE_MOVABLE(TextureUnit)
 
-            static void unbind();
-            static void updateEvery(const std::vector<std::shared_ptr<TextureUnit>>& textureUnits,
-                std::function<void()> updater);
-
-            void addTexture(std::shared_ptr<Texture> texture);
-            void bind();
+            void setCurrentTexture(std::shared_ptr<BaseTexture> texture);
+            std::shared_ptr<BaseTexture> getCurrentTexture(TextureTarget textureTarget) const noexcept;
+            const std::map<TextureTarget, std::shared_ptr<BaseTexture>>& getAllCurrentTextures() const noexcept;
 
         private:
-            static TextureUnit* activeTU = nullptr;
+            TextureUnit(GLuint);
+
+        private:
+            const GLuint m_index = 0;
+            std::map<TextureTarget, std::shared_ptr<BaseTexture>> m_unitTextures;
+
+        friend std::shared_ptr<TextureUnit> TextureUnitsManager::get(GLuint);
+        friend void TextureUnitsManager::activateTextureUnit(const std::shared_ptr<TextureUnit>&);
 
     };
+
+    bool checkIsValidTextureUnitIndex(GLuint textureUnitIndex) noexcept;
 }
 
 #endif
