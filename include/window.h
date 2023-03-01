@@ -51,12 +51,12 @@ class Window
         void cleanAndThrowOnInitException(const std::string& errorMessage);
 
 	private:
+        static bool s_isTerminated;
+
         /**
          * \brief Pointer to controlled GLFWwindow object.
          */
 		GLFWwindow* m_window = nullptr;
-
-		static bool isTerminated;
 
 };
 

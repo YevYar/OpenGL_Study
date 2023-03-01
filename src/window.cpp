@@ -7,7 +7,7 @@
 #include "exceptions.h"
 #include "helpers/debugHelpers.h"
 
-bool Window::isTerminated = false;
+bool Window::s_isTerminated = false;
 
 namespace {
     void windowFramebufferSizeCalback(GLFWwindow* window, int width, int height)
@@ -47,12 +47,12 @@ Window::Window(int width, int height, const std::string& title)
 Window::~Window()
 {
     glfwTerminate();
-    Window::isTerminated = true;
+    Window::s_isTerminated = true;
 }
 
 bool Window::isGLFWTerminated()
 {
-    return Window::isTerminated;
+    return Window::s_isTerminated;
 }
 
 void Window::swapBuffers() const
@@ -68,6 +68,6 @@ bool Window::shouldClose() const
 void Window::cleanAndThrowOnInitException(const std::string& errorMessage)
 {
     glfwTerminate();
-    Window::isTerminated = true;
+    Window::s_isTerminated = true;
     throw exceptions::WindowInitializationException(errorMessage);
 }

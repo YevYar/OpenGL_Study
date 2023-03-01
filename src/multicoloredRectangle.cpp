@@ -17,7 +17,6 @@ MulticoloredRectangle::MulticoloredRectangle(std::shared_ptr<vertex::VertexArray
 	SceneObject(std::move(vao), shaderProgram),
 	m_colorCoefficient{ static_cast<decltype(m_colorCoefficient)>(shaderProgram->findUniform<float, 1>("k")) }
 {
-
 }
 
 void MulticoloredRectangle::draw()
