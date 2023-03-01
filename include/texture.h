@@ -5,17 +5,35 @@
 #include <memory>
 
 #include "textureImpl.h"
+#include "textureUnit.h"
 
 /**
  * \brief texture namespace contains types, related to OpenGL textures.  
  */
 namespace texture
 {
+    class BaseTexture
+    {
+        public:
+            BaseTexture() = default;
+            virtual ~BaseTexture() = default;
+
+        protected:
+            /**
+             * \brief Id of referenced OpenGL texture.
+             */
+            GLuint m_rendererId = 0;
+            TextureTarget m_target = TextureTarget::TEXTURE_2D;
+
+        friend class TextureUnit;
+
+    };
+
 	/**
 	 * \brief Texture is a wrapper over OpenGL texture.
 	 */
     template<unsigned int DimensionsNumber>
-	class Texture
+	class Texture : public BaseTexture
 	{
         static_assert(DimensionsNumber >= 1 && DimensionsNumber <= 3,
             "The number of dimensions must be in range [1, 3].");
@@ -36,8 +54,6 @@ namespace texture
 
             Texture& operator=(const Texture& obj) = delete;
             Texture& operator=(Texture&& obj) noexcept;
-
-            static void bindTextureToTextureUnit(GLuint textureUnit, const Texture<DimensionsNumber>& texture);
             
 			/**
 			 * \brief Unbinds current texture from the target.
@@ -103,13 +119,8 @@ namespace texture
             void bindForAMomentAndExecute(const std::function<void()>& funcToExecute = []() { });
             void deleteTexture() noexcept;
 
-		private:
-			/**
-			 * \brief Id of referenced OpenGL texture.
-			 */
-            GLuint m_rendererId = 0;
+		private:			
             const unsigned int m_dimensionsNumber = DimensionsNumber;
-            TextureTarget m_target = TextureTarget::TEXTURE_2D;
 			std::shared_ptr<TextureData> m_data;            
             TexImageTarget m_lastTexImageTarget;
             mutable bool m_isBound = false;

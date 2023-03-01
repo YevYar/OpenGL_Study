@@ -1,22 +1,13 @@
 #include "texture.h"
 
-#include <format>
 #include <glad/glad.h>
-#include <map>
-#include <stdexcept>
 
 #include "exceptions.h"
-#include "openglLimits.h"
 
 using namespace texture;
 
 namespace
 {
-    /**
-     * \brief Texture unit ID - { Texture target, Texture ID }
-     */
-    std::map<GLuint, std::map<TextureTarget, GLuint>> textureUnits;
-
     TextureBindingTarget getTargetAssociatedGetParameter(TextureTarget target) noexcept;
 }
 
@@ -86,36 +77,6 @@ Texture<DimensionsNumber>& Texture<DimensionsNumber>::operator=(Texture&& obj) n
     obj.m_isBound = false;
 
     return *this;
-}
-
-template<unsigned int DimensionsNumber>
-void Texture<DimensionsNumber>::bindTextureToTextureUnit(GLuint textureUnitId, const Texture<DimensionsNumber>& textureObj)
-{
-    const auto maxTUnitIndex = getOpenglLimit(LimitName::MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-    if (textureUnitId > maxTUnitIndex - 1)
-    {
-        const auto errorMessage = std::format("Texture unit index must be less than {}.", maxTUnitIndex);
-        throw std::out_of_range(errorMessage);
-    }
-
-    const auto textureUnit = textureUnits.find(textureUnitId);
-    if (textureUnit != textureUnits.end())
-    {
-        const auto texture = textureUnit->second.find(textureObj.m_target);
-        if (texture != textureUnit->second.end() && texture->second == textureObj.m_rendererId)
-        {
-            return;
-        }
-
-        textureUnit->second.insert_or_assign(textureObj.m_target, textureObj.m_rendererId);
-    }
-    else
-    {
-        textureUnits.insert(
-            { textureUnitId, std::map<TextureTarget, GLuint>({ { textureObj.m_target, textureObj.m_rendererId } }) });
-    }
-
-    GLCall(glBindTextureUnit(textureUnitId, textureObj.m_rendererId));
 }
 
 template<unsigned int DimensionsNumber>

@@ -6,8 +6,22 @@
 #include "helpers/debugHelpers.h"
 #include "helpers/helpers.h"
 #include "openglLimits.h"
+#include "texture.h"
 
 using namespace texture;
+
+namespace
+{
+	GLuint getActiveTextureUnitIndex()
+	{
+		return helpers::getOpenGLIntegerValue(GL_ACTIVE_TEXTURE) - GL_TEXTURE0;
+	}
+
+	void activateTextureUnitWithoutCheck(GLuint index)
+	{
+		GLCall(glActiveTexture(GL_TEXTURE0 + index));
+	}
+}
 
 namespace texture::TextureUnitsManager
 {
@@ -23,7 +37,7 @@ namespace texture::TextureUnitsManager
 				const auto errorMessage = std::format("Texture unit index must be less than {}.", maxTUnitIndex);
 				throw std::out_of_range(errorMessage);
 			}
-		}
+		}		
 	}
 	
 	std::shared_ptr<TextureUnit> get(GLuint index)
@@ -44,19 +58,53 @@ namespace texture::TextureUnitsManager
 	{
 		checkTextureUnitIndexAndThrowIfNot(index);
 
-		GLCall(glActiveTexture(GL_TEXTURE0 + index));
+		if (index == getActiveTextureUnitIndex())
+		{
+			return;
+		}
+
+		activateTextureUnitWithoutCheck(index);
 	}
 
 	void TextureUnitsManager::activateTextureUnit(const std::shared_ptr<TextureUnit>& textureUnit)
 	{
-		GLCall(glActiveTexture(GL_TEXTURE0 + textureUnit->m_index));
+		if (textureUnit->m_index == getActiveTextureUnitIndex())
+		{
+			return;
+		}
+
+		activateTextureUnitWithoutCheck(textureUnit->m_index);
 	}
 
 	std::shared_ptr<TextureUnit> TextureUnitsManager::getActiveTextureUnit()
 	{
-		const auto activeTextureUnitIndex = helpers::getOpenGLIntegerValue(GL_ACTIVE_TEXTURE) - GL_TEXTURE0;
+		const auto activeTextureUnitIndex = getActiveTextureUnitIndex();
 		return get(activeTextureUnitIndex);
 	}
+}
+
+void TextureUnit::setTexture(std::shared_ptr<BaseTexture> texture)
+{
+	const auto activeTextureUnitIndex = getActiveTextureUnitIndex();
+
+	GLCall(glBindTextureUnit(m_index, texture->m_rendererId));
+	m_unitTextures.insert_or_assign(texture->m_target, std::move(texture));
+
+	activateTextureUnitWithoutCheck(activeTextureUnitIndex);
+}
+
+std::shared_ptr<BaseTexture> TextureUnit::getTexture(TextureTarget textureTarget) const noexcept
+{
+	return m_unitTextures.contains(textureTarget) ? m_unitTextures.at(textureTarget) : nullptr;
+}
+
+const std::map<TextureTarget, std::shared_ptr<BaseTexture>>& TextureUnit::getAllTextures() const noexcept
+{
+	return m_unitTextures;
+}
+
+TextureUnit::TextureUnit(GLuint index) : m_index{ index }
+{
 }
 
 bool texture::checkIsValidTextureUnitIndex(GLuint textureUnitIndex) noexcept

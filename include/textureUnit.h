@@ -30,12 +30,12 @@ namespace texture
             TextureUnit() = delete;
             NOT_COPYABLE_MOVABLE(TextureUnit)
 
-            void setCurrentTexture(std::shared_ptr<BaseTexture> texture);
-            std::shared_ptr<BaseTexture> getCurrentTexture(TextureTarget textureTarget) const noexcept;
-            const std::map<TextureTarget, std::shared_ptr<BaseTexture>>& getAllCurrentTextures() const noexcept;
+            void setTexture(std::shared_ptr<BaseTexture> texture);
+            std::shared_ptr<BaseTexture> getTexture(TextureTarget textureTarget) const noexcept;
+            const std::map<TextureTarget, std::shared_ptr<BaseTexture>>& getAllTextures() const noexcept;
 
         private:
-            TextureUnit(GLuint);
+            TextureUnit(GLuint index);
 
         private:
             const GLuint m_index = 0;
