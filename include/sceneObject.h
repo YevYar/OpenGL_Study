@@ -6,6 +6,7 @@
 
 #include "helpers/macros.h"
 #include "shaderProgram.h"
+#include "textureUnit.h"
 #include "vertexArray.h"
 
 namespace renderer
@@ -40,6 +41,8 @@ namespace renderer
 			 */
 			virtual void draw() = 0;
 
+            virtual void setTexturesConfiguration(texture::TexturesConfiguration texturesConfiguration);
+
 		protected:
             /**
              * \brief Vertex array object of the object.
@@ -50,6 +53,8 @@ namespace renderer
              * \brief Shader program, which is used to render this object.
              */
 			std::shared_ptr<shader::ShaderProgram> m_shaderProgram = nullptr;
+
+            texture::TexturesConfiguration m_texturesConfiguration;
 
 	};
 }

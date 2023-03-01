@@ -83,14 +83,37 @@ namespace texture::TextureUnitsManager
 	}
 }
 
-void TextureUnit::setTexture(std::shared_ptr<BaseTexture> texture)
+void TextureUnit::setTexture(const std::shared_ptr<BaseTexture>& texture)
 {
+    if (m_unitTextures.contains(texture->m_target) && m_unitTextures.at(texture->m_target) == texture)
+    {
+        return;
+    }
+
 	const auto activeTextureUnitIndex = getActiveTextureUnitIndex();
 
 	GLCall(glBindTextureUnit(m_index, texture->m_rendererId));
-	m_unitTextures.insert_or_assign(texture->m_target, std::move(texture));
+	m_unitTextures.insert_or_assign(texture->m_target, texture);
 
 	activateTextureUnitWithoutCheck(activeTextureUnitIndex);
+}
+
+void TextureUnit::setTextures(const std::vector<std::shared_ptr<BaseTexture>>& textures)
+{
+    const auto activeTextureUnitIndex = getActiveTextureUnitIndex();
+
+    for (const auto& texture : textures)
+    {
+        if (m_unitTextures.contains(texture->m_target) && m_unitTextures.at(texture->m_target) == texture)
+        {
+            continue;
+        }
+
+        GLCall(glBindTextureUnit(m_index, texture->m_rendererId));
+        m_unitTextures.insert_or_assign(texture->m_target, texture);
+    }    
+
+    activateTextureUnitWithoutCheck(activeTextureUnitIndex);
 }
 
 std::shared_ptr<BaseTexture> TextureUnit::getTexture(TextureTarget textureTarget) const noexcept
@@ -110,4 +133,12 @@ TextureUnit::TextureUnit(GLuint index) : m_index{ index }
 bool texture::checkIsValidTextureUnitIndex(GLuint textureUnitIndex) noexcept
 {
 	return textureUnitIndex <= getOpenglLimit(LimitName::MAX_COMBINED_TEXTURE_IMAGE_UNITS) - 1;
+}
+
+void texture::applyTexturesConfiguration(const TexturesConfiguration& texturesConfiguration)
+{
+    for (const auto& tUnit : texturesConfiguration)
+    {
+        tUnit.first->setTextures(tUnit.second);
+    }
 }

@@ -7,3 +7,8 @@ SceneObject::SceneObject(std::shared_ptr<vertex::VertexArray> vao,
 	m_vao{ std::move(vao) }, m_shaderProgram{ std::move(shaderProgram) }
 {
 }
+
+void SceneObject::setTexturesConfiguration(texture::TexturesConfiguration texturesConfiguration)
+{
+    m_texturesConfiguration = std::move(texturesConfiguration);
+}
