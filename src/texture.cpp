@@ -1,6 +1,7 @@
 #include "texture.h"
 
 #include <glad/glad.h>
+#include <stdexcept>
 
 #include "exceptions.h"
 
@@ -11,9 +12,16 @@ namespace
     TextureBindingTarget getTargetAssociatedGetParameter(TextureTarget target) noexcept;
 }
 
+BaseTexture::BaseTexture(TextureTarget target) : m_target{ target }
+{
+}
+
+BaseTexture::BaseTexture(GLuint rendererId, TextureTarget target) : m_rendererId{ rendererId }, m_target{ target }
+{
+}
+
 template<unsigned int DimensionsNumber>
-Texture<DimensionsNumber>::Texture(TextureTarget target) :
-    m_target{ target }
+Texture<DimensionsNumber>::Texture(TextureTarget target) : BaseTexture{ target }
 {
     if (m_dimensionsNumber == 1 && target != TextureTarget::TEXTURE_1D)
     {
@@ -39,7 +47,7 @@ Texture<DimensionsNumber>::Texture(TextureTarget target, TexImageTarget texImage
 }
 
 template<unsigned int DimensionsNumber>
-Texture<DimensionsNumber>::Texture(const Texture& obj) : m_target{ obj.m_target },
+Texture<DimensionsNumber>::Texture(const Texture& obj) : BaseTexture{ obj.m_target },
     m_lastTexImageTarget{ obj.m_lastTexImageTarget }
 {
     genTexture();
@@ -47,8 +55,8 @@ Texture<DimensionsNumber>::Texture(const Texture& obj) : m_target{ obj.m_target 
 }
 
 template<unsigned int DimensionsNumber>
-Texture<DimensionsNumber>::Texture(Texture&& obj) noexcept : m_rendererId{ obj.m_rendererId },
-    m_target{ obj.m_target }, m_data{ std::move(obj.m_data) }, m_lastTexImageTarget{ obj.m_lastTexImageTarget },
+Texture<DimensionsNumber>::Texture(Texture&& obj) noexcept : BaseTexture{ obj.m_rendererId, obj.m_target },
+    m_data{ std::move(obj.m_data) }, m_lastTexImageTarget{ obj.m_lastTexImageTarget },
     m_isBound{ obj.m_isBound }, m_isStorageFormatSpecified{ obj.m_isStorageFormatSpecified }
 {
     obj.m_rendererId = 0;

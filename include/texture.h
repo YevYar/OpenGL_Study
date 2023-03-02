@@ -19,6 +19,10 @@ namespace texture
             virtual ~BaseTexture() = default;
 
         protected:
+            BaseTexture(TextureTarget target);
+            BaseTexture(GLuint rendererId, TextureTarget target);
+
+        protected:
             /**
              * \brief Id of referenced OpenGL texture.
              */
