@@ -127,7 +127,6 @@ namespace texture
             const unsigned int m_dimensionsNumber = DimensionsNumber;
 			std::shared_ptr<TextureData> m_data;            
             TexImageTarget m_lastTexImageTarget;
-            mutable bool m_isBound = false;
             mutable bool m_isStorageFormatSpecified = false;
 
 	};

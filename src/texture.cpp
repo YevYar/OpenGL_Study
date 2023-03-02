@@ -57,10 +57,9 @@ Texture<DimensionsNumber>::Texture(const Texture& obj) : BaseTexture{ obj.m_targ
 template<unsigned int DimensionsNumber>
 Texture<DimensionsNumber>::Texture(Texture&& obj) noexcept : BaseTexture{ obj.m_rendererId, obj.m_target },
     m_data{ std::move(obj.m_data) }, m_lastTexImageTarget{ obj.m_lastTexImageTarget },
-    m_isBound{ obj.m_isBound }, m_isStorageFormatSpecified{ obj.m_isStorageFormatSpecified }
+    m_isStorageFormatSpecified{ obj.m_isStorageFormatSpecified }
 {
     obj.m_rendererId = 0;
-    obj.m_isBound = false;
 }
 
 template<unsigned int DimensionsNumber>
@@ -78,11 +77,9 @@ Texture<DimensionsNumber>& Texture<DimensionsNumber>::operator=(Texture&& obj) n
     m_target = obj.m_target;
     m_data = std::move(obj.m_data);
     m_lastTexImageTarget = obj.m_lastTexImageTarget;
-    m_isBound = obj.m_isBound;
     m_isStorageFormatSpecified = obj.m_isStorageFormatSpecified;
 
     obj.m_rendererId = 0;
-    obj.m_isBound = false;
 
     return *this;
 }
@@ -97,17 +94,12 @@ template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::bind() const noexcept
 {
     GLCall(glBindTexture(helpers::toUType(m_target), m_rendererId));
-    m_isBound = true;
 }
 
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::unbind() const noexcept
 {
-    if (m_isBound)
-    {
-        Texture::unbindTarget(m_target);
-        m_isBound = false;
-    }    
+    Texture::unbindTarget(m_target);
 }
 
 template<unsigned int DimensionsNumber>
