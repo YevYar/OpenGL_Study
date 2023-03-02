@@ -23,6 +23,7 @@ void MulticoloredRectangle::draw()
 {
 	m_vao->bind();
 	m_shaderProgram->use();
+	applyTexturesConfiguration();
 	
 	GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 }

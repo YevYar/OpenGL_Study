@@ -12,3 +12,8 @@ void SceneObject::setTexturesConfiguration(texture::TexturesConfiguration textur
 {
     m_texturesConfiguration = std::move(texturesConfiguration);
 }
+
+void SceneObject::applyTexturesConfiguration()
+{
+	texture::applyTexturesConfiguration(m_texturesConfiguration);
+}

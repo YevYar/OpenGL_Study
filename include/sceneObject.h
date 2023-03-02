@@ -43,6 +43,9 @@ namespace renderer
 
             virtual void setTexturesConfiguration(texture::TexturesConfiguration texturesConfiguration);
 
+        protected:
+            void applyTexturesConfiguration();
+
 		protected:
             /**
              * \brief Vertex array object of the object.
