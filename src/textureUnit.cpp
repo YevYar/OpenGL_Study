@@ -116,6 +116,11 @@ void TextureUnit::setTextures(const std::vector<std::shared_ptr<BaseTexture>>& t
     activateTextureUnitWithoutCheck(activeTextureUnitIndex);
 }
 
+GLuint TextureUnit::getIndex() const noexcept
+{
+	return m_index;
+}
+
 std::shared_ptr<BaseTexture> TextureUnit::getTexture(TextureTarget textureTarget) const noexcept
 {
 	return m_unitTextures.contains(textureTarget) ? m_unitTextures.at(textureTarget) : nullptr;
@@ -139,6 +144,6 @@ void texture::applyTexturesConfiguration(const TexturesConfiguration& texturesCo
 {
     for (const auto& tUnit : texturesConfiguration)
     {
-        tUnit.first->setTextures(tUnit.second);
+        texture::TextureUnitsManager::get(tUnit.first)->setTextures(tUnit.second);
     }
 }

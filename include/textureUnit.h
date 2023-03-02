@@ -14,7 +14,7 @@ namespace texture
     class TextureUnit;
     enum class TextureTarget : GLenum;
 
-    using TexturesConfiguration = std::map<std::shared_ptr<TextureUnit>, std::vector<std::shared_ptr<BaseTexture>>>;
+    using TexturesConfiguration = std::map<GLuint, std::vector<std::shared_ptr<BaseTexture>>>;
 
     namespace TextureUnitsManager
     {
@@ -32,6 +32,7 @@ namespace texture
 
             void setTexture(const std::shared_ptr<BaseTexture>& texture);
             void setTextures(const std::vector<std::shared_ptr<BaseTexture>>& textures);
+            GLuint getIndex() const noexcept;
             std::shared_ptr<BaseTexture> getTexture(TextureTarget textureTarget) const noexcept;
             const std::map<TextureTarget, std::shared_ptr<BaseTexture>>& getAllTextures() const noexcept;
 

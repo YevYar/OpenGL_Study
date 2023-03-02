@@ -131,6 +131,36 @@ namespace texture
             mutable bool m_isStorageFormatSpecified = false;
 
 	};
+
+    template<unsigned int DimensionsNumber>
+    auto castBaseTextureToTexture(
+        std::shared_ptr<texture::BaseTexture> baseTexture)
+    {
+        return std::dynamic_pointer_cast<texture::Texture<DimensionsNumber>>(baseTexture);
+    }
+
+    template<unsigned int DimensionsNumber>
+    auto castBaseTextureToTexture(GLuint textureUnitIndex, texture::TextureTarget textureTarget)
+    {
+        const auto tUnit = texture::TextureUnitsManager::get(textureUnitIndex);
+        return std::dynamic_pointer_cast<texture::Texture<DimensionsNumber>>(tUnit->getTexture(textureTarget));
+    }
+
+    template<unsigned int DimensionsNumber>
+    auto castBaseTextureToTexture(const std::shared_ptr<texture::TextureUnit>& textureUnit,
+        texture::TextureTarget textureTarget)
+    {
+        return std::dynamic_pointer_cast<texture::Texture<DimensionsNumber>>(
+            textureUnit->getTexture(textureTarget));
+    }
+
+    template<unsigned int DimensionsNumber>
+    auto castBaseTextureToTexture(const texture::TexturesConfiguration& texturesConfig, GLuint textureUnitIndex,
+        unsigned int textureIndex)
+    {
+        return std::dynamic_pointer_cast<texture::Texture<DimensionsNumber>>(
+            texturesConfig.at(textureUnitIndex).at(textureIndex));
+    }
 }
 
 #endif

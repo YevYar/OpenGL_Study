@@ -32,7 +32,7 @@ void MulticoloredRectangle::draw()
 		auto textureData = std::shared_ptr<texture::TextureData>(
 			helpers::readTextureFromFile("resources/textures/awesomeface.png"));
 		textureData->m_format = texture::TexturePixelFormat::RGBA;
-		static_cast<texture::Texture<2>*>(m_texturesConfiguration.at(texture::TextureUnitsManager::get(0)).at(0).get())
+		texture::castBaseTextureToTexture<2>(m_texturesConfiguration, 0, 0)
 			->setData(texture::TexImage2DTarget::TEXTURE_2D, textureData);
 	}
 	
@@ -95,7 +95,7 @@ std::unique_ptr<MulticoloredRectangle> renderer::makeMulticoloredRectangle()
 	static auto texture2D = std::make_shared<texture::Texture<2>>(texture::TextureTarget::TEXTURE_2D,
 		texture::TexImage2DTarget::TEXTURE_2D, textureData);
 	static texture::TexturesConfiguration texturesConfig{{
-		texture::TextureUnitsManager::get(0),
+		0,
 		std::vector<std::shared_ptr<texture::BaseTexture>>{ texture2D }
 		}};
 
