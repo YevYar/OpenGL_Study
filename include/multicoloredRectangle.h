@@ -34,6 +34,7 @@ namespace renderer
 
 		private:
 			shader::Uniform<float, 1>& m_colorCoefficient;
+			int m_counter = 0;
 
 		friend std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle();
 	};

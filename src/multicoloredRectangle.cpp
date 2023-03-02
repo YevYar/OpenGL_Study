@@ -8,6 +8,7 @@
 #include "generalTypes.h"
 #include "helpers/debugHelpers.h"
 #include "shaderProgram.h"
+#include "texture.h"
 #include "vertexBufferLayout.h"
 
 using namespace renderer;
@@ -24,6 +25,16 @@ void MulticoloredRectangle::draw()
 	m_vao->bind();
 	m_shaderProgram->use();
 	applyTexturesConfiguration();
+
+	m_counter++;
+	if (m_counter == 300)
+	{
+		auto textureData = std::shared_ptr<texture::TextureData>(
+			helpers::readTextureFromFile("resources/textures/awesomeface.png"));
+		textureData->m_format = texture::TexturePixelFormat::RGBA;
+		static_cast<texture::Texture<2>*>(m_texturesConfiguration.at(texture::TextureUnitsManager::get(0)).at(0).get())
+			->setData(texture::TexImage2DTarget::TEXTURE_2D, textureData);
+	}
 	
 	GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 }
@@ -43,10 +54,10 @@ std::unique_ptr<MulticoloredRectangle> renderer::makeMulticoloredRectangle()
 	using namespace vertex;
 
 	static const float points[] = {
-		-0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f, 1.0f, 0.0f, 0.0f,
-		 0.5f,  0.5f, 0.0f, 1.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f
+		-0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+		 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f
 	};
 	static const unsigned int indices[] = {
 		0, 1, 2,
@@ -57,11 +68,13 @@ std::unique_ptr<MulticoloredRectangle> renderer::makeMulticoloredRectangle()
 	static auto VAO = std::make_shared<VertexArray>();
 
 	static VertexAttribute coordinateMap(0, 2, VertexAttrType::FLOAT, false, 0),
-		colorMap(1, 3, VertexAttrType::FLOAT, false, getByteSizeOfType(VertexAttrType::FLOAT) * 3);
+		colorMap(1, 3, VertexAttrType::FLOAT, false, getByteSizeOfType(VertexAttrType::FLOAT) * 2),
+		texCoords(2, 2, VertexAttrType::FLOAT, false, getByteSizeOfType(VertexAttrType::FLOAT) * 5);
 
 	static VertexBufferLayout layout;
 	layout.addVertexAttribute(coordinateMap);
 	layout.addVertexAttribute(colorMap);
+	layout.addVertexAttribute(texCoords);
 
 	static ArrayData data{ reinterpret_cast<const void*>(points), sizeof(points) };
 	static auto VBO = std::make_shared<Buffer>(BufferTarget::ARRAY_BUFFER, data, BufferDataUsage::STATIC_DRAW, layout);
@@ -76,7 +89,19 @@ std::unique_ptr<MulticoloredRectangle> renderer::makeMulticoloredRectangle()
 	static std::shared_ptr<ShaderProgram> shaderProgram = makeShaderProgram("resources/shaders/vs/vertexShader.vert",
 		"resources/shaders/fs/fragmentShader.frag");
 
+	// Load textures only once
+	static auto textureData = std::shared_ptr<texture::TextureData>(
+		helpers::readTextureFromFile("resources/textures/wooden_container.jpg"));
+	static auto texture2D = std::make_shared<texture::Texture<2>>(texture::TextureTarget::TEXTURE_2D,
+		texture::TexImage2DTarget::TEXTURE_2D, textureData);
+	static texture::TexturesConfiguration texturesConfig{{
+		texture::TextureUnitsManager::get(0),
+		std::vector<std::shared_ptr<texture::BaseTexture>>{ texture2D }
+		}};
+
+
 	// Create new MulticoloredRectangle
 	auto rect = new MulticoloredRectangle(VAO, shaderProgram);
+	rect->setTexturesConfiguration(texturesConfig);
 	return std::unique_ptr<MulticoloredRectangle>(rect);
 }
