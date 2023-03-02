@@ -7,8 +7,11 @@
 #include "openglLimits.h"
 #include "window.h"
 
-static constexpr int WIDTH = 800, HEIGHT = 600;
-static constexpr char TITLE[] = "OpenGL Study Project";
+namespace
+{
+    constexpr int WIDTH = 800, HEIGHT = 600;
+    constexpr char TITLE[] = "OpenGL Study Project";
+}
 
 int main()
 {
