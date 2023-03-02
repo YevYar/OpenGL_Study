@@ -1,6 +1,7 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
+#include <functional>
 #include <optional>
 #include <vector>
 
@@ -54,18 +55,7 @@ namespace vertex
 			Buffer(BufferTarget target, ArrayData data, BufferDataUsage usage,
 				std::optional<VertexBufferLayout> bufferLayout = std::nullopt);
 
-			/**
-			 * \brief Constructs new Buffer as copy of other Buffer.
-			 * 
-			 * However new 1 buffer in OpenGL state machine is generated.
-			 * Deep copy of m_data is not made (see copy constructor of ArrayData).
-			 *  
-			 * Buffer data is not immediately loaded in generated OpenGL buffer.
-			 * Data is loaded in generated OpenGL buffer in first call of method bind().
-			 * 
-			 * \throw exceptions::GLRecAcquisitionException().
-			 */
-			Buffer(const Buffer& obj);
+            Buffer(const Buffer& obj) = delete;
 
 			/**
 			 * \brief Constructs new Buffer as move-copy of other Buffer.
@@ -84,15 +74,7 @@ namespace vertex
              */
             ~Buffer();
 
-			/**
-			 * \brief Copies state of other Buffer.
-			 * 
-			 * References on pointed OpenGL buffers of objects are not changed.
-			 * Deep copy of m_data is not made (see copy constructor of ArrayData).
-			 * 
-			 * Data is loaded in OpenGL buffer of assignment destination Buffer in first call of method bind().
-			 */
-			Buffer& operator=(const Buffer& obj);
+			Buffer& operator=(const Buffer& obj) = delete;
 
 			/**
 			 * \brief Move-copies the state of other Buffer.
@@ -156,13 +138,9 @@ namespace vertex
              * Wraps [glGenBuffers()](https://docs.gl/gl4/glGenBuffers).
              */
 			void genBuffer();
-
-            /**
-             * \brief Loads data in referenced OpenGL buffer.
-             * 
-             * Wraps [glBufferData()](https://docs.gl/gl4/glBufferData).
-             */
-			void updateData() const noexcept;
+            void loadData() const noexcept;
+            void bindForAMomentAndExecute(const std::function<void()>& funcToExecute = []() {});
+            void deleteBuffer() noexcept;
 
 		private:
 			/**
@@ -173,12 +151,6 @@ namespace vertex
 			ArrayData m_data;
 			BufferDataUsage m_usage = BufferDataUsage::STATIC_DRAW;
 			std::optional<VertexBufferLayout> m_layout = std::nullopt;
-
-            /**
-             * \brief Indicator, which indicates if the data of the referenced OpenGL buffer
-             * must be updated.
-             */
-			mutable bool m_isDataSet = false;
 		
 	};
 }

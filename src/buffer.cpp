@@ -14,52 +14,34 @@ Buffer::Buffer(BufferTarget target, ArrayData data, BufferDataUsage usage,
 	m_usage{ usage }, m_layout{ std::move(bufferLayout) }
 {
 	genBuffer();
-}
-
-Buffer::Buffer(const Buffer& obj) :
-	m_target{ obj.m_target }, m_data{ obj.m_data },
-	m_usage{ obj.m_usage }, m_layout{ obj.m_layout }
-{
-	genBuffer();
+    loadData();
 }
 
 Buffer::Buffer(Buffer&& obj) noexcept :
 	m_rendererId{ obj.m_rendererId }, m_target{ obj.m_target },
 	m_data{ std::move(obj.m_data) }, m_usage{ obj.m_usage },
-	m_layout{ std::move(obj.m_layout) }, m_isDataSet{ obj.m_isDataSet }
+	m_layout{ std::move(obj.m_layout) }
 {
 	obj.m_rendererId = 0;
-	obj.m_isDataSet = true;
 }
 
 Buffer::~Buffer()
 {
-    GLCall(glDeleteBuffers(1, &m_rendererId));
-}
-
-Buffer& Buffer::operator=(const Buffer& obj)
-{
-	m_target = obj.m_target;
-	m_usage = obj.m_usage;
-	m_layout = obj.m_layout;
-	m_data = obj.m_data;
-	m_isDataSet = false;
-
-	return *this;
+    deleteBuffer();
 }
 
 Buffer& Buffer::operator=(Buffer&& obj) noexcept
 {
-	// TODO: delete one of the buffers
+    deleteBuffer();
+
+    m_rendererId = obj.m_rendererId;
 	m_target = obj.m_target;
 	m_usage = obj.m_usage;
 	m_layout = std::move(obj.m_layout);
 	m_data = std::move(obj.m_data);
-	m_isDataSet = false;
-
+	
 	obj.m_rendererId = 0;
-	obj.m_isDataSet = true;
-
+	
 	return *this;
 }
 
@@ -71,10 +53,6 @@ void Buffer::unbindTarget(BufferTarget target) noexcept
 void Buffer::bind() const noexcept
 {
 	GLCall(glBindBuffer(helpers::toUType(m_target), m_rendererId));
-	if (!m_isDataSet)
-	{
-		updateData();
-	}
 }
 
 void Buffer::unbind() const noexcept
@@ -84,17 +62,8 @@ void Buffer::unbind() const noexcept
 
 void Buffer::setData(ArrayData data)
 {
-	/* 
-	 * Set m_isDataSet to true to avoid loading previously set data.
-	 * For example, the following code will cause unnecessary loading data in OpenGL buffer.
-	 * Buffer b2(otherBuffer); // data of buffer b2 will be loaded only after calling b2.bind()
-	 * b2.setData(newData); // without m_isDataSet = true, bind() inside setData() will cause
-	 * loading previously set data in OpenGL buffer and only after that newData will be loaded.
-	 */
-	m_isDataSet = true;
-	bind();
-	m_data = std::move(data);
-	updateData();
+    m_data = std::move(data);
+    loadData();
 }
 
 const ArrayData& Buffer::getData() const noexcept
@@ -116,8 +85,15 @@ void Buffer::genBuffer()
 	}
 }
 
-void Buffer::updateData() const noexcept
+void Buffer::loadData() const noexcept
 {
-	GLCall(glBufferData(helpers::toUType(m_target), m_data.size, m_data.pointer, helpers::toUType(m_usage)));
-	m_isDataSet = true;
+    // TODO
+    bind();
+    GLCall(glBufferData(helpers::toUType(m_target), m_data.size, m_data.pointer, helpers::toUType(m_usage)));
+}
+
+void Buffer::deleteBuffer() noexcept
+{
+    GLCall(glDeleteBuffers(1, &m_rendererId));
+    m_rendererId = 0;
 }
