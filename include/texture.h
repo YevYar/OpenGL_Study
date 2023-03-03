@@ -119,6 +119,8 @@ namespace texture
 			std::shared_ptr<TextureData> getData() const noexcept;
 
         private:
+            static void bindToTarget(TextureTarget target, GLuint textureId) noexcept;
+
             void genTexture();
             void bindForAMomentAndExecute(const std::function<void()>& funcToExecute = []() { });
             void deleteTexture() noexcept;

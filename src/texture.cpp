@@ -93,7 +93,7 @@ void Texture<DimensionsNumber>::unbindTarget(TextureTarget target) noexcept
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::bind() const noexcept
 {
-    GLCall(glBindTexture(helpers::toUType(m_target), m_rendererId));
+    Texture::bindToTarget(m_target, m_rendererId);
 }
 
 template<unsigned int DimensionsNumber>
@@ -140,6 +140,12 @@ std::shared_ptr<TextureData> Texture<DimensionsNumber>::getData() const noexcept
 }
 
 template<unsigned int DimensionsNumber>
+void Texture<DimensionsNumber>::bindToTarget(TextureTarget target, GLuint textureId) noexcept
+{
+    GLCall(glBindTexture(helpers::toUType(target), textureId));
+}
+
+template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::genTexture()
 {
     GLCall(glCreateTextures(helpers::toUType(m_target), 1, &m_rendererId));
@@ -154,14 +160,12 @@ void Texture<DimensionsNumber>::bindForAMomentAndExecute(const std::function<voi
 {
     using namespace helpers;
 
-    GLuint boundTexture = 0;
-    GLCall(glGetIntegerv(toUType(getTargetAssociatedGetParameter(m_target)),
-        reinterpret_cast<GLint*>(&boundTexture)));
-    GLCall(glBindTexture(toUType(m_target), m_rendererId));
+    GLuint boundTexture = getOpenGLIntegerValue(toUType(getTargetAssociatedGetParameter(m_target)));
+    bind();
 
     funcToExecute();
 
-    GLCall(glBindTexture(toUType(m_target), boundTexture));
+    Texture::bindToTarget(m_target, boundTexture);
 }
 
 template<unsigned int DimensionsNumber>
@@ -177,28 +181,28 @@ namespace
     {
         switch (target)
         {
-        case TextureTarget::TEXTURE_1D:
-            return TextureBindingTarget::TEXTURE_BINDING_1D;
-        case TextureTarget::TEXTURE_1D_ARRAY:
-            return TextureBindingTarget::TEXTURE_BINDING_1D_ARRAY;
-        case TextureTarget::TEXTURE_2D:
-            return TextureBindingTarget::TEXTURE_BINDING_2D;
-        case TextureTarget::TEXTURE_2D_ARRAY:
-            return TextureBindingTarget::TEXTURE_BINDING_2D_ARRAY;
-        case TextureTarget::TEXTURE_2D_MULTISAMPLE:
-            return TextureBindingTarget::TEXTURE_BINDING_2D_MULTISAMPLE;
-        case TextureTarget::TEXTURE_2D_MULTISAMPLE_ARRAY:
-            return TextureBindingTarget::TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY;
-        case TextureTarget::TEXTURE_3D:
-            return TextureBindingTarget::TEXTURE_BINDING_3D;
-        case TextureTarget::TEXTURE_BUFFER:
-            return TextureBindingTarget::TEXTURE_BINDING_BUFFER;
-        case TextureTarget::TEXTURE_CUBE_MAP:
-            return TextureBindingTarget::TEXTURE_BINDING_CUBE_MAP;
-        case TextureTarget::TEXTURE_CUBE_MAP_ARRAY:
-            return TextureBindingTarget::TEXTURE_BINDING_CUBE_MAP_ARRAY;
-        case TextureTarget::TEXTURE_RECTANGLE:
-            return TextureBindingTarget::TEXTURE_BINDING_RECTANGLE;
+            case TextureTarget::TEXTURE_1D:
+                return TextureBindingTarget::TEXTURE_BINDING_1D;
+            case TextureTarget::TEXTURE_1D_ARRAY:
+                return TextureBindingTarget::TEXTURE_BINDING_1D_ARRAY;
+            case TextureTarget::TEXTURE_2D:
+                return TextureBindingTarget::TEXTURE_BINDING_2D;
+            case TextureTarget::TEXTURE_2D_ARRAY:
+                return TextureBindingTarget::TEXTURE_BINDING_2D_ARRAY;
+            case TextureTarget::TEXTURE_2D_MULTISAMPLE:
+                return TextureBindingTarget::TEXTURE_BINDING_2D_MULTISAMPLE;
+            case TextureTarget::TEXTURE_2D_MULTISAMPLE_ARRAY:
+                return TextureBindingTarget::TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY;
+            case TextureTarget::TEXTURE_3D:
+                return TextureBindingTarget::TEXTURE_BINDING_3D;
+            case TextureTarget::TEXTURE_BUFFER:
+                return TextureBindingTarget::TEXTURE_BINDING_BUFFER;
+            case TextureTarget::TEXTURE_CUBE_MAP:
+                return TextureBindingTarget::TEXTURE_BINDING_CUBE_MAP;
+            case TextureTarget::TEXTURE_CUBE_MAP_ARRAY:
+                return TextureBindingTarget::TEXTURE_BINDING_CUBE_MAP_ARRAY;
+            case TextureTarget::TEXTURE_RECTANGLE:
+                return TextureBindingTarget::TEXTURE_BINDING_RECTANGLE;
         }
     }
 }
