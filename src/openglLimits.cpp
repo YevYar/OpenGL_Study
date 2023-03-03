@@ -1,6 +1,5 @@
 #include "openglLimits.h"
 
-#include "helpers/debugHelpers.h"
 #include "helpers/helpers.h"
 
 namespace
@@ -13,10 +12,10 @@ void initOpenglLimits()
     using namespace helpers;
     GLint limitValue = 0;
 
-    GLCall(glGetIntegerv(toUType(LimitName::MAX_COMBINED_TEXTURE_IMAGE_UNITS), &limitValue));
+    limitValue = getOpenGLIntegerValue(toUType(LimitName::MAX_COMBINED_TEXTURE_IMAGE_UNITS));
     limits.insert({ LimitName::MAX_COMBINED_TEXTURE_IMAGE_UNITS, limitValue });
 
-    GLCall(glGetIntegerv(toUType(LimitName::MAX_VERTEX_ATTRIBS), &limitValue));
+    limitValue = getOpenGLIntegerValue(toUType(LimitName::MAX_VERTEX_ATTRIBS));
     limits.insert({ LimitName::MAX_VERTEX_ATTRIBS, limitValue });
 }
 

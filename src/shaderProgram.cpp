@@ -101,12 +101,12 @@ static std::string getShaderNameByType(ShaderType type)
 {
     switch (type)
     {
-    case ShaderType::VERTEX_SHADER:
-        return "VERTEX";
-    case ShaderType::FRAGMENT_SHADER:
-        return "FRAGMENT";
-    case ShaderType::GEOMETRY_SHADER:
-        return "GEOMETRY";
+		case ShaderType::VERTEX_SHADER:
+			return "VERTEX";
+		case ShaderType::FRAGMENT_SHADER:
+			return "FRAGMENT";
+		case ShaderType::GEOMETRY_SHADER:
+			return "GEOMETRY";
     };
 }
 
