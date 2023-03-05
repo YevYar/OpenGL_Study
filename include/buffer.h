@@ -42,6 +42,8 @@ namespace vertex
 		DYNAMIC_COPY = 0x88EA
 	};
 
+    class VertexArray;
+
 	/**
 	 * \brief Buffer is a wrapper over OpenGL buffer object. 	
 	 */
@@ -165,6 +167,8 @@ namespace vertex
 			BufferDataUsage m_usage = BufferDataUsage::STATIC_DRAW;
 			std::optional<VertexBufferLayout> m_layout = std::nullopt;
 		
+        friend class VertexArray;
+
 	};
 }
 

@@ -32,19 +32,34 @@ void VertexArray::bind() const noexcept
 
 void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
 {
-    GLuint boundVao = helpers::getOpenGLIntegerValue(GL_VERTEX_ARRAY_BINDING);
-
-	bind();
-	buffer->bind();
-
 	const auto layout = buffer->getLayout();
 
-	if (layout != std::nullopt)
+    if (layout == std::nullopt)
+    {
+        GLuint boundVao = helpers::getOpenGLIntegerValue(GL_VERTEX_ARRAY_BINDING);
+        if (boundVao == m_rendererId)
+        {
+            buffer->bind();
+        }
+        else
+        {
+            bind();
+            buffer->bind();
+            bindSpecificVao(boundVao);
+        }
+    }
+    else
 	{
 		const auto stride = layout->getStride();
+        GLCall(glVertexArrayVertexBuffer(m_rendererId, 0, buffer->m_rendererId, 0, stride));
 
 		for (const auto& attr : layout->getAttributes())
 		{
+            using namespace helpers;
+
+            enableAttribute(attr.index);
+            GLCall(glVertexArrayAttribBinding(m_rendererId, attr.index, 0));
+
             switch (attr.type)
             {
                 case VertexAttrType::BYTE:
@@ -57,33 +72,26 @@ void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
                 case VertexAttrType::UNSIGNED_SHORT:
                 case VertexAttrType::FIXED:
                 case VertexAttrType::UNSIGNED_INT_10F_11F_11F_REV:
-                    GLCall(glVertexAttribIPointer(attr.index, attr.count, helpers::toUType(attr.type),
-                        stride, reinterpret_cast<void*>(attr.byteOffset)));
+                    GLCall(glVertexArrayAttribIFormat(m_rendererId, attr.index, attr.count, toUType(attr.type),
+                        attr.byteOffset));
                     break;
                 case VertexAttrType::FLOAT:
                 case VertexAttrType::HALF_FLOAT:
-                    GLCall(glVertexAttribPointer(attr.index, attr.count, helpers::toUType(attr.type),
-                        attr.normalized ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<void*>(attr.byteOffset)));
+                    GLCall(glVertexArrayAttribFormat(m_rendererId, attr.index, attr.count, toUType(attr.type),
+                        attr.normalized, attr.byteOffset));
                     break;
                 case VertexAttrType::DOUBLE:
-                    GLCall(glVertexAttribLPointer(attr.index, attr.count, helpers::toUType(attr.type),
-                        stride, reinterpret_cast<void*>(attr.byteOffset)));
+                    GLCall(glVertexArrayAttribLFormat(m_rendererId, attr.index, attr.count, toUType(attr.type),
+                        attr.byteOffset));
                     break;
                 default:
-                    GLCall(glVertexAttribPointer(attr.index, attr.count, helpers::toUType(attr.type),
-                        attr.normalized ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<void*>(attr.byteOffset)));
+                    GLCall(glVertexArrayAttribFormat(m_rendererId, attr.index, attr.count, toUType(attr.type),
+                        attr.normalized, attr.byteOffset));
             }
-			
-			enableAttribute(attr.index);
 		}
 	}	
 
 	m_buffers.push_back(std::move(buffer));
-
-    if (boundVao != m_rendererId)
-    {
-        bindSpecificVao(boundVao);
-    }
 }
 
 const std::vector<std::shared_ptr<Buffer>>& vertex::VertexArray::getBuffers() const noexcept
