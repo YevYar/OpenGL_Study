@@ -11,7 +11,7 @@ using namespace vertex;
 
 VertexArray::VertexArray()
 {
-	GLCall(glGenVertexArrays(1, &m_rendererId));
+	GLCall(glCreateVertexArrays(1, &m_rendererId));
 	bind();
 }
 
@@ -22,16 +22,18 @@ VertexArray::~VertexArray()
 
 void VertexArray::unbind() noexcept
 {
-    GLCall(glBindVertexArray(0));
+    bindSpecificVao(0);
 }
 
 void VertexArray::bind() const noexcept
 {
-	GLCall(glBindVertexArray(m_rendererId));
+    bindSpecificVao(m_rendererId);
 }
 
 void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
 {
+    GLuint boundVao = helpers::getOpenGLIntegerValue(GL_VERTEX_ARRAY_BINDING);
+
 	bind();
 	buffer->bind();
 
@@ -77,6 +79,11 @@ void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
 	}	
 
 	m_buffers.push_back(std::move(buffer));
+
+    if (boundVao != m_rendererId)
+    {
+        bindSpecificVao(boundVao);
+    }
 }
 
 const std::vector<std::shared_ptr<Buffer>>& vertex::VertexArray::getBuffers() const noexcept
@@ -86,12 +93,15 @@ const std::vector<std::shared_ptr<Buffer>>& vertex::VertexArray::getBuffers() co
 
 void VertexArray::enableAttribute(unsigned int index) const noexcept
 {
-	bind();
-	GLCall(glEnableVertexAttribArray(index));
+    GLCall(glEnableVertexArrayAttrib(m_rendererId, index));
 }
 
 void VertexArray::disableAttribute(unsigned int index) const noexcept
 {
-	bind();
-	GLCall(glDisableVertexAttribArray(index));
+	GLCall(glDisableVertexArrayAttrib(m_rendererId, index));
+}
+
+void VertexArray::bindSpecificVao(GLuint vaoId) noexcept
+{
+    GLCall(glBindVertexArray(vaoId));
 }

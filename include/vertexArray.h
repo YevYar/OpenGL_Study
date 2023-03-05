@@ -1,6 +1,7 @@
 #ifndef VERTEX_ARRAY_H
 #define VERTEX_ARRAY_H
 
+#include <glad/glad.h>
 #include <memory>
 #include <vector>
 
@@ -94,11 +95,14 @@ namespace vertex
 			 */
 			void disableAttribute(unsigned int index) const noexcept;
 
+        private:
+            static void bindSpecificVao(GLuint vaoId) noexcept;
+
 		private:
 			/**
 			 * \brief Id of referenced OpenGL vertex array object.
 			 */
-			unsigned int m_rendererId = 0;
+            GLuint m_rendererId = 0;
 			std::vector<std::shared_ptr<Buffer>> m_buffers;
 			
 	};
