@@ -4,6 +4,7 @@
 #include <functional>
 #include <memory>
 
+#include "helpers/openglHelpers.h"
 #include "textureImpl.h"
 #include "textureUnit.h"
 
@@ -73,8 +74,8 @@ namespace texture
             void specifyTextureStorageFormat(const std::shared_ptr<TextureData>& textureData) const noexcept;
             void setData(TexImageTarget texImageTarget, std::shared_ptr<TextureData> textureData);
 
-			template<typename Type, typename = std::enable_if_t<std::is_same_v<GLfloat, Type> ||
-                                                                std::is_same_v<GLint, Type>>>
+			template<typename Type>
+            requires std::is_same_v<GLfloat, Type> || std::is_same_v<GLint, Type>
             void setParameter(TexParameterName parameter, Type value)
             {
                 if constexpr (std::is_same_v<GLfloat, Type>)
@@ -87,8 +88,8 @@ namespace texture
                 }
             }
 
-            template<typename Type, typename = std::enable_if_t<std::is_same_v<GLfloat, Type> ||
-                                                                std::is_same_v<GLint, Type>>>
+            template<typename Type>
+            requires std::is_same_v<GLfloat, Type> || std::is_same_v<GLint, Type>
             void setParameterV(TexParameterName parameter, const Type* values)
             {
                 if constexpr (std::is_same_v<GLfloat, Type>)
@@ -101,8 +102,8 @@ namespace texture
                 }
             }
 
-            template<typename Type, typename = std::enable_if_t<std::is_same_v<GLint, Type> ||
-                                                                std::is_same_v<GLuint, Type>>>
+            template<typename Type>
+            requires std::is_same_v<GLint, Type> || std::is_same_v<GLuint, Type>
             void setParameterIV(TexParameterName parameter, const Type* values)
             {
                 if constexpr (std::is_same_v<GLint, Type>)
@@ -120,9 +121,9 @@ namespace texture
 
         private:
             static void bindToTarget(TextureTarget target, GLuint textureId) noexcept;
+            static TextureBindingTarget getTargetAssociatedGetParameter(TextureTarget target) noexcept;
 
             void genTexture();
-            void bindForAMomentAndExecute(const std::function<void()>& funcToExecute = []() { });
             void deleteTexture() noexcept;
 
 		private:			
@@ -130,6 +131,9 @@ namespace texture
 			std::shared_ptr<TextureData> m_data;            
             TexImageTarget m_lastTexImageTarget;
             mutable bool m_isStorageFormatSpecified = false;
+
+            template<typename Type>
+            friend class helpers::OpenGLBindableObject;
 
 	};
 

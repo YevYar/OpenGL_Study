@@ -7,11 +7,6 @@
 
 using namespace texture;
 
-namespace
-{
-    TextureBindingTarget getTargetAssociatedGetParameter(TextureTarget target) noexcept;
-}
-
 BaseTexture::BaseTexture(TextureTarget target) : m_target{ target }
 {
 }
@@ -146,6 +141,36 @@ void Texture<DimensionsNumber>::bindToTarget(TextureTarget target, GLuint textur
 }
 
 template<unsigned int DimensionsNumber>
+TextureBindingTarget Texture<DimensionsNumber>::getTargetAssociatedGetParameter(TextureTarget target) noexcept
+{
+    switch (target)
+    {
+        case TextureTarget::TEXTURE_1D:
+            return TextureBindingTarget::TEXTURE_BINDING_1D;
+        case TextureTarget::TEXTURE_1D_ARRAY:
+            return TextureBindingTarget::TEXTURE_BINDING_1D_ARRAY;
+        case TextureTarget::TEXTURE_2D:
+            return TextureBindingTarget::TEXTURE_BINDING_2D;
+        case TextureTarget::TEXTURE_2D_ARRAY:
+            return TextureBindingTarget::TEXTURE_BINDING_2D_ARRAY;
+        case TextureTarget::TEXTURE_2D_MULTISAMPLE:
+            return TextureBindingTarget::TEXTURE_BINDING_2D_MULTISAMPLE;
+        case TextureTarget::TEXTURE_2D_MULTISAMPLE_ARRAY:
+            return TextureBindingTarget::TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY;
+        case TextureTarget::TEXTURE_3D:
+            return TextureBindingTarget::TEXTURE_BINDING_3D;
+        case TextureTarget::TEXTURE_BUFFER:
+            return TextureBindingTarget::TEXTURE_BINDING_BUFFER;
+        case TextureTarget::TEXTURE_CUBE_MAP:
+            return TextureBindingTarget::TEXTURE_BINDING_CUBE_MAP;
+        case TextureTarget::TEXTURE_CUBE_MAP_ARRAY:
+            return TextureBindingTarget::TEXTURE_BINDING_CUBE_MAP_ARRAY;
+        case TextureTarget::TEXTURE_RECTANGLE:
+            return TextureBindingTarget::TEXTURE_BINDING_RECTANGLE;
+    }
+}
+
+template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::genTexture()
 {
     GLCall(glCreateTextures(helpers::toUType(m_target), 1, &m_rendererId));
@@ -156,55 +181,10 @@ void Texture<DimensionsNumber>::genTexture()
 }
 
 template<unsigned int DimensionsNumber>
-void Texture<DimensionsNumber>::bindForAMomentAndExecute(const std::function<void()>& funcToExecute)
-{
-    using namespace helpers;
-
-    GLuint boundTexture = getOpenGLIntegerValue(toUType(getTargetAssociatedGetParameter(m_target)));
-    bind();
-
-    funcToExecute();
-
-    Texture::bindToTarget(m_target, boundTexture);
-}
-
-template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::deleteTexture() noexcept
 {
     GLCall(glDeleteTextures(1, &m_rendererId));
     m_rendererId = 0;
-}
-
-namespace
-{
-    TextureBindingTarget getTargetAssociatedGetParameter(TextureTarget target) noexcept
-    {
-        switch (target)
-        {
-            case TextureTarget::TEXTURE_1D:
-                return TextureBindingTarget::TEXTURE_BINDING_1D;
-            case TextureTarget::TEXTURE_1D_ARRAY:
-                return TextureBindingTarget::TEXTURE_BINDING_1D_ARRAY;
-            case TextureTarget::TEXTURE_2D:
-                return TextureBindingTarget::TEXTURE_BINDING_2D;
-            case TextureTarget::TEXTURE_2D_ARRAY:
-                return TextureBindingTarget::TEXTURE_BINDING_2D_ARRAY;
-            case TextureTarget::TEXTURE_2D_MULTISAMPLE:
-                return TextureBindingTarget::TEXTURE_BINDING_2D_MULTISAMPLE;
-            case TextureTarget::TEXTURE_2D_MULTISAMPLE_ARRAY:
-                return TextureBindingTarget::TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY;
-            case TextureTarget::TEXTURE_3D:
-                return TextureBindingTarget::TEXTURE_BINDING_3D;
-            case TextureTarget::TEXTURE_BUFFER:
-                return TextureBindingTarget::TEXTURE_BINDING_BUFFER;
-            case TextureTarget::TEXTURE_CUBE_MAP:
-                return TextureBindingTarget::TEXTURE_BINDING_CUBE_MAP;
-            case TextureTarget::TEXTURE_CUBE_MAP_ARRAY:
-                return TextureBindingTarget::TEXTURE_BINDING_CUBE_MAP_ARRAY;
-            case TextureTarget::TEXTURE_RECTANGLE:
-                return TextureBindingTarget::TEXTURE_BINDING_RECTANGLE;
-        }
-    }
 }
 
 template class Texture<1>;

@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "generalTypes.h"
+#include "helpers/openglHelpers.h"
 #include "vertexBufferLayout.h"
 
 namespace vertex
@@ -146,6 +147,7 @@ namespace vertex
 
 		private:
 			static void bindToTarget(BufferTarget target, GLuint bufferId) noexcept;
+            static BufferBindingTarget getTargetAssociatedGetParameter(BufferTarget target) noexcept;
 
             /**
              * \brief Generates OpenGL buffer object.
@@ -154,7 +156,6 @@ namespace vertex
              */
 			void genBuffer();
 			bool checkAndGenerateNewStorage(const ArrayData& data) noexcept;
-            void bindForAMomentAndExecute(const std::function<void()>& funcToExecute = []() {});
             void deleteBuffer() noexcept;
 
 		private:
@@ -168,6 +169,9 @@ namespace vertex
 			std::optional<VertexBufferLayout> m_layout = std::nullopt;
 		
         friend class VertexArray;
+
+        template<typename Type>
+        friend class helpers::OpenGLBindableObject;
 
 	};
 }

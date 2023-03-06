@@ -13,7 +13,8 @@ set(SOURCES main.cpp
     texture.cpp
     textureTypes.cpp
     openglLimits.cpp
-	textureUnit.cpp)
+	textureUnit.cpp
+    helpers/openglHelpers.cpp)
 
 target_sources(OpenGL_Study_Exe PRIVATE ${SOURCES})
 

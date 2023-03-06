@@ -63,10 +63,3 @@ void helpers::freeTextureData(texture::TextureData& textureData)
 {
     stbi_image_free(textureData.m_data);
 }
-
-GLint helpers::getOpenGLIntegerValue(GLenum parameterName)
-{
-    GLint result = 0;
-    GLCall(glGetIntegerv(parameterName, &result));
-    return result;
-}
