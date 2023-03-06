@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "helpers/macros.h"
+
 class GLFWwindow;
 
 /**
@@ -21,6 +23,8 @@ class Window
          * \throw exceptions::WindowInitializationException().
          */
 		Window(int width, int height, const std::string& title);
+
+        NOT_COPYABLE_MOVABLE(Window)
 
         /**
          * \brief Destructs the window and OpenGL context by calling
