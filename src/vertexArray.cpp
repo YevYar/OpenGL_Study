@@ -12,13 +12,40 @@ using namespace vertex;
 
 VertexArray::VertexArray()
 {
-    genBuffer();
+    genVertexArray();
 	bind();
+}
+
+VertexArray::VertexArray(const VertexArray& obj)
+{
+    genVertexArray();
+    for (const auto& buffer : obj.m_buffers)
+    {
+        addBuffer(buffer);
+    }
+}
+
+VertexArray::VertexArray(VertexArray&& obj) noexcept : m_rendererId{ obj.m_rendererId },
+    m_buffers{ std::move(obj.m_buffers) }
+{
+    obj.m_rendererId = 0;
 }
 
 VertexArray::~VertexArray()
 {
-	GLCall(glDeleteVertexArrays(1, &m_rendererId));
+    deleteVertexArray();
+}
+
+VertexArray& VertexArray::operator=(VertexArray&& obj) noexcept
+{
+    deleteVertexArray();
+
+    m_rendererId = obj.m_rendererId;
+    m_buffers = std::move(obj.m_buffers);
+
+    obj.m_rendererId = 0;
+
+    return *this;
 }
 
 void VertexArray::unbind() noexcept
@@ -100,7 +127,7 @@ void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
 	m_buffers.push_back(std::move(buffer));
 }
 
-const std::vector<std::shared_ptr<Buffer>>& vertex::VertexArray::getBuffers() const noexcept
+const std::vector<std::shared_ptr<Buffer>>& VertexArray::getBuffers() const noexcept
 {
 	return m_buffers;
 }
@@ -115,25 +142,22 @@ void VertexArray::disableAttribute(unsigned int index) const noexcept
 	GLCall(glDisableVertexArrayAttrib(m_rendererId, index));
 }
 
-VertexArray::VertexArray(const VertexArray& obj)
-{
-    genBuffer();
-    for (const auto& buffer : obj.m_buffers)
-    {
-        addBuffer(buffer);
-    }
-}
-
 void VertexArray::bindSpecificVao(GLuint vaoId) noexcept
 {
     GLCall(glBindVertexArray(vaoId));
 }
 
-void vertex::VertexArray::genBuffer()
+void VertexArray::genVertexArray()
 {
     GLCall(glCreateVertexArrays(1, &m_rendererId));
     if (m_rendererId == 0)
     {
         throw exceptions::GLRecAcquisitionException("Vertex array cannot be generated.");
     }
+}
+
+void VertexArray::deleteVertexArray()
+{
+    GLCall(glDeleteVertexArrays(1, &m_rendererId));
+    m_rendererId = 0;
 }

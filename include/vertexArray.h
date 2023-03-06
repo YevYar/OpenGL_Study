@@ -39,7 +39,7 @@ namespace vertex
 			 */
 			VertexArray();
 
-			NOT_MOVABLE(VertexArray)
+            VertexArray(VertexArray&& obj) noexcept;
 
 			/**
 			 * \brief Deletes vertex array object in OpenGL state machine.
@@ -49,6 +49,7 @@ namespace vertex
 			~VertexArray();	
 
 			VertexArray& operator=(const VertexArray& obj) = delete;
+            VertexArray& operator=(VertexArray&& obj) noexcept;
 
             /**
              * \brief Unbinds current vertex array object.
@@ -105,7 +106,8 @@ namespace vertex
 
             static void bindSpecificVao(GLuint vaoId) noexcept;
 
-			void genBuffer();
+			void genVertexArray();
+            void deleteVertexArray();
 
 		private:
 			/**
