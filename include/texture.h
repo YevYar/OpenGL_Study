@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "generalTypes.h"
+#include "helpers/macros.h"
 #include "helpers/openglHelpers.h"
 #include "textureImpl.h"
 #include "textureUnit.h"
@@ -18,6 +19,9 @@ namespace texture
     {
         public:
             BaseTexture() = default;
+
+            DEFAULT_COPYABLE_MOVABLE(BaseTexture)
+
             virtual ~BaseTexture() = default;
 
             BaseTexture* clone() const override;

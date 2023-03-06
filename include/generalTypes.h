@@ -61,7 +61,6 @@ class ICloneable
          * \return deep copy of yourself.
          */
         virtual ICloneable* clone() const = 0;
-
 };
 
 #endif

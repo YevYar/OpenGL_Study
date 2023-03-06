@@ -17,20 +17,20 @@ Buffer::Buffer(BufferTarget target, ArrayData data, BufferDataUsage usage,
     setData(std::move(m_data));
 }
 
+Buffer::Buffer(const Buffer& obj) :
+    m_target{ obj.m_target }, m_data{ obj.m_data },
+    m_usage{ obj.m_usage }, m_layout{ obj.m_layout }
+{
+    genBuffer();
+    setData(std::move(m_data));
+}
+
 Buffer::Buffer(Buffer&& obj) noexcept :
 	m_rendererId{ obj.m_rendererId }, m_target{ obj.m_target },
 	m_data{ std::move(obj.m_data) }, m_usage{ obj.m_usage },
 	m_layout{ std::move(obj.m_layout) }
 {
 	obj.m_rendererId = 0;
-}
-
-Buffer::Buffer(const Buffer& obj) :
-	m_target{ obj.m_target }, m_data{ obj.m_data },
-	m_usage{ obj.m_usage }, m_layout{ obj.m_layout }
-{
-	genBuffer();
-	setData(std::move(m_data));
 }
 
 Buffer::~Buffer()
