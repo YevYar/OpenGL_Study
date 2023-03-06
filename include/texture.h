@@ -4,6 +4,7 @@
 #include <functional>
 #include <memory>
 
+#include "generalTypes.h"
 #include "helpers/openglHelpers.h"
 #include "textureImpl.h"
 #include "textureUnit.h"
@@ -13,11 +14,13 @@
  */
 namespace texture
 {
-    class BaseTexture
+    class BaseTexture : public ICloneable
     {
         public:
             BaseTexture() = default;
             virtual ~BaseTexture() = default;
+
+            BaseTexture* clone() const override;
 
         protected:
             BaseTexture(TextureTarget target);
@@ -52,7 +55,6 @@ namespace texture
 		public:
             Texture(TextureTarget target);
             Texture(TextureTarget target, TexImageTarget texImageTarget, std::shared_ptr<TextureData> textureData);
-            Texture(const Texture& obj);
             Texture(Texture&& obj) noexcept;
 
 			~Texture();
@@ -66,6 +68,8 @@ namespace texture
 			 * \param target - target texture to be unbound from.
 			 */
 			static void unbindTarget(TextureTarget target) noexcept;
+
+            Texture* clone() const override;
 
 			void bind() const noexcept;
 
@@ -120,6 +124,8 @@ namespace texture
 			std::shared_ptr<TextureData> getData() const noexcept;
 
         private:
+            Texture(const Texture& obj);
+
             static void bindToTarget(TextureTarget target, GLuint textureId) noexcept;
             static TextureBindingTarget getTargetAssociatedGetParameter(TextureTarget target) noexcept;
 

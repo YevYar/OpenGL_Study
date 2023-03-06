@@ -48,7 +48,7 @@ namespace vertex
 	/**
 	 * \brief Buffer is a wrapper over OpenGL buffer object. 	
 	 */
-	class Buffer
+	class Buffer : public ICloneable
 	{
 		public:
 			/**
@@ -68,8 +68,6 @@ namespace vertex
 			 */
 			Buffer(BufferTarget target, ArrayData data, BufferDataUsage usage,
 				std::optional<VertexBufferLayout> bufferLayout = std::nullopt);
-
-            Buffer(const Buffer& obj) = delete;
 
 			/**
 			 * \brief Constructs new Buffer as move-copy of other Buffer.
@@ -105,6 +103,8 @@ namespace vertex
              * \param target - target buffer to be unbound from.
              */
             static void unbindTarget(BufferTarget target) noexcept;
+
+			Buffer* clone() const override;
 
 			/**
 			 * \brief Wraps [glBindBuffer()](https://docs.gl/gl4/glBindBuffer).
@@ -146,6 +146,19 @@ namespace vertex
 			std::optional<VertexBufferLayout> getLayout() const noexcept;
 
 		private:
+			/**
+			 * \brief Constructs new Buffer as copy of other Buffer.
+			 *
+			 * However new 1 buffer in OpenGL state machine is generated.
+			 * Deep copy of m_data is not made (see copy constructor of ArrayData).
+			 *
+			 * Buffer data is not immediately loaded in generated OpenGL buffer.
+			 * Data is loaded in generated OpenGL buffer in first call of method bind().
+			 *
+			 * \throw exceptions::GLRecAcquisitionException().
+			 */
+			Buffer(const Buffer& obj);
+
 			static void bindToTarget(BufferTarget target, GLuint bufferId) noexcept;
             static BufferBindingTarget getTargetAssociatedGetParameter(BufferTarget target) noexcept;
 

@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 
 #include "buffer.h"
+#include "exceptions.h"
 #include "helpers/debugHelpers.h"
 #include "helpers/helpers.h"
 #include "vertexBufferLayout.h"
@@ -11,7 +12,7 @@ using namespace vertex;
 
 VertexArray::VertexArray()
 {
-	GLCall(glCreateVertexArrays(1, &m_rendererId));
+    genBuffer();
 	bind();
 }
 
@@ -23,6 +24,11 @@ VertexArray::~VertexArray()
 void VertexArray::unbind() noexcept
 {
     bindSpecificVao(0);
+}
+
+VertexArray* VertexArray::clone() const
+{
+    return new VertexArray(*this);
 }
 
 void VertexArray::bind() const noexcept
@@ -109,7 +115,25 @@ void VertexArray::disableAttribute(unsigned int index) const noexcept
 	GLCall(glDisableVertexArrayAttrib(m_rendererId, index));
 }
 
+VertexArray::VertexArray(const VertexArray& obj)
+{
+    genBuffer();
+    for (const auto& buffer : obj.m_buffers)
+    {
+        addBuffer(buffer);
+    }
+}
+
 void VertexArray::bindSpecificVao(GLuint vaoId) noexcept
 {
     GLCall(glBindVertexArray(vaoId));
+}
+
+void vertex::VertexArray::genBuffer()
+{
+    GLCall(glCreateVertexArrays(1, &m_rendererId));
+    if (m_rendererId == 0)
+    {
+        throw exceptions::GLRecAcquisitionException("Vertex array cannot be generated.");
+    }
 }

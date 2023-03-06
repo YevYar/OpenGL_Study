@@ -49,4 +49,19 @@ struct ArrayData
 
 };
 
+/**
+ * \brief ICloneable is an interface class, which provides the interface of cloneable objects. 
+ */
+class ICloneable
+{
+    public:
+        /**
+         * \brief Creates a deep copy of yourself.
+         * 
+         * \return deep copy of yourself.
+         */
+        virtual ICloneable* clone() const = 0;
+
+};
+
 #endif

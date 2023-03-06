@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 
+#include "generalTypes.h"
 #include "helpers/macros.h"
 
 /**
@@ -26,7 +27,7 @@ namespace vertex
 	 * 
 	 * So, VertexArray should be stored as std::shared_ptr.
 	 */
-	class VertexArray
+	class VertexArray : public ICloneable
 	{
 		public:
 			/**
@@ -38,7 +39,7 @@ namespace vertex
 			 */
 			VertexArray();
 
-            NOT_COPYABLE_MOVABLE(VertexArray)
+			NOT_MOVABLE(VertexArray)
 
 			/**
 			 * \brief Deletes vertex array object in OpenGL state machine.
@@ -47,10 +48,14 @@ namespace vertex
 			 */
 			~VertexArray();	
 
+			VertexArray& operator=(const VertexArray& obj) = delete;
+
             /**
              * \brief Unbinds current vertex array object.
              */
             static void unbind() noexcept;
+
+			VertexArray* clone() const override;
 
 			/**
 			 * \brief Wraps [glBindVertexArray()](https://docs.gl/gl4/glBindVertexArray).
@@ -96,7 +101,11 @@ namespace vertex
 			void disableAttribute(unsigned int index) const noexcept;
 
         private:
+			VertexArray(const VertexArray& obj);
+
             static void bindSpecificVao(GLuint vaoId) noexcept;
+
+			void genBuffer();
 
 		private:
 			/**

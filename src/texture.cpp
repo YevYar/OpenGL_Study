@@ -15,6 +15,11 @@ BaseTexture::BaseTexture(GLuint rendererId, TextureTarget target) : m_rendererId
 {
 }
 
+BaseTexture* BaseTexture::clone() const
+{
+    return new BaseTexture(this->m_rendererId, this->m_target);
+}
+
 template<unsigned int DimensionsNumber>
 Texture<DimensionsNumber>::Texture(TextureTarget target) : BaseTexture{ target }
 {
@@ -83,6 +88,12 @@ template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::unbindTarget(TextureTarget target) noexcept
 {
     GLCall(glBindTexture(helpers::toUType(target), 0));
+}
+
+template<unsigned int DimensionsNumber>
+Texture<DimensionsNumber>* Texture<DimensionsNumber>::clone() const
+{
+    return new Texture(*this);
 }
 
 template<unsigned int DimensionsNumber>

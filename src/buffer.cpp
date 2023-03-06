@@ -25,6 +25,14 @@ Buffer::Buffer(Buffer&& obj) noexcept :
 	obj.m_rendererId = 0;
 }
 
+Buffer::Buffer(const Buffer& obj) :
+	m_target{ obj.m_target }, m_data{ obj.m_data },
+	m_usage{ obj.m_usage }, m_layout{ obj.m_layout }
+{
+	genBuffer();
+	setData(std::move(m_data));
+}
+
 Buffer::~Buffer()
 {
     deleteBuffer();
@@ -48,6 +56,11 @@ Buffer& Buffer::operator=(Buffer&& obj) noexcept
 void Buffer::unbindTarget(BufferTarget target) noexcept
 {
     GLCall(glBindBuffer(helpers::toUType(target), 0));
+}
+
+Buffer* Buffer::clone() const
+{
+	return new Buffer(*this);
 }
 
 void Buffer::bind() const noexcept
@@ -116,7 +129,7 @@ BufferBindingTarget Buffer::getTargetAssociatedGetParameter(BufferTarget target)
             return BufferBindingTarget::TRANSFORM_FEEDBACK_BUFFER_BINDING;
         case BufferTarget::UNIFORM_BUFFER:
             return BufferBindingTarget::UNIFORM_BUFFER_BINDING;
-        }
+    }
 }
 
 void Buffer::genBuffer()
