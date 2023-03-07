@@ -130,7 +130,7 @@ namespace shader
 					throw exceptions::GLRecAcquisitionException(excMes);
 				}
 
-				auto uniform = new Uniform<Type, Count>(location, name);
+				auto uniform = new Uniform<Type, Count>(m_rendererId, location, name);
 				m_uniforms.insert({ std::move(name), std::unique_ptr<BaseUniform>(uniform) });
 				return *uniform;
 			}

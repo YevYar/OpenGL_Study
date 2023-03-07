@@ -19,6 +19,8 @@ namespace shader
      */
 	using BaseUniformSetter = void (*)(GLint, GLsizei, const void*);
 
+    using BaseUniformGetter = void (*)(GLuint, GLint, void*);
+
     /**
      * \brief Returns a pointer to an OpenGL function, which satisfies to passed type name and count.
      * 
@@ -27,6 +29,8 @@ namespace shader
      * \return pointer to the OpenGL function or nullptr.
      */
 	BaseUniformSetter getUniformSetter(const char* typeName, unsigned int count) noexcept;
+
+    BaseUniformGetter getUniformGetter(const char* typeName) noexcept;
 
     /**
      * \brief BaseUniform is a base class for unifrom classes.
@@ -56,7 +60,7 @@ namespace shader
              * \param name - a name of the uniform variable. 
              * \throw exceptions::GLRecAcquisitionException(), if location is 0
              */
-			BaseUniform(int location, std::string name);
+			BaseUniform(GLuint shaderProgram, int location, std::string name);
 
 			NOT_COPYABLE_MOVABLE(BaseUniform)
 			
@@ -69,7 +73,9 @@ namespace shader
             /**
              * \brief Name of the referenced OpenGL uniform variable, which is used in a code of a shader.
              */
-			const std::string m_name;			
+			const std::string m_name;
+
+            const GLuint m_shaderProgram = 0;
 
 		friend class ShaderProgram;
 
@@ -92,12 +98,25 @@ namespace shader
 
 		private:
 			using ConcreteUniformSetter = void (*)(GLint, GLsizei, const Type*);
+            using ConcreteUniformGetter = void (*)(GLuint, GLint, Type*);
 
 		public:
 			void setData(const void* data) override
 			{
 				GLCall(m_setter(m_location, Count, reinterpret_cast<const Type*>(data)));
 			}
+
+            Type getValue()
+            {
+                Type value = 0;
+                GLCall(m_getter(m_shaderProgram, m_location, &value));
+                return value;
+            }
+            
+            explicit operator Type() noexcept
+            {
+                return getValue();
+            }
 
 		protected:
             /**
@@ -107,15 +126,21 @@ namespace shader
              * \param name - a name of the uniform variable.
              * \throw exceptions::GLRecAcquisitionException(), if location is 0
              */
-			Uniform(int location, std::string name) :
-				BaseUniform{ location, std::move(name) },
-				m_setter{ reinterpret_cast<ConcreteUniformSetter>(getUniformSetter(typeid(Type).name(), Count)) }
+			Uniform(GLuint shaderProgram, int location, std::string name) :
+				BaseUniform{ shaderProgram, location, std::move(name) },
+				m_setter{ reinterpret_cast<ConcreteUniformSetter>(getUniformSetter(typeid(Type).name(), Count)) },
+                m_getter{ reinterpret_cast<ConcreteUniformGetter>(getUniformGetter(typeid(Type).name())) }
 			{
 				if (m_setter == nullptr)
 				{
 					throw exceptions::GLRecAcquisitionException(
 						"No uniform setter function for specified template arguments.");
 				}
+                if (m_getter == nullptr)
+                {
+                    throw exceptions::GLRecAcquisitionException(
+                        "No uniform getter function for specified template arguments.");
+                }
 			}
 
 		private:
@@ -127,7 +152,8 @@ namespace shader
             /**
              * \brief The pointer to OpenGL function to set value of this uniform in OpenGL state machine.
              */
-			const ConcreteUniformSetter m_setter = nullptr;			
+			const ConcreteUniformSetter m_setter = nullptr;
+            const ConcreteUniformGetter m_getter = nullptr;
 
 		friend class ShaderProgram;
 

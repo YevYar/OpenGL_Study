@@ -50,10 +50,32 @@ BaseUniformSetter shader::getUniformSetter(const char* typeName, unsigned int co
 	return nullptr;
 }
 
-BaseUniform::BaseUniform(int location, std::string name) :
-	m_location{ location }, m_name{ std::move(name) }
+BaseUniformGetter shader::getUniformGetter(const char* typeName) noexcept
 {
-	if (m_location < 0)
+    if (strcmp(typeName, "float") == 0)
+    {
+        return reinterpret_cast<BaseUniformGetter>(glGetUniformfv);
+    }
+    if (strcmp(typeName, "double") == 0)
+    {
+        return reinterpret_cast<BaseUniformGetter>(glGetUniformdv);
+    }
+    if (strcmp(typeName, "int") == 0)
+    {
+        return reinterpret_cast<BaseUniformGetter>(glGetUniformiv);
+    }
+    if (strcmp(typeName, "unsigned int") == 0)
+    {
+        return reinterpret_cast<BaseUniformGetter>(glGetUniformuiv);
+    }
+
+    return nullptr;
+}
+
+BaseUniform::BaseUniform(GLuint shaderProgram, int location, std::string name) :
+    m_shaderProgram{ shaderProgram }, m_location{ location }, m_name{ std::move(name) }
+{
+	if (m_shaderProgram == 0 || m_location < 0)
 	{
 		throw exceptions::GLRecAcquisitionException("Uniform is not attached to a shader program.");
 	}
