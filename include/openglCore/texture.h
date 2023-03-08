@@ -6,8 +6,7 @@
 
 #include "generalTypes.h"
 #include "helpers/macros.h"
-#include "helpers/openglHelpers.h"
-#include "textureImpl.h"
+#include "openglHelpers.h"
 #include "textureUnit.h"
 
 /**
@@ -41,6 +40,9 @@ namespace texture
 
     };
 
+    template<unsigned int DimensionsNumber>
+    struct TexDimensionSpecificTypesAndFunc;
+
 	/**
 	 * \brief Texture is a wrapper over OpenGL texture.
 	 */
@@ -51,10 +53,12 @@ namespace texture
             "The number of dimensions must be in range [1, 3].");
 
         private:
-            TexDimensionSpecificTypesAndFunc<DimensionsNumber> m_dimensionTypesAndFunc;
+            
+
+            TexDimensionSpecificTypesAndFunc<DimensionsNumber>* m_dimensionTypesAndFunc;
 
         public:
-            using TexImageTarget = decltype(m_dimensionTypesAndFunc.texImageTarget);
+            using TexImageTarget = texture::TexImage2DTarget; // decltype(m_dimensionTypesAndFunc->texImageTarget);
 
 		public:
             Texture(TextureTarget target);

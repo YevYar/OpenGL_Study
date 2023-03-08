@@ -3,7 +3,9 @@
 #include <glad/glad.h>
 #include <stdexcept>
 
+#include "debugHelpers.h"
 #include "exceptions.h"
+#include "textureImpl.h"
 
 using namespace texture;
 
@@ -113,7 +115,7 @@ void Texture<DimensionsNumber>::specifyTextureStorageFormat(const std::shared_pt
 {
     ASSERT(!m_isStorageFormatSpecified);
 
-    m_dimensionTypesAndFunc.setTexStorageFormat(m_rendererId, textureData);
+    m_dimensionTypesAndFunc->setTexStorageFormat(m_rendererId, textureData);
     m_isStorageFormatSpecified = true;
 }
 
@@ -126,7 +128,7 @@ void Texture<DimensionsNumber>::setData(TexImageTarget texImageTarget,
         specifyTextureStorageFormat(textureData);
     }
 
-    m_dimensionTypesAndFunc.setTexImageInTarget(m_rendererId, texImageTarget, textureData);
+    //m_dimensionTypesAndFunc->setTexImageInTarget(m_rendererId, texImageTarget, textureData);
     GLCall(glGenerateTextureMipmap(m_rendererId));
 
     m_data = std::move(textureData);

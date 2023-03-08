@@ -1,6 +1,6 @@
 #include "openglLimits.h"
 
-#include "helpers/openglHelpers.h"
+#include "openglHelpers.h"
 
 namespace
 {

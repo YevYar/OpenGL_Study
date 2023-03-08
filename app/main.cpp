@@ -1,5 +1,5 @@
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
+// #include <GLFW/glfw3.h>
 #include <iostream>
 #include <memory>
 
@@ -26,7 +26,7 @@ int main()
         return -1;
     }
     
-    glfwSwapInterval(4);
+    // glfwSwapInterval(4);
 
     initOpenglLimits();
 
@@ -61,7 +61,7 @@ int main()
         currentK += increment;
 
         window->swapBuffers();
-        glfwPollEvents();
+        // glfwPollEvents();
     }
 
     /*VBO->unbind();

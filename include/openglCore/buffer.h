@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "generalTypes.h"
-#include "helpers/openglHelpers.h"
+#include "openglHelpers.h"
 #include "vertexBufferLayout.h"
 
 namespace vertex
@@ -183,8 +183,8 @@ namespace vertex
 		
         friend class VertexArray;
 
-        template<typename Type>
-        friend class helpers::OpenGLBindableObject;
+        /*template<typename Type>
+        friend class helpers::OpenGLBindableObject;*/
 
 	};
 }

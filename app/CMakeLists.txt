@@ -1,0 +1,30 @@
+add_executable(OpenGL_Study_Exe)
+
+
+set(HEADERS multicoloredRectangle.h
+	sceneObject.h)
+	
+set(SOURCES main.cpp
+	multicoloredRectangle.cpp
+	sceneObject.cpp)
+	
+	
+target_sources(OpenGL_Study_Exe PRIVATE ${SOURCES} ${HEADERS})
+target_link_libraries(OpenGL_Study_Exe PRIVATE glad
+	${GLFW3}
+	OpenGL_Study_compiler_flags
+	OpenGL_Study_General
+	OpenGL_Study_Helpers
+	OpenGL_Study_OpenGL_Core)
+
+
+source_group(
+	TREE "${CMAKE_CURRENT_SOURCE_DIR}"
+	PREFIX "Header Files"
+	FILES ${HEADERS})
+	
+source_group(
+	TREE "${CMAKE_CURRENT_SOURCE_DIR}"
+	PREFIX "Source Files"
+	FILES ${SOURCES})
+	

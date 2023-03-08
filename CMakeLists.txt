@@ -6,46 +6,50 @@ project(OpenGL_Study
 	HOMEPAGE_URL "https://github.com/YevYarWolf/OpenGL_Study"
 	LANGUAGES CXX C)
 
-# Set options
+# === SET OPTIONS
 option(BUILD_DOC "Build documentation" ON)
 
-add_executable(OpenGL_Study_Exe)
 
-set(HEADERS include/window.h
-	include/buffer.h
-	include/vertexArray.h
-	include/vertexBufferLayout.h
-	include/generalTypes.h
-	include/shaderProgram.h
-	include/uniforms.h
-	include/exceptions.h
-	include/helpers/helpers.h
-	include/helpers/debugHelpers.h
-	include/helpers/macros.h
-	include/sceneObject.h
-	include/multicoloredRectangle.h
-    include/texture.h
-    include/textureTypes.h
-	include/textureImpl.h
-    include/openglLimits.h
-    include/helpers/openglHelpers.h)
+# === CREATE GENERAL INTERFACE LIBRARY TO SET NECESSARY FLAGS TO ALL TARGETS
+add_library(OpenGL_Study_compiler_flags INTERFACE)
+target_compile_features(OpenGL_Study_compiler_flags INTERFACE cxx_std_23)
 
-target_sources(OpenGL_Study_Exe PRIVATE ${HEADERS})
-target_include_directories(OpenGL_Study_Exe PRIVATE include/ libs/include)
-target_compile_features(OpenGL_Study_Exe PRIVATE cxx_std_23)
+# Adding compiler warning flags
+set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
+set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
+target_compile_options(OpenGL_Study_compiler_flags INTERFACE
+  "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wextra;-Wshadow;-Wformat=2;-Wunused>>"
+  "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>"
+)
+
+
+# === SOME USEFUL CONFIGURATION
+# Let's nicely support folders in IDEs
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+
+# === SET OUTPUT DIRECTORIES
+# Set folder for build result files (*.exe/*.lib/*.a) 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
+
+# === FORBID BUILD IN SOURCE DIRECTORY
+file(TO_CMAKE_PATH "${PROJECT_BINARY_DIR}/CMakeLists.txt" LOC_PATH)
+if(EXISTS ${LOC_PATH})
+	message(FATAL_ERROR "You cannot build in a source directory (or any directory with a CMakeLists.txt file). Please make a build subdirectory. Feel free to remove CMakeCache.txt and CMakeFiles.")
+endif()
+
 
 # Find OpenGL
 find_package(OpenGL REQUIRED)
 
-add_subdirectory(src)
+
+# === ADD SUBDIRECTORIES
+add_subdirectory(app)
 add_subdirectory(libs)
-
-source_group(
-	TREE "${CMAKE_CURRENT_SOURCE_DIR}/include"
-	PREFIX "Header Files"
-	FILES ${HEADERS})
-
-target_link_libraries(OpenGL_Study_Exe PRIVATE OpenGL::GL ${GLFW3} glad)
+add_subdirectory(src)
 
 if(BUILD_DOC)
 	add_subdirectory(docs)
