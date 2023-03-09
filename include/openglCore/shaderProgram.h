@@ -2,12 +2,10 @@
 #define SHADER_PROGRAM_H
 
 #include <glad/glad.h>
-#include <format>
 #include <map>
 #include <string>
 
 #include "exceptions.h"
-#include "helpers/debugHelpers.h"
 #include "helpers/macros.h"
 #include "uniforms.h"
 
@@ -118,18 +116,7 @@ namespace shader
                     return getUniform(name);
                 }
                 
-				int location = 0;
-				GLCall(location = glGetUniformLocation(m_rendererId, name.c_str()));
-				if (location < 0)
-				{
-					const auto excMes = std::format(
-						"Cannot find location of uniform variable '{}'."
-						" Check the name and is this uniform used in the shader.",
-						name
-					);
-					throw exceptions::GLRecAcquisitionException(excMes);
-				}
-
+				const auto location = getUniformLocation(name);
 				auto uniform = new Uniform<Type, Count>(m_rendererId, location, name);
 				m_uniforms.insert({ std::move(name), std::unique_ptr<BaseUniform>(uniform) });
 				return *uniform;
@@ -146,6 +133,9 @@ namespace shader
 			 * \throw std::out_of_range.
 			 */
 			BaseUniform& getUniform(const std::string& name) const;
+
+		private:
+			GLint getUniformLocation(const std::string& uniformName) const;
 
 		private:
             /**

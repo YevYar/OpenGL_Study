@@ -1,5 +1,6 @@
 #include "shaderProgram.h"
 
+#include <format>
 #include <iostream>
 #include <vector>
 
@@ -95,6 +96,24 @@ void ShaderProgram::use() const noexcept
 BaseUniform& ShaderProgram::getUniform(const std::string& name) const
 {
     return *(m_uniforms.at(name).get());
+}
+
+GLint ShaderProgram::getUniformLocation(const std::string& uniformName) const
+{
+	GLint location = 0;
+	GLCall(location = glGetUniformLocation(m_rendererId, uniformName.c_str()));
+
+	if (location < 0)
+	{
+		const auto excMes = std::format(
+			"Cannot find location of uniform variable '{}'."
+			" Check the name and is this uniform used in the shader.",
+			uniformName
+		);
+		throw exceptions::GLRecAcquisitionException(excMes);
+	}
+
+	return location;
 }
 
 static std::string getShaderNameByType(ShaderType type)
