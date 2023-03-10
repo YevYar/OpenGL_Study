@@ -5,8 +5,10 @@
 #include <memory>
 
 #include "generalTypes.h"
+#include "helpers/helpers.h"
 #include "helpers/macros.h"
-#include "openglHelpers.h"
+// #include "openglHelpers.h"
+#include "textureTypes.h"
 #include "textureUnit.h"
 
 /**
@@ -146,8 +148,8 @@ namespace texture
             TexImageTarget m_lastTexImageTarget;
             mutable bool m_isStorageFormatSpecified = false;
 
-            template<typename Type>
-            friend class helpers::OpenGLBindableObject;
+            /*template<typename Type>
+            friend class helpers::OpenGLBindableObject;*/
 
 	};
 

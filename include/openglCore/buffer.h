@@ -1,11 +1,10 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
-#include <glad/glad.h>
+#include <memory>
 #include <optional>
 
 #include "generalTypes.h"
-#include "openglHelpers.h"
 #include "vertexBufferLayout.h"
 #include "vertexTypes.h"
 
@@ -52,6 +51,7 @@ namespace vertex
 
             ~Buffer();
 
+			// Note that it can affect VAO to which current buffer is bound, because OpenGL buffer obj. can references on old buffer
 			Buffer& operator=(const Buffer& obj) = delete;
 
 			/**
@@ -130,9 +130,6 @@ namespace vertex
             std::unique_ptr<Impl> m_impl;
 
         friend class VertexArray;
-
-        /*template<typename Type>
-        friend class helpers::OpenGLBindableObject;*/
 
 	};
 }

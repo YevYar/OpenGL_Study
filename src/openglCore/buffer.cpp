@@ -28,7 +28,6 @@ Buffer::~Buffer() = default;
 
 Buffer& Buffer::operator=(Buffer&& obj) noexcept
 {
-    // m_impl->deleteBuffer();
     m_impl = std::move(obj.m_impl);
 
 	return *this;

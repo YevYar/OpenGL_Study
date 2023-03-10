@@ -1,7 +1,6 @@
 add_library(OpenGL_Study_OpenGL_Core)
 
 set(PUBLIC_HEADERS ${PATH_TO_PUBLIC_INCLUDE}/openglCore/buffer.h
-	${PATH_TO_PUBLIC_INCLUDE}/openglCore/openglHelpers.h
 	${PATH_TO_PUBLIC_INCLUDE}/openglCore/openglLimits.h
 	${PATH_TO_PUBLIC_INCLUDE}/openglCore/shaderProgram.h
 	${PATH_TO_PUBLIC_INCLUDE}/openglCore/texture.h
@@ -13,6 +12,7 @@ set(PUBLIC_HEADERS ${PATH_TO_PUBLIC_INCLUDE}/openglCore/buffer.h
     ${PATH_TO_PUBLIC_INCLUDE}/openglCore/vertexTypes.h)
 	
 set(PRIVATE_HEADERS bufferImpl.h
+	openglHelpers.h
     include/textureImpl.h)
 	
 set(SOURCES buffer.cpp

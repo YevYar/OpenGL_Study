@@ -2,6 +2,7 @@
 #define BUFFER_IMPL_H
 
 #include "buffer.h"
+#include "openglHelpers.h"
 
 namespace vertex
 {
@@ -44,6 +45,9 @@ namespace vertex
         ArrayData m_data;
         BufferDataUsage m_usage = BufferDataUsage::STATIC_DRAW;
         std::optional<VertexBufferLayout> m_layout = std::nullopt;
+
+        template<openglCore::OpenGLBindableObject Type>
+        friend void openglCore::bindForAMomentAndExecute(const Type&, const std::function<void()>&);
     };
 }
 

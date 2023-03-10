@@ -34,6 +34,16 @@ namespace helpers
 	{
 		return static_cast<std::underlying_type_t<decltype(enumeration)>>(enumeration);
 	}
+
+    /**
+     * \brief Gets the integer value of the specified parameter from the OpenGL state machine.
+     *
+     * The list of available parameters see in description of
+     * [glGet()](https://registry.khronos.org/OpenGL-Refpages/gl4/html/glGet.xhtml).
+     *
+     * \return the integer value of the specified parameter.
+     */
+    GLint getOpenGLIntegerValue(GLenum parameterName);
 }
 
 #endif

@@ -1,6 +1,8 @@
 #ifndef VERTEX_TYPES_H
 #define VERTEX_TYPES_H
 
+#include <glad/glad.h>
+
 namespace vertex
 {
     /**
