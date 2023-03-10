@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 
 #include "buffer.h"
+#include "bufferImpl.h"
 #include "exceptions.h"
 #include "helpers/debugHelpers.h"
 #include "helpers/helpers.h"
@@ -84,7 +85,7 @@ void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
     else
 	{
 		const auto stride = layout->getStride();
-        GLCall(glVertexArrayVertexBuffer(m_rendererId, 0, buffer->m_rendererId, 0, stride));
+        GLCall(glVertexArrayVertexBuffer(m_rendererId, 0, buffer->m_impl->m_rendererId, 0, stride));
 
 		for (const auto& attr : layout->getAttributes())
 		{

@@ -1,6 +1,5 @@
 #include "buffer.h"
-
-#include <glad/glad.h>
+#include "bufferImpl.h"
 
 #include "exceptions.h"
 #include "helpers/debugHelpers.h"
@@ -9,47 +8,29 @@
 using namespace vertex;
 
 Buffer::Buffer(BufferTarget target, ArrayData data, BufferDataUsage usage,
-	std::optional<VertexBufferLayout> bufferLayout) :
-	m_target{ target }, m_data{ std::move(data) },
-	m_usage{ usage }, m_layout{ std::move(bufferLayout) }
+    std::optional<VertexBufferLayout> bufferLayout) :
+    m_impl{ std::make_unique<Impl>(target, std::move(data), usage, std::move(bufferLayout)) }
 {
-	genBuffer();
-    setData(std::move(m_data));
+    setData(std::move(m_impl->m_data));
 }
 
 Buffer::Buffer(const Buffer& obj) :
-    m_target{ obj.m_target }, m_data{ obj.m_data },
-    m_usage{ obj.m_usage }, m_layout{ obj.m_layout }
+    m_impl{ std::make_unique<Impl>(*obj.m_impl.get()) }
 {
-    genBuffer();
-    setData(std::move(m_data));
+    setData(std::move(m_impl->m_data));
 }
 
-Buffer::Buffer(Buffer&& obj) noexcept :
-	m_rendererId{ obj.m_rendererId }, m_target{ obj.m_target },
-	m_data{ std::move(obj.m_data) }, m_usage{ obj.m_usage },
-	m_layout{ std::move(obj.m_layout) }
+Buffer::Buffer(Buffer&& obj) noexcept : m_impl{ std::move(obj.m_impl) }
 {
-	obj.m_rendererId = 0;
 }
 
-Buffer::~Buffer()
-{
-    deleteBuffer();
-}
+Buffer::~Buffer() = default;
 
 Buffer& Buffer::operator=(Buffer&& obj) noexcept
 {
-    deleteBuffer();
+    // m_impl->deleteBuffer();
+    m_impl = std::move(obj.m_impl);
 
-    m_rendererId = obj.m_rendererId;
-	m_target = obj.m_target;
-	m_usage = obj.m_usage;
-	m_layout = std::move(obj.m_layout);
-	m_data = std::move(obj.m_data);
-	
-	obj.m_rendererId = 0;
-	
 	return *this;
 }
 
@@ -65,39 +46,66 @@ Buffer* Buffer::clone() const
 
 void Buffer::bind() const noexcept
 {
-	Buffer::bindToTarget(m_target, m_rendererId);
+	m_impl->bind();
 }
 
 void Buffer::unbind() const noexcept
 {
-	Buffer::unbindTarget(m_target);
+	Buffer::unbindTarget(m_impl->m_target);
 }
 
 void Buffer::setData(ArrayData data)
 {
-	if (!checkAndGenerateNewStorage(data))
+	if (!m_impl->checkAndGenerateNewStorage(data))
 	{
-		GLCall(glNamedBufferSubData(m_rendererId, 0, m_data.size, m_data.pointer));
-		m_data = std::move(data);
+		GLCall(glNamedBufferSubData(m_impl->m_rendererId, 0, m_impl->m_data.size, m_impl->m_data.pointer));
+        m_impl->m_data = std::move(data);
 	}    
 }
 
 const ArrayData& Buffer::getData() const noexcept
 {
-	return m_data;
+	return m_impl->m_data;
 }
 
 std::optional<VertexBufferLayout> Buffer::getLayout() const noexcept
 {
-	return m_layout;
+	return m_impl->m_layout;
 }
 
-void Buffer::bindToTarget(BufferTarget target, GLuint bufferId) noexcept
+
+// IMPLEMENTATION
+
+Buffer::Impl::Impl(BufferTarget target, ArrayData data, BufferDataUsage usage,
+    std::optional<VertexBufferLayout> bufferLayout) : m_target{ target }, m_data{ std::move(data) },
+    m_usage{ usage }, m_layout{ std::move(bufferLayout) }
 {
-	GLCall(glBindBuffer(helpers::toUType(target), bufferId));
+    genBuffer();
 }
 
-BufferBindingTarget Buffer::getTargetAssociatedGetParameter(BufferTarget target) noexcept
+Buffer::Impl::Impl(const Impl& obj) : m_target{ obj.m_target }, m_data{ obj.m_data }, m_usage{ obj.m_usage },
+    m_layout{ obj.m_layout }
+{
+    genBuffer();
+}
+
+Buffer::Impl::Impl(Impl&& obj) noexcept : m_rendererId{ obj.m_rendererId }, m_target{ obj.m_target },
+    m_data{ std::move(obj.m_data) }, m_usage{ obj.m_usage }, m_layout{ std::move(obj.m_layout) }
+{
+    obj.m_rendererId = 0;
+}
+
+Buffer::Impl::~Impl()
+{
+    deleteBuffer();
+}
+
+void Buffer::Impl::bindToTarget(BufferTarget target, GLuint bufferId) noexcept
+{
+    GLCall(glBindBuffer(helpers::toUType(target), bufferId));
+}
+
+BufferBindingTarget Buffer::Impl::getTargetAssociatedGetParameter(BufferTarget target) noexcept
 {
     switch (target)
     {
@@ -132,29 +140,33 @@ BufferBindingTarget Buffer::getTargetAssociatedGetParameter(BufferTarget target)
     }
 }
 
-void Buffer::genBuffer()
+void Buffer::Impl::genBuffer()
 {
-	GLCall(glCreateBuffers(1, &m_rendererId));
-	if (m_rendererId == 0)
-	{
-		throw exceptions::GLRecAcquisitionException("Buffer cannot be generated.");
-	}
+    GLCall(glCreateBuffers(1, &m_rendererId));
+    if (m_rendererId == 0)
+    {
+        throw exceptions::GLRecAcquisitionException("Buffer cannot be generated.");
+    }
 }
 
-bool Buffer::checkAndGenerateNewStorage(const ArrayData& data) noexcept
+void Buffer::Impl::bind() const noexcept
 {
-	if (m_data.size != data.size)
-	{
-		GLCall(glNamedBufferData(m_rendererId, data.size, data.pointer, helpers::toUType(m_usage)));
-		m_data = data;
-		return true;
-	}
-	return false;
+    Impl::bindToTarget(m_target, m_rendererId);
 }
 
-void Buffer::deleteBuffer() noexcept
+bool Buffer::Impl::checkAndGenerateNewStorage(const ArrayData& data) noexcept
 {
+    if (m_data.size != data.size)
+    {
+        GLCall(glNamedBufferData(m_rendererId, data.size, data.pointer, helpers::toUType(m_usage)));
+        m_data = data;
+        return true;
+    }
+    return false;
+}
 
+void Buffer::Impl::deleteBuffer() noexcept
+{
     GLCall(glDeleteBuffers(1, &m_rendererId));
     m_rendererId = 0;
 }

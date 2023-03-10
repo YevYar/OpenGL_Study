@@ -9,9 +9,11 @@ set(PUBLIC_HEADERS ${PATH_TO_PUBLIC_INCLUDE}/openglCore/buffer.h
 	${PATH_TO_PUBLIC_INCLUDE}/openglCore/textureUnit.h
 	${PATH_TO_PUBLIC_INCLUDE}/openglCore/uniforms.h
 	${PATH_TO_PUBLIC_INCLUDE}/openglCore/vertexArray.h
-	${PATH_TO_PUBLIC_INCLUDE}/openglCore/vertexBufferLayout.h)
+	${PATH_TO_PUBLIC_INCLUDE}/openglCore/vertexBufferLayout.h
+    ${PATH_TO_PUBLIC_INCLUDE}/openglCore/vertexTypes.h)
 	
-set(PRIVATE_HEADERS include/textureImpl.h)
+set(PRIVATE_HEADERS bufferImpl.h
+    include/textureImpl.h)
 	
 set(SOURCES buffer.cpp
 	openglHelpers.cpp
@@ -40,7 +42,7 @@ source_group(
 	FILES ${PUBLIC_HEADERS})
 	
 source_group(
-	TREE "${CMAKE_CURRENT_SOURCE_DIR}/include"
+	TREE "${CMAKE_CURRENT_SOURCE_DIR}"
 	PREFIX "Private Header Files"
 	FILES ${PRIVATE_HEADERS})
 	
