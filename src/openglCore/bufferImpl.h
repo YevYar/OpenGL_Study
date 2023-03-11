@@ -13,6 +13,9 @@ namespace vertex
         Impl(const Impl& obj);
         Impl(Impl&& obj) noexcept;
 
+        Impl& operator=(const Impl&) = delete;
+        Impl& operator=(Impl&&) noexcept = delete;
+
         /**
          * \brief Deletes the object and the buffer object in OpenGL state machine.
          *
@@ -48,6 +51,7 @@ namespace vertex
 
         template<openglCore::OpenGLBindableObject Type>
         friend void openglCore::bindForAMomentAndExecute(const Type&, const std::function<void()>&);
+
     };
 }
 

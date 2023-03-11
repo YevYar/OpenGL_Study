@@ -5,7 +5,6 @@
 #include <map>
 #include <string>
 
-#include "exceptions.h"
 #include "helpers/macros.h"
 #include "uniforms.h"
 
@@ -17,7 +16,7 @@ namespace shader
 	/**
 	 * \brief ShaderType represents 'shaderType' parameter of [glCreateShader()](https://docs.gl/gl4/glCreateShader).
 	 */
-	enum class ShaderType : unsigned int
+	enum class ShaderType : GLenum
 	{
         COMPUTE_SHADER = 0x91B9, VERTEX_SHADER = 0x8B31, TESS_CONTROL_SHADER = 0x8E88, TESS_EVALUATION_SHADER = 0x8E87,
         GEOMETRY_SHADER = 0x8DD9, FRAGMENT_SHADER = 0x8B30
@@ -49,14 +48,11 @@ namespace shader
 			 * 
 			 * Wraps [glDeleteShader()](https://docs.gl/gl4/glDeleteShader).
 			 */
-			~Shader();			
+			~Shader();	
 
 		private:
-            /**
-             * \brief Id of referenced OpenGL shader object.
-             */
-			unsigned int m_rendererId = 0;
-			const ShaderType m_type = ShaderType::VERTEX_SHADER;
+            struct Impl;
+            std::unique_ptr<Impl> m_impl;
 
 		friend class ShaderProgram;
 
@@ -109,18 +105,7 @@ namespace shader
 			 * \throw exceptions::GLRecAcquisitionException().
 			 */
 			template<typename Type, unsigned int Count>
-			BaseUniform& findUniform(std::string name)
-			{
-                if (m_uniforms.contains(name))
-                {
-                    return getUniform(name);
-                }
-                
-				const auto location = getUniformLocation(name);
-				auto uniform = new Uniform<Type, Count>(m_rendererId, location, name);
-				m_uniforms.insert({ std::move(name), std::unique_ptr<BaseUniform>(uniform) });
-				return *uniform;
-			}
+            BaseUniform& findUniform(std::string name);
 
 			/**
 			 * \brief Returns BaseUniform, which wraps the OpenGL uniform variable with specified name.
@@ -135,14 +120,8 @@ namespace shader
 			BaseUniform& getUniform(const std::string& name) const;
 
 		private:
-			GLint getUniformLocation(const std::string& uniformName) const;
-
-		private:
-            /**
-             * \brief Id of referenced OpenGL shader program.
-             */
-			unsigned int m_rendererId = 0;
-			std::map<std::string, std::unique_ptr<BaseUniform>> m_uniforms;
+            struct Impl;
+            std::unique_ptr<Impl> m_impl;
 
 	};
 

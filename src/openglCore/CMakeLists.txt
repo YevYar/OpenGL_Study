@@ -13,6 +13,7 @@ set(PUBLIC_HEADERS ${PATH_TO_PUBLIC_INCLUDE}/openglCore/buffer.h
 	
 set(PRIVATE_HEADERS bufferImpl.h
 	openglHelpers.h
+    shaderProgramImpl.h
     include/textureImpl.h)
 	
 set(SOURCES buffer.cpp
