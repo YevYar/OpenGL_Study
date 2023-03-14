@@ -21,29 +21,25 @@ namespace texture
         public:
             BaseTexture() = default;
 
-            DEFAULT_COPYABLE_MOVABLE(BaseTexture)
+            DEFAULT_MOVABLE(BaseTexture)
 
             virtual ~BaseTexture() = default;
+
+            BaseTexture& operator=(const BaseTexture& obj) = delete;
 
             BaseTexture* clone() const override;
 
         protected:
             BaseTexture(TextureTarget target);
-            BaseTexture(GLuint rendererId, TextureTarget target);
+            BaseTexture(const BaseTexture& obj);
 
         protected:
-            /**
-             * \brief Id of referenced OpenGL texture.
-             */
-            GLuint m_rendererId = 0;
-            TextureTarget m_target = TextureTarget::TEXTURE_2D;
+            struct Impl;
+            std::unique_ptr<Impl> m_impl;
 
         friend class TextureUnit;
 
     };
-
-    template<unsigned int DimensionsNumber>
-    struct TexDimensionSpecificTypesAndFunc;
 
 	/**
 	 * \brief Texture is a wrapper over OpenGL texture.
@@ -55,12 +51,11 @@ namespace texture
             "The number of dimensions must be in range [1, 3].");
 
         private:
-            
-
-            TexDimensionSpecificTypesAndFunc<DimensionsNumber>* m_dimensionTypesAndFunc;
+            struct Impl;
+            std::unique_ptr<Impl> m_impl;
 
         public:
-            using TexImageTarget = texture::TexImage2DTarget; // decltype(m_dimensionTypesAndFunc->texImageTarget);
+            using TexImageTarget = decltype(m_impl->texImageTarget);
 
 		public:
             Texture(TextureTarget target);
@@ -135,18 +130,6 @@ namespace texture
 
         private:
             Texture(const Texture& obj);
-
-            static void bindToTarget(TextureTarget target, GLuint textureId) noexcept;
-            static TextureBindingTarget getTargetAssociatedGetParameter(TextureTarget target) noexcept;
-
-            void genTexture();
-            void deleteTexture() noexcept;
-
-		private:			
-            const unsigned int m_dimensionsNumber = DimensionsNumber;
-			std::shared_ptr<TextureData> m_data;            
-            TexImageTarget m_lastTexImageTarget;
-            mutable bool m_isStorageFormatSpecified = false;
 
             /*template<typename Type>
             friend class helpers::OpenGLBindableObject;*/
