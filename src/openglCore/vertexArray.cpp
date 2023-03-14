@@ -1,4 +1,5 @@
 #include "vertexArray.h"
+#include "vertexArrayImpl.h"
 
 #include <glad/glad.h>
 
@@ -11,47 +12,35 @@
 
 using namespace vertex;
 
-VertexArray::VertexArray()
+VertexArray::VertexArray() : m_impl{ std::make_unique<Impl>() }
 {
-    genVertexArray();
 	bind();
 }
 
-VertexArray::VertexArray(const VertexArray& obj)
+VertexArray::VertexArray(const VertexArray& obj) : m_impl{ std::make_unique<Impl>() }
 {
-    genVertexArray();
-    for (const auto& buffer : obj.m_buffers)
+    for (const auto& buffer : obj.m_impl->m_buffers)
     {
         addBuffer(buffer);
     }
 }
 
-VertexArray::VertexArray(VertexArray&& obj) noexcept : m_rendererId{ obj.m_rendererId },
-    m_buffers{ std::move(obj.m_buffers) }
+VertexArray::VertexArray(VertexArray&& obj) noexcept : m_impl{ std::move(obj.m_impl) }
 {
-    obj.m_rendererId = 0;
 }
 
-VertexArray::~VertexArray()
-{
-    deleteVertexArray();
-}
+VertexArray::~VertexArray() = default;
 
 VertexArray& VertexArray::operator=(VertexArray&& obj) noexcept
 {
-    deleteVertexArray();
-
-    m_rendererId = obj.m_rendererId;
-    m_buffers = std::move(obj.m_buffers);
-
-    obj.m_rendererId = 0;
+    m_impl = std::move(obj.m_impl);
 
     return *this;
 }
 
 void VertexArray::unbind() noexcept
 {
-    bindSpecificVao(0);
+    Impl::bindSpecificVao(0);
 }
 
 VertexArray* VertexArray::clone() const
@@ -61,7 +50,7 @@ VertexArray* VertexArray::clone() const
 
 void VertexArray::bind() const noexcept
 {
-    bindSpecificVao(m_rendererId);
+    Impl::bindSpecificVao(m_impl->m_rendererId);
 }
 
 void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
@@ -71,7 +60,7 @@ void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
     if (layout == std::nullopt)
     {
         GLuint boundVao = helpers::getOpenGLIntegerValue(GL_VERTEX_ARRAY_BINDING);
-        if (boundVao == m_rendererId)
+        if (boundVao == m_impl->m_rendererId)
         {
             buffer->bind();
         }
@@ -79,20 +68,20 @@ void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
         {
             bind();
             buffer->bind();
-            bindSpecificVao(boundVao);
+            Impl::bindSpecificVao(boundVao);
         }
     }
     else
 	{
 		const auto stride = layout->getStride();
-        GLCall(glVertexArrayVertexBuffer(m_rendererId, 0, buffer->m_impl->m_rendererId, 0, stride));
+        GLCall(glVertexArrayVertexBuffer(m_impl->m_rendererId, 0, buffer->m_impl->m_rendererId, 0, stride));
 
 		for (const auto& attr : layout->getAttributes())
 		{
             using namespace helpers;
 
             enableAttribute(attr.index);
-            GLCall(glVertexArrayAttribBinding(m_rendererId, attr.index, 0));
+            GLCall(glVertexArrayAttribBinding(m_impl->m_rendererId, attr.index, 0));
 
             switch (attr.type)
             {
@@ -106,49 +95,62 @@ void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
                 case VertexAttrType::UNSIGNED_SHORT:
                 case VertexAttrType::FIXED:
                 case VertexAttrType::UNSIGNED_INT_10F_11F_11F_REV:
-                    GLCall(glVertexArrayAttribIFormat(m_rendererId, attr.index, attr.count, toUType(attr.type),
+                    GLCall(glVertexArrayAttribIFormat(m_impl->m_rendererId, attr.index, attr.count, toUType(attr.type),
                         attr.byteOffset));
                     break;
                 case VertexAttrType::FLOAT:
                 case VertexAttrType::HALF_FLOAT:
-                    GLCall(glVertexArrayAttribFormat(m_rendererId, attr.index, attr.count, toUType(attr.type),
+                    GLCall(glVertexArrayAttribFormat(m_impl->m_rendererId, attr.index, attr.count, toUType(attr.type),
                         attr.normalized, attr.byteOffset));
                     break;
                 case VertexAttrType::DOUBLE:
-                    GLCall(glVertexArrayAttribLFormat(m_rendererId, attr.index, attr.count, toUType(attr.type),
+                    GLCall(glVertexArrayAttribLFormat(m_impl->m_rendererId, attr.index, attr.count, toUType(attr.type),
                         attr.byteOffset));
                     break;
                 default:
-                    GLCall(glVertexArrayAttribFormat(m_rendererId, attr.index, attr.count, toUType(attr.type),
+                    GLCall(glVertexArrayAttribFormat(m_impl->m_rendererId, attr.index, attr.count, toUType(attr.type),
                         attr.normalized, attr.byteOffset));
             }
 		}
 	}	
 
-	m_buffers.push_back(std::move(buffer));
+    m_impl->m_buffers.push_back(std::move(buffer));
 }
 
 const std::vector<std::shared_ptr<Buffer>>& VertexArray::getBuffers() const noexcept
 {
-	return m_buffers;
+	return m_impl->m_buffers;
 }
 
 void VertexArray::enableAttribute(unsigned int index) const noexcept
 {
-    GLCall(glEnableVertexArrayAttrib(m_rendererId, index));
+    GLCall(glEnableVertexArrayAttrib(m_impl->m_rendererId, index));
 }
 
 void VertexArray::disableAttribute(unsigned int index) const noexcept
 {
-	GLCall(glDisableVertexArrayAttrib(m_rendererId, index));
+	GLCall(glDisableVertexArrayAttrib(m_impl->m_rendererId, index));
 }
 
-void VertexArray::bindSpecificVao(GLuint vaoId) noexcept
+
+// IMPLEMENTATION
+
+VertexArray::Impl::Impl()
+{
+    genVertexArray();
+}
+
+VertexArray::Impl::~Impl()
+{
+    deleteVertexArray();
+}
+
+void VertexArray::Impl::bindSpecificVao(GLuint vaoId) noexcept
 {
     GLCall(glBindVertexArray(vaoId));
 }
 
-void VertexArray::genVertexArray()
+void VertexArray::Impl::genVertexArray()
 {
     GLCall(glCreateVertexArrays(1, &m_rendererId));
     if (m_rendererId == 0)
@@ -157,7 +159,7 @@ void VertexArray::genVertexArray()
     }
 }
 
-void VertexArray::deleteVertexArray()
+void VertexArray::Impl::deleteVertexArray()
 {
     GLCall(glDeleteVertexArrays(1, &m_rendererId));
     m_rendererId = 0;

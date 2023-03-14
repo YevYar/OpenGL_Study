@@ -41,11 +41,6 @@ namespace vertex
 
             VertexArray(VertexArray&& obj) noexcept;
 
-			/**
-			 * \brief Deletes vertex array object in OpenGL state machine.
-			 * 
-			 * Wraps [glDeleteVertexArrays()](https://docs.gl/gl4/glDeleteVertexArrays).
-			 */
 			~VertexArray();	
 
 			VertexArray& operator=(const VertexArray& obj) = delete;
@@ -104,17 +99,9 @@ namespace vertex
         private:
 			VertexArray(const VertexArray& obj);
 
-            static void bindSpecificVao(GLuint vaoId) noexcept;
-
-			void genVertexArray();
-            void deleteVertexArray();
-
 		private:
-			/**
-			 * \brief Id of referenced OpenGL vertex array object.
-			 */
-            GLuint m_rendererId = 0;
-			std::vector<std::shared_ptr<Buffer>> m_buffers;
+			struct Impl;
+			std::unique_ptr<Impl> m_impl;
 			
 	};
 }
