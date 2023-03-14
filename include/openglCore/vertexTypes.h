@@ -35,6 +35,18 @@ namespace vertex
         STATIC_READ = 0x88E5, STATIC_COPY = 0x88E6, DYNAMIC_DRAW = 0x88E8, DYNAMIC_READ = 0x88E9,
         DYNAMIC_COPY = 0x88EA
     };
+
+    /**
+     * VertexAttrType represents 'type' parameter of
+     * [glVertexAttribPointer()](https://docs.gl/gl4/glVertexAttribPointer).
+     */
+    enum class VertexAttrType : GLenum
+    {
+        BYTE = 0x1400, UNSIGNED_BYTE = 0x1401, SHORT = 0x1402, UNSIGNED_SHORT = 0x1403,
+        INT = 0x1404, UNSIGNED_INT = 0x1405, HALF_FLOAT = 0x140B, FLOAT = 0x1406,
+        DOUBLE = 0x140A, FIXED = 0x140C, INT_2_10_10_10_REV = 0x8D9F, UNSIGNED_INT_2_10_10_10_REV = 0x8368,
+        UNSIGNED_INT_10F_11F_11F_REV = 0x8C3B
+    };
 }
 
 #endif

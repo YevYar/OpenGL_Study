@@ -1,4 +1,5 @@
- #include "vertexBufferLayout.h"
+#include "vertexBufferLayout.h"
+#include "vertexBufferLayoutImpl.h"
 
 #include <format>
 #include <glad/glad.h>
@@ -7,6 +8,22 @@
 #include "openglLimits.h"
 
 using namespace vertex;
+
+VertexBufferLayout::VertexBufferLayout() : m_impl{ std::make_unique<Impl>() }
+{
+}
+
+VertexBufferLayout::VertexBufferLayout(const VertexBufferLayout& obj) : m_impl{ std::make_unique<Impl>(*obj.m_impl) }
+{
+}
+
+VertexBufferLayout::~VertexBufferLayout() = default;
+
+VertexBufferLayout& VertexBufferLayout::operator=(const VertexBufferLayout& obj)
+{
+	m_impl = std::make_unique<Impl>(*obj.m_impl);
+	return *this;
+}
 
 void VertexBufferLayout::addVertexAttribute(const VertexAttribute& va)
 {
@@ -21,18 +38,18 @@ void VertexBufferLayout::addVertexAttribute(const VertexAttribute& va)
 		throw std::out_of_range("Count must be greater than 0 and less than 5.");
 	}
 
-	m_vertexAttributes.push_back(va);
-	m_stride += getByteSizeOfType(va.type) * va.count;
+	m_impl->m_vertexAttributes.push_back(va);
+	m_impl->m_stride += getByteSizeOfType(va.type) * va.count;
 }
 
 const std::vector<VertexAttribute>& VertexBufferLayout::getAttributes() const noexcept
 {
-	return m_vertexAttributes;
+	return m_impl->m_vertexAttributes;
 }
 
-unsigned int VertexBufferLayout::getStride() const noexcept
+GLsizei VertexBufferLayout::getStride() const noexcept
 {
-	return m_stride;
+	return m_impl->m_stride;
 }
 
 unsigned int vertex::getByteSizeOfType(VertexAttrType type) noexcept
@@ -62,4 +79,12 @@ unsigned int vertex::getByteSizeOfType(VertexAttrType type) noexcept
 		case VertexAttrType::UNSIGNED_INT_2_10_10_10_REV:
 			return 4;
 	}
+}
+
+
+// IMPLEMENTATION
+
+VertexBufferLayout::Impl::Impl(const Impl& obj) : m_stride{ obj.m_stride },
+	m_vertexAttributes{ obj.m_vertexAttributes }
+{
 }

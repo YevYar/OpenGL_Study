@@ -1,24 +1,14 @@
 #ifndef VERTEX_BUFFER_LAYOUT_H
 #define VERTEX_BUFFER_LAYOUT_H
 
+#include <memory>
 #include <vector>
 
 #include "helpers/macros.h"
+#include "vertexTypes.h"
 
 namespace vertex
 {
-	/**
-	 * VertexAttrType represents 'type' parameter of 
-	 * [glVertexAttribPointer()](https://docs.gl/gl4/glVertexAttribPointer).
-	 */
-	enum class VertexAttrType : unsigned int
-	{
-		BYTE = 0x1400, UNSIGNED_BYTE = 0x1401, SHORT = 0x1402, UNSIGNED_SHORT = 0x1403,
-		INT = 0x1404, UNSIGNED_INT = 0x1405, HALF_FLOAT = 0x140B, FLOAT = 0x1406,
-		DOUBLE = 0x140A, FIXED = 0x140C, INT_2_10_10_10_REV = 0x8D9F, UNSIGNED_INT_2_10_10_10_REV = 0x8368,
-        UNSIGNED_INT_10F_11F_11F_REV = 0x8C3B
-	};
-
 	/**
 	 * \brief VertexAttribute represents one vertex attribute and contains all arguments,
 	 * which are needed to call function [glVertexAttribPointer()](https://docs.gl/gl4/glVertexAttribPointer).
@@ -28,11 +18,11 @@ namespace vertex
 		/**
 		 * \brief The index of the generic vertex attribute to be modified.
 		 */
-		unsigned int index = 0;
+		GLuint index = 0;
 		/**
 		 * \brief The number of components per generic vertex attribute. Must be 1, 2, 3, 4.
 		 */
-		int count = 1;
+		GLint count = 1;
 		/**
 		 * \brief The data type of each component in the array.
 		 */
@@ -41,7 +31,7 @@ namespace vertex
 		 * \brief Specification whether fixed-point data values should be normalized or converted directly 
 		 * as fixed-point values when they are accessed.
 		 */
-		bool normalized = false;
+		GLboolean normalized = false;
 		/**
 		 * \brief The 'pointer' parameter of the function. Specifies an offset in bytes of the first component 
 		 * of the first generic vertex attribute in the array in the data store of the buffer currently bound 
@@ -56,11 +46,14 @@ namespace vertex
 	class VertexBufferLayout
 	{
 		public:
-			VertexBufferLayout() = default;
+			VertexBufferLayout();
+			VertexBufferLayout(const VertexBufferLayout& obj);
 
-            DEFAULT_COPYABLE_MOVABLE(VertexBufferLayout)
+            DEFAULT_MOVABLE(VertexBufferLayout)
 
-			~VertexBufferLayout() = default;			
+			VertexBufferLayout& operator=(const VertexBufferLayout& obj);
+
+			~VertexBufferLayout();			
 
 			/**
 			 * \brief Adds new VertexAttribute in layout.
@@ -79,15 +72,11 @@ namespace vertex
 			 * \brief Returns automatically calculated 'stride' parameter, which is needed by 
 			 * [glVertexAttribPointer()](https://docs.gl/gl4/glVertexAttribPointer).
 			 */
-			unsigned int getStride() const noexcept;
+			GLsizei getStride() const noexcept;
 
 		private:
-			std::vector<VertexAttribute> m_vertexAttributes;
-
-			/**
-			 * \brief See getStride(). It is automatically calculated value, when new VertexAttribute is added via addVertexAttribute().
-			 */
-			unsigned int m_stride = 0;
+			struct Impl;
+			std::unique_ptr<Impl> m_impl;
 
 	};
 

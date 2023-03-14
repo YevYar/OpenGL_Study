@@ -15,6 +15,7 @@ set(PRIVATE_HEADERS bufferImpl.h
 	openglHelpers.h
     shaderProgramImpl.h
 	vertexArrayImpl.h
+	vertexBufferLayoutImpl.h
     include/textureImpl.h)
 	
 set(SOURCES buffer.cpp
