@@ -85,15 +85,16 @@ namespace texture::TextureUnitsManager
 
 void TextureUnit::setTexture(const std::shared_ptr<BaseTexture>& texture)
 {
-    if (m_unitTextures.contains(texture->m_target) && m_unitTextures.at(texture->m_target) == texture)
+    // TODO
+    /*if (m_unitTextures.contains(texture->m_impl) && m_unitTextures.at(texture->m_target) == texture)
     {
         return;
-    }
+    }*/
 
 	const auto activeTextureUnitIndex = getActiveTextureUnitIndex();
 
-	GLCall(glBindTextureUnit(m_index, texture->m_rendererId));
-	m_unitTextures.insert_or_assign(texture->m_target, texture);
+	/*GLCall(glBindTextureUnit(m_index, texture->m_rendererId));
+	m_unitTextures.insert_or_assign(texture->m_target, texture);*/
 
 	activateTextureUnitWithoutCheck(activeTextureUnitIndex);
 }
@@ -104,13 +105,13 @@ void TextureUnit::setTextures(const std::vector<std::shared_ptr<BaseTexture>>& t
 
     for (const auto& texture : textures)
     {
-        if (m_unitTextures.contains(texture->m_target) && m_unitTextures.at(texture->m_target) == texture)
+        /*if (m_unitTextures.contains(texture->m_target) && m_unitTextures.at(texture->m_target) == texture)
         {
             continue;
         }
 
         GLCall(glBindTextureUnit(m_index, texture->m_rendererId));
-        m_unitTextures.insert_or_assign(texture->m_target, texture);
+        m_unitTextures.insert_or_assign(texture->m_target, texture);*/
     }    
 
     activateTextureUnitWithoutCheck(activeTextureUnitIndex);

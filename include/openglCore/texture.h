@@ -23,19 +23,19 @@ namespace texture
 
             DEFAULT_MOVABLE(BaseTexture)
 
-            virtual ~BaseTexture() = default;
+            virtual ~BaseTexture();
 
             BaseTexture& operator=(const BaseTexture& obj) = delete;
 
             BaseTexture* clone() const override;
 
         protected:
-            BaseTexture(TextureTarget target);
-            BaseTexture(const BaseTexture& obj);
+            struct BaseImpl;
+            std::unique_ptr<BaseImpl> m_impl = std::make_unique<BaseImpl>();
 
         protected:
-            struct Impl;
-            std::unique_ptr<Impl> m_impl;
+            BaseTexture(std::unique_ptr<BaseImpl> impl);
+            BaseTexture(const BaseTexture& obj);
 
         friend class TextureUnit;
 
@@ -52,20 +52,19 @@ namespace texture
 
         private:
             struct Impl;
-            std::unique_ptr<Impl> m_impl;
 
         public:
-            using TexImageTarget = decltype(m_impl->texImageTarget);
+            using TexImageTarget = Impl::TexImageTarget;
 
 		public:
             Texture(TextureTarget target);
             Texture(TextureTarget target, TexImageTarget texImageTarget, std::shared_ptr<TextureData> textureData);
-            Texture(Texture&& obj) noexcept;
+            
+            DEFAULT_MOVABLE(Texture)
 
 			~Texture();
 
             Texture& operator=(const Texture& obj) = delete;
-            Texture& operator=(Texture&& obj) noexcept;
             
 			/**
 			 * \brief Unbinds current texture from the target.
@@ -89,11 +88,11 @@ namespace texture
             {
                 if constexpr (std::is_same_v<GLfloat, Type>)
                 {
-                    GLCall(glTextureParameterf(m_rendererId, helpers::toUType(parameter), value));
+                    // GLCall(glTextureParameterf(m_rendererId, helpers::toUType(parameter), value));
                 }
                 else
                 {
-                    GLCall(glTextureParameteri(m_rendererId, helpers::toUType(parameter), value));
+                    // GLCall(glTextureParameteri(m_rendererId, helpers::toUType(parameter), value));
                 }
             }
 
@@ -103,11 +102,11 @@ namespace texture
             {
                 if constexpr (std::is_same_v<GLfloat, Type>)
                 {
-                    GLCall(glTextureParameterfv(m_rendererId, helpers::toUType(parameter), values));
+                    // GLCall(glTextureParameterfv(m_rendererId, helpers::toUType(parameter), values));
                 }
                 else
                 {
-                    GLCall(glTextureParameteriv(m_rendererId, helpers::toUType(parameter), values));
+                    // GLCall(glTextureParameteriv(m_rendererId, helpers::toUType(parameter), values));
                 }
             }
 
@@ -117,11 +116,11 @@ namespace texture
             {
                 if constexpr (std::is_same_v<GLint, Type>)
                 {
-                    GLCall(glTextureParameterIiv(m_rendererId, helpers::toUType(parameter), values));
+                    // GLCall(glTextureParameterIiv(m_rendererId, helpers::toUType(parameter), values));
                 }
                 else
                 {
-                    GLCall(glTextureParameterIuiv(m_rendererId, helpers::toUType(parameter), values));
+                    // GLCall(glTextureParameterIuiv(m_rendererId, helpers::toUType(parameter), values));
                 }
             }
 

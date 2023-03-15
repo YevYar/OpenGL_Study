@@ -11,14 +11,22 @@
 
 using namespace texture;
 
-BaseTexture::BaseTexture(TextureTarget target) : m_impl{ std::make_unique<Impl>(target) }
+namespace
+{
+    template<unsigned int DimensionsNumber>
+    Texture<DimensionsNumber>::Impl* castImpl(const std::unique_ptr<BaseTexture::BaseImpl>& baseImpl);
+}
+
+BaseTexture::BaseTexture(std::unique_ptr<BaseImpl> impl) : m_impl{ std::move(impl) }
 {
 }
 
 BaseTexture::BaseTexture(const BaseTexture& obj) :
-    m_impl{ std::make_unique<Impl>(*obj.m_impl.get()) }
+    m_impl{ std::make_unique<BaseImpl>(*obj.m_impl) }
 {
 }
+
+BaseTexture::~BaseTexture() = default;
 
 BaseTexture* BaseTexture::clone() const
 {
@@ -26,22 +34,20 @@ BaseTexture* BaseTexture::clone() const
 }
 
 template<unsigned int DimensionsNumber>
-Texture<DimensionsNumber>::Texture(TextureTarget target) : BaseTexture{ target }
+Texture<DimensionsNumber>::Texture(TextureTarget target) : BaseTexture{ std::make_unique<Texture::Impl>(target) }
 {
-    if (m_dimensionsNumber == 1 && target != TextureTarget::TEXTURE_1D)
+    if (castImpl<DimensionsNumber>(m_impl)->m_dimensionsNumber == 1 && target != TextureTarget::TEXTURE_1D)
     {
         throw std::invalid_argument("For DimensionsNumber = 1 only TextureTarget::TEXTURE_1D is supported.");
     }
-    if (m_dimensionsNumber == 2 && target != TextureTarget::TEXTURE_2D)
+    if (castImpl<DimensionsNumber>(m_impl)->m_dimensionsNumber == 2 && target != TextureTarget::TEXTURE_2D)
     {
         throw std::invalid_argument("For DimensionsNumber = 2 only TextureTarget::TEXTURE_2D is supported.");
     }
-    if (m_dimensionsNumber == 3 && target != TextureTarget::TEXTURE_3D)
+    if (castImpl<DimensionsNumber>(m_impl)->m_dimensionsNumber == 3 && target != TextureTarget::TEXTURE_3D)
     {
         throw std::invalid_argument("For DimensionsNumber = 3 only TextureTarget::TEXTURE_3D is supported.");
     }
-
-    genTexture();
 }
 
 template<unsigned int DimensionsNumber>
@@ -52,42 +58,12 @@ Texture<DimensionsNumber>::Texture(TextureTarget target, TexImageTarget texImage
 }
 
 template<unsigned int DimensionsNumber>
-Texture<DimensionsNumber>::Texture(const Texture& obj) : BaseTexture{ obj.m_target },
-    m_lastTexImageTarget{ obj.m_lastTexImageTarget }
+Texture<DimensionsNumber>::Texture(const Texture& obj) : BaseTexture{ std::make_unique<Texture::Impl>(*obj.m_impl) }
 {
-    genTexture();
-    setData(m_lastTexImageTarget, obj.m_data);
 }
 
 template<unsigned int DimensionsNumber>
-Texture<DimensionsNumber>::Texture(Texture&& obj) noexcept : BaseTexture{ obj.m_rendererId, obj.m_target },
-    m_data{ std::move(obj.m_data) }, m_lastTexImageTarget{ obj.m_lastTexImageTarget },
-    m_isStorageFormatSpecified{ obj.m_isStorageFormatSpecified }
-{
-    obj.m_rendererId = 0;
-}
-
-template<unsigned int DimensionsNumber>
-Texture<DimensionsNumber>::~Texture()
-{
-    deleteTexture();
-}
-
-template<unsigned int DimensionsNumber>
-Texture<DimensionsNumber>& Texture<DimensionsNumber>::operator=(Texture&& obj) noexcept
-{
-    deleteTexture();
-
-    m_rendererId = obj.m_rendererId;
-    m_target = obj.m_target;
-    m_data = std::move(obj.m_data);
-    m_lastTexImageTarget = obj.m_lastTexImageTarget;
-    m_isStorageFormatSpecified = obj.m_isStorageFormatSpecified;
-
-    obj.m_rendererId = 0;
-
-    return *this;
-}
+Texture<DimensionsNumber>::~Texture() = default;
 
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::unbindTarget(TextureTarget target) noexcept
@@ -104,90 +80,59 @@ Texture<DimensionsNumber>* Texture<DimensionsNumber>::clone() const
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::bind() const noexcept
 {
-    Texture::bindToTarget(m_target, m_rendererId);
+    Texture::Impl::bindToTarget(m_impl->m_target, m_impl->m_rendererId);
 }
 
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::unbind() const noexcept
 {
-    Texture::unbindTarget(m_target);
+    Texture::unbindTarget(m_impl->m_target);
 }
 
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::specifyTextureStorageFormat(const std::shared_ptr<TextureData>& textureData) const noexcept
 {
-    ASSERT(!m_isStorageFormatSpecified);
-
-    m_dimensionTypesAndFunc->setTexStorageFormat(m_rendererId, textureData);
-    m_isStorageFormatSpecified = true;
+    castImpl<DimensionsNumber>(m_impl)->specifyTextureStorageFormat(textureData);
 }
 
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::setData(TexImageTarget texImageTarget,
     std::shared_ptr<TextureData> textureData)
 {
-    if (!m_isStorageFormatSpecified)
-    {
-        specifyTextureStorageFormat(textureData);
-    }
-
-    //m_dimensionTypesAndFunc->setTexImageInTarget(m_rendererId, texImageTarget, textureData);
-    GLCall(glGenerateTextureMipmap(m_rendererId));
-
-    m_data = std::move(textureData);
-    m_lastTexImageTarget = texImageTarget;
+    castImpl<DimensionsNumber>(m_impl)->setData(texImageTarget, std::move(textureData));
 }
 
 template<unsigned int DimensionsNumber>
 TextureTarget texture::Texture<DimensionsNumber>::getTarget() const noexcept
 {
-    return m_target;
+    return m_impl->m_target;
 }
 
 template<unsigned int DimensionsNumber>
 std::shared_ptr<TextureData> Texture<DimensionsNumber>::getData() const noexcept
 {
-    return m_data;
+    return castImpl<DimensionsNumber>(m_impl)->m_data;
 }
 
-template<unsigned int DimensionsNumber>
-void Texture<DimensionsNumber>::bindToTarget(TextureTarget target, GLuint textureId) noexcept
+
+// IMPLEMENTATION
+
+BaseTexture::BaseImpl::BaseImpl(TextureTarget target) : m_target{ target }
 {
-    GLCall(glBindTexture(helpers::toUType(target), textureId));
+    genTexture();
 }
 
-template<unsigned int DimensionsNumber>
-TextureBindingTarget Texture<DimensionsNumber>::getTargetAssociatedGetParameter(TextureTarget target) noexcept
+BaseTexture::BaseImpl::BaseImpl(const BaseImpl& obj) : m_target{ obj.m_target }
 {
-    switch (target)
-    {
-        case TextureTarget::TEXTURE_1D:
-            return TextureBindingTarget::TEXTURE_BINDING_1D;
-        case TextureTarget::TEXTURE_1D_ARRAY:
-            return TextureBindingTarget::TEXTURE_BINDING_1D_ARRAY;
-        case TextureTarget::TEXTURE_2D:
-            return TextureBindingTarget::TEXTURE_BINDING_2D;
-        case TextureTarget::TEXTURE_2D_ARRAY:
-            return TextureBindingTarget::TEXTURE_BINDING_2D_ARRAY;
-        case TextureTarget::TEXTURE_2D_MULTISAMPLE:
-            return TextureBindingTarget::TEXTURE_BINDING_2D_MULTISAMPLE;
-        case TextureTarget::TEXTURE_2D_MULTISAMPLE_ARRAY:
-            return TextureBindingTarget::TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY;
-        case TextureTarget::TEXTURE_3D:
-            return TextureBindingTarget::TEXTURE_BINDING_3D;
-        case TextureTarget::TEXTURE_BUFFER:
-            return TextureBindingTarget::TEXTURE_BINDING_BUFFER;
-        case TextureTarget::TEXTURE_CUBE_MAP:
-            return TextureBindingTarget::TEXTURE_BINDING_CUBE_MAP;
-        case TextureTarget::TEXTURE_CUBE_MAP_ARRAY:
-            return TextureBindingTarget::TEXTURE_BINDING_CUBE_MAP_ARRAY;
-        case TextureTarget::TEXTURE_RECTANGLE:
-            return TextureBindingTarget::TEXTURE_BINDING_RECTANGLE;
-    }
+    genTexture();
 }
 
-template<unsigned int DimensionsNumber>
-void Texture<DimensionsNumber>::genTexture()
+BaseTexture::BaseImpl::~BaseImpl()
+{
+    deleteTexture();
+}
+
+void BaseTexture::BaseImpl::genTexture()
 {
     GLCall(glCreateTextures(helpers::toUType(m_target), 1, &m_rendererId));
     if (m_rendererId == 0)
@@ -196,29 +141,11 @@ void Texture<DimensionsNumber>::genTexture()
     }
 }
 
-template<unsigned int DimensionsNumber>
-void Texture<DimensionsNumber>::deleteTexture() noexcept
+void BaseTexture::BaseImpl::deleteTexture() noexcept
 {
     GLCall(glDeleteTextures(1, &m_rendererId));
     m_rendererId = 0;
 }
-
-
-// IMPLEMENTATION
-
-BaseTexture::Impl::Impl(TextureTarget target) : m_target{ target }
-{
-}
-
-BaseTexture::Impl::Impl(const Impl& obj) : m_target{ obj.m_target }, m_rendererId{ obj.m_rendererId }
-{
-}
-
-BaseTexture::Impl::Impl(Impl&& obj) noexcept : m_target{ obj.m_target }, m_rendererId{ obj.m_rendererId }
-{
-    obj.m_rendererId = 0;
-}
-
 
 
 template<>
@@ -281,6 +208,90 @@ struct TexDimensionSpecificTypesAndFunc<3>
             textureData->m_data));
     }
 };
+
+
+template<unsigned int DimensionsNumber>
+Texture<DimensionsNumber>::Impl::Impl(TextureTarget target) : BaseImpl(target)
+{
+}
+
+template<unsigned int DimensionsNumber>
+Texture<DimensionsNumber>::Impl::Impl(const Impl& obj) : BaseImpl(obj)
+{
+    m_lastTexImageTarget = obj.m_lastTexImageTarget;
+    setData(m_lastTexImageTarget, obj.m_data);
+}
+
+template<unsigned int DimensionsNumber>
+void Texture<DimensionsNumber>::Impl::bindToTarget(TextureTarget target, GLuint textureId) noexcept
+{
+    GLCall(glBindTexture(helpers::toUType(target), textureId));
+}
+
+template<unsigned int DimensionsNumber>
+TextureBindingTarget Texture<DimensionsNumber>::Impl::getTargetAssociatedGetParameter(TextureTarget target) noexcept
+{
+    switch (target)
+    {
+        case TextureTarget::TEXTURE_1D:
+            return TextureBindingTarget::TEXTURE_BINDING_1D;
+        case TextureTarget::TEXTURE_1D_ARRAY:
+            return TextureBindingTarget::TEXTURE_BINDING_1D_ARRAY;
+        case TextureTarget::TEXTURE_2D:
+            return TextureBindingTarget::TEXTURE_BINDING_2D;
+        case TextureTarget::TEXTURE_2D_ARRAY:
+            return TextureBindingTarget::TEXTURE_BINDING_2D_ARRAY;
+        case TextureTarget::TEXTURE_2D_MULTISAMPLE:
+            return TextureBindingTarget::TEXTURE_BINDING_2D_MULTISAMPLE;
+        case TextureTarget::TEXTURE_2D_MULTISAMPLE_ARRAY:
+            return TextureBindingTarget::TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY;
+        case TextureTarget::TEXTURE_3D:
+            return TextureBindingTarget::TEXTURE_BINDING_3D;
+        case TextureTarget::TEXTURE_BUFFER:
+            return TextureBindingTarget::TEXTURE_BINDING_BUFFER;
+        case TextureTarget::TEXTURE_CUBE_MAP:
+            return TextureBindingTarget::TEXTURE_BINDING_CUBE_MAP;
+        case TextureTarget::TEXTURE_CUBE_MAP_ARRAY:
+            return TextureBindingTarget::TEXTURE_BINDING_CUBE_MAP_ARRAY;
+        case TextureTarget::TEXTURE_RECTANGLE:
+            return TextureBindingTarget::TEXTURE_BINDING_RECTANGLE;
+    }
+}
+
+template<unsigned int DimensionsNumber>
+void Texture<DimensionsNumber>::Impl::
+    specifyTextureStorageFormat(const std::shared_ptr<TextureData>& textureData) const noexcept
+{
+    ASSERT(!m_isStorageFormatSpecified);
+
+    setTexStorageFormat(m_rendererId, textureData);
+    m_isStorageFormatSpecified = true;
+}
+
+template<unsigned int DimensionsNumber>
+void Texture<DimensionsNumber>::Impl::setData(TexImageTarget texImageTarget,
+    std::shared_ptr<TextureData> textureData)
+{
+    if (!m_isStorageFormatSpecified)
+    {
+        specifyTextureStorageFormat(textureData);
+    }
+
+    setTexImageInTarget(m_rendererId, texImageTarget, textureData);
+    GLCall(glGenerateTextureMipmap(m_rendererId));
+
+    m_data = std::move(textureData);
+    m_lastTexImageTarget = texImageTarget;
+}
+
+namespace
+{
+    template<unsigned int DimensionsNumber>
+    Texture<DimensionsNumber>::Impl* castImpl(const std::unique_ptr<BaseTexture::BaseImpl>& baseImpl)
+    {
+        return static_cast<Texture<DimensionsNumber>::Impl*>(baseImpl.get());
+    }
+}
 
 template class Texture<1>;
 template class Texture<2>;
