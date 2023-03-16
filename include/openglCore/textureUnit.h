@@ -29,6 +29,7 @@ namespace texture
         public:
             TextureUnit() = delete;
             NOT_COPYABLE_MOVABLE(TextureUnit)
+            ~TextureUnit();
 
             void setTexture(const std::shared_ptr<BaseTexture>& texture);
             void setTextures(const std::vector<std::shared_ptr<BaseTexture>>& textures);
@@ -40,8 +41,8 @@ namespace texture
             TextureUnit(GLuint index);
 
         private:
-            const GLuint m_index = 0;
-            std::map<TextureTarget, std::shared_ptr<BaseTexture>> m_unitTextures;
+            struct Impl;
+            std::unique_ptr<Impl> m_impl;
 
         friend std::shared_ptr<TextureUnit> TextureUnitsManager::get(GLuint);
         friend void TextureUnitsManager::activateTextureUnit(const std::shared_ptr<TextureUnit>&);
