@@ -54,7 +54,7 @@ namespace texture
             struct Impl;
 
         public:
-            using TexImageTarget = Impl::TexImageTarget;
+            using TexImageTarget = TexDimensionSpecificTypes<DimensionsNumber>::TexImageTarget;
 
 		public:
             Texture(TextureTarget target);
@@ -129,6 +129,8 @@ namespace texture
 
         private:
             Texture(const Texture& obj);
+
+            Impl* impl() const noexcept;
 
             /*template<typename Type>
             friend class helpers::OpenGLBindableObject;*/

@@ -28,16 +28,40 @@ namespace texture
     };
 
     template<unsigned int DimensionsNumber>
-    struct TexDimensionSpecificTypesAndFunc
+    struct TexDimensionSpecificFunc
     {
     };
 
-    template<unsigned int DimensionsNumber>
-    struct Texture<DimensionsNumber>::Impl : public BaseTexture::BaseImpl,
-        public TexDimensionSpecificTypesAndFunc<DimensionsNumber>
+    template<>
+    struct TexDimensionSpecificFunc<1>
     {
-        using TexImageTarget = TexDimensionSpecificTypesAndFunc<DimensionsNumber>::TexImageTarget;
-        // TexDimensionSpecificTypesAndFunc<DimensionsNumber>* m_dimensionTypesAndFunc;
+        using TexImageTarget = TexDimensionSpecificTypes<1>::TexImageTarget;
+        void setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData) const noexcept;
+        void setTexImageInTarget(GLuint textureId, TexImageTarget target, std::shared_ptr<TextureData> textureData);
+    };
+
+    template<>
+    struct TexDimensionSpecificFunc<2>
+    {
+        using TexImageTarget = TexDimensionSpecificTypes<2>::TexImageTarget;
+        void setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData) const noexcept;
+        void setTexImageInTarget(GLuint textureId, TexImageTarget target, std::shared_ptr<TextureData> textureData);
+    };
+
+    template<>
+    struct TexDimensionSpecificFunc<3>
+    {
+        using TexImageTarget = TexDimensionSpecificTypes<3>::TexImageTarget;
+        void setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData) const noexcept;
+        void setTexImageInTarget(GLuint textureId, TexImageTarget target, std::shared_ptr<TextureData> textureData);
+    };
+
+    template<unsigned int DimensionsNumber>
+    struct Texture<DimensionsNumber>::Impl : public BaseTexture::BaseImpl
+    {
+        using TexImageTarget = TexDimensionSpecificFunc<DimensionsNumber>::TexImageTarget;
+        
+
         Impl(TextureTarget target);
         Impl(const Impl& obj);
 
@@ -50,6 +74,7 @@ namespace texture
         void specifyTextureStorageFormat(const std::shared_ptr<TextureData>& textureData) const noexcept;
         void setData(TexImageTarget texImageTarget, std::shared_ptr<TextureData> textureData);
 
+        TexDimensionSpecificFunc<DimensionsNumber> m_specific;
         const GLuint m_dimensionsNumber = DimensionsNumber;
         TexImageTarget m_texImageTarget;
         TexImageTarget m_lastTexImageTarget;

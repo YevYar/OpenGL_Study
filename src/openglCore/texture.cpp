@@ -11,12 +11,6 @@
 
 using namespace texture;
 
-namespace
-{
-    template<unsigned int DimensionsNumber>
-    Texture<DimensionsNumber>::Impl* castImpl(const std::unique_ptr<BaseTexture::BaseImpl>& baseImpl);
-}
-
 BaseTexture::BaseTexture(std::unique_ptr<BaseImpl> impl) : m_impl{ std::move(impl) }
 {
 }
@@ -36,15 +30,15 @@ BaseTexture* BaseTexture::clone() const
 template<unsigned int DimensionsNumber>
 Texture<DimensionsNumber>::Texture(TextureTarget target) : BaseTexture{ std::make_unique<Texture::Impl>(target) }
 {
-    if (castImpl<DimensionsNumber>(m_impl)->m_dimensionsNumber == 1 && target != TextureTarget::TEXTURE_1D)
+    if (impl()->m_dimensionsNumber == 1 && target != TextureTarget::TEXTURE_1D)
     {
         throw std::invalid_argument("For DimensionsNumber = 1 only TextureTarget::TEXTURE_1D is supported.");
     }
-    if (castImpl<DimensionsNumber>(m_impl)->m_dimensionsNumber == 2 && target != TextureTarget::TEXTURE_2D)
+    if (impl()->m_dimensionsNumber == 2 && target != TextureTarget::TEXTURE_2D)
     {
         throw std::invalid_argument("For DimensionsNumber = 2 only TextureTarget::TEXTURE_2D is supported.");
     }
-    if (castImpl<DimensionsNumber>(m_impl)->m_dimensionsNumber == 3 && target != TextureTarget::TEXTURE_3D)
+    if (impl()->m_dimensionsNumber == 3 && target != TextureTarget::TEXTURE_3D)
     {
         throw std::invalid_argument("For DimensionsNumber = 3 only TextureTarget::TEXTURE_3D is supported.");
     }
@@ -58,7 +52,7 @@ Texture<DimensionsNumber>::Texture(TextureTarget target, TexImageTarget texImage
 }
 
 template<unsigned int DimensionsNumber>
-Texture<DimensionsNumber>::Texture(const Texture& obj) : BaseTexture{ std::make_unique<Texture::Impl>(*obj.m_impl) }
+Texture<DimensionsNumber>::Texture(const Texture& obj) : BaseTexture{ std::make_unique<Texture::Impl>(*obj.impl()) }
 {
 }
 
@@ -92,14 +86,14 @@ void Texture<DimensionsNumber>::unbind() const noexcept
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::specifyTextureStorageFormat(const std::shared_ptr<TextureData>& textureData) const noexcept
 {
-    castImpl<DimensionsNumber>(m_impl)->specifyTextureStorageFormat(textureData);
+    impl()->specifyTextureStorageFormat(textureData);
 }
 
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::setData(TexImageTarget texImageTarget,
     std::shared_ptr<TextureData> textureData)
 {
-    castImpl<DimensionsNumber>(m_impl)->setData(texImageTarget, std::move(textureData));
+    impl()->setData(texImageTarget, std::move(textureData));
 }
 
 template<unsigned int DimensionsNumber>
@@ -111,7 +105,13 @@ TextureTarget texture::Texture<DimensionsNumber>::getTarget() const noexcept
 template<unsigned int DimensionsNumber>
 std::shared_ptr<TextureData> Texture<DimensionsNumber>::getData() const noexcept
 {
-    return castImpl<DimensionsNumber>(m_impl)->m_data;
+    return impl()->m_data;
+}
+
+template<unsigned int DimensionsNumber>
+Texture<DimensionsNumber>::Impl* Texture<DimensionsNumber>::impl() const noexcept
+{
+    return static_cast<Texture<DimensionsNumber>::Impl*>(m_impl.get());
 }
 
 
@@ -147,68 +147,53 @@ void BaseTexture::BaseImpl::deleteTexture() noexcept
     m_rendererId = 0;
 }
 
-
-template<>
-struct TexDimensionSpecificTypesAndFunc<1>
+void TexDimensionSpecificFunc<1>::setTexStorageFormat(GLuint textureId,
+    const std::shared_ptr<TextureData>&textureData) const noexcept
 {
-    using TexImageTarget = TexImage1DTarget;
+    GLCall(glTextureStorage1D(textureId, textureData->m_level, helpers::toUType(textureData->m_internalFormat),
+        textureData->m_width));
+}
 
-    void setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData) const noexcept
-    {
-        GLCall(glTextureStorage1D(textureId, textureData->m_level, helpers::toUType(textureData->m_internalFormat),
-            textureData->m_width));
-    }
-
-    void setTexImageInTarget(GLuint textureId, TexImageTarget target, std::shared_ptr<TextureData> textureData)
-    {
-        using namespace helpers;
-
-        GLCall(glTextureSubImage1D(textureId, 0, 0, textureData->m_width, toUType(textureData->m_format),
-            toUType(textureData->m_type), textureData->m_data));
-    }
-};
-
-template<>
-struct TexDimensionSpecificTypesAndFunc<2>
+void TexDimensionSpecificFunc<1>::setTexImageInTarget(GLuint textureId, TexImageTarget target,
+    std::shared_ptr<TextureData> textureData)
 {
-    using TexImageTarget = TexImage2DTarget;
+    using namespace helpers;
+    
+    GLCall(glTextureSubImage1D(textureId, 0, 0, textureData->m_width, toUType(textureData->m_format),
+        toUType(textureData->m_type), textureData->m_data));
+}
 
-    void setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData) const noexcept
-    {
-        GLCall(glTextureStorage2D(textureId, textureData->m_level, helpers::toUType(textureData->m_internalFormat),
-            textureData->m_width, textureData->m_height));
-    }
-
-    void setTexImageInTarget(GLuint textureId, TexImageTarget target, std::shared_ptr<TextureData> textureData)
-    {
-        using namespace helpers;
-
-        GLCall(glTextureSubImage2D(textureId, 0, 0, 0, textureData->m_width, textureData->m_height,
-            toUType(textureData->m_format), toUType(textureData->m_type), textureData->m_data));
-    }
-};
-
-template<>
-struct TexDimensionSpecificTypesAndFunc<3>
+void TexDimensionSpecificFunc<2>::setTexStorageFormat(GLuint textureId,
+    const std::shared_ptr<TextureData>& textureData) const noexcept
 {
-    using TexImageTarget = TexImage3DTarget;
+    GLCall(glTextureStorage2D(textureId, textureData->m_level, helpers::toUType(textureData->m_internalFormat),
+        textureData->m_width, textureData->m_height));
+}
 
-    void setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData) const noexcept
-    {
-        GLCall(glTextureStorage3D(textureId, textureData->m_level, helpers::toUType(textureData->m_internalFormat),
-            textureData->m_width, textureData->m_height, textureData->m_depth));
-    }
+void TexDimensionSpecificFunc<2>::setTexImageInTarget(GLuint textureId, TexImageTarget target,
+    std::shared_ptr<TextureData> textureData)
+{
+    using namespace helpers;
+    
+    GLCall(glTextureSubImage2D(textureId, 0, 0, 0, textureData->m_width, textureData->m_height,
+        toUType(textureData->m_format), toUType(textureData->m_type), textureData->m_data));
+}
 
-    void setTexImageInTarget(GLuint textureId, TexImageTarget target, std::shared_ptr<TextureData> textureData)
-    {
-        using namespace helpers;
+void TexDimensionSpecificFunc<3>::setTexStorageFormat(GLuint textureId,
+    const std::shared_ptr<TextureData>& textureData) const noexcept
+{
+    GLCall(glTextureStorage3D(textureId, textureData->m_level, helpers::toUType(textureData->m_internalFormat),
+        textureData->m_width, textureData->m_height, textureData->m_depth));
+}
 
-        GLCall(glTextureSubImage3D(textureId, 0, 0, 0, 0, textureData->m_width, textureData->m_height,
-            textureData->m_depth, toUType(textureData->m_format), toUType(textureData->m_type),
-            textureData->m_data));
-    }
-};
-
+void TexDimensionSpecificFunc<3>::setTexImageInTarget(GLuint textureId, TexImageTarget target,
+    std::shared_ptr<TextureData> textureData)
+{
+    using namespace helpers;
+    
+    GLCall(glTextureSubImage3D(textureId, 0, 0, 0, 0, textureData->m_width, textureData->m_height,
+        textureData->m_depth, toUType(textureData->m_format), toUType(textureData->m_type),textureData->m_data));
+}
 
 template<unsigned int DimensionsNumber>
 Texture<DimensionsNumber>::Impl::Impl(TextureTarget target) : BaseImpl(target)
@@ -263,8 +248,7 @@ void Texture<DimensionsNumber>::Impl::
     specifyTextureStorageFormat(const std::shared_ptr<TextureData>& textureData) const noexcept
 {
     ASSERT(!m_isStorageFormatSpecified);
-
-    setTexStorageFormat(m_rendererId, textureData);
+    m_specific.setTexStorageFormat(m_rendererId, textureData);
     m_isStorageFormatSpecified = true;
 }
 
@@ -277,20 +261,11 @@ void Texture<DimensionsNumber>::Impl::setData(TexImageTarget texImageTarget,
         specifyTextureStorageFormat(textureData);
     }
 
-    setTexImageInTarget(m_rendererId, texImageTarget, textureData);
+    m_specific.setTexImageInTarget(m_rendererId, texImageTarget, textureData);
     GLCall(glGenerateTextureMipmap(m_rendererId));
 
     m_data = std::move(textureData);
     m_lastTexImageTarget = texImageTarget;
-}
-
-namespace
-{
-    template<unsigned int DimensionsNumber>
-    Texture<DimensionsNumber>::Impl* castImpl(const std::unique_ptr<BaseTexture::BaseImpl>& baseImpl)
-    {
-        return static_cast<Texture<DimensionsNumber>::Impl*>(baseImpl.get());
-    }
 }
 
 template class Texture<1>;

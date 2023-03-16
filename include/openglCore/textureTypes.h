@@ -212,6 +212,29 @@ namespace texture
         TEXTURE_3D = 0x806F, PROXY_TEXTURE_3D = 0x8070, TEXTURE_2D_ARRAY = 0x8C1A, PROXY_TEXTURE_2D_ARRAY = 0x8C1B
     };
 
+    template<unsigned int DimensionsNumber>
+    struct TexDimensionSpecificTypes
+    {
+    };
+
+    template<>
+    struct TexDimensionSpecificTypes<1>
+    {
+        using TexImageTarget = TexImage1DTarget;
+    };
+
+    template<>
+    struct TexDimensionSpecificTypes<2>
+    {
+        using TexImageTarget = TexImage2DTarget;
+    };
+
+    template<>
+    struct TexDimensionSpecificTypes<3>
+    {
+        using TexImageTarget = TexImage3DTarget;
+    };
+
     /**
      * \brief TexParameterName represents 'pname' parameter of [glTexParameter()](https://docs.gl/gl4/glTexParameter).
      */
