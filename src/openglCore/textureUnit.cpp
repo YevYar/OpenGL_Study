@@ -7,6 +7,7 @@
 #include "helpers/helpers.h"
 #include "openglLimits.h"
 #include "texture.h"
+#include "textureImpl.h"
 
 using namespace texture;
 

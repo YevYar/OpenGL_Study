@@ -4,6 +4,7 @@
 #include "exceptions.h"
 #include "helpers/debugHelpers.h"
 #include "helpers/helpers.h"
+#include "vertexBufferLayoutImpl.h"
 
 using namespace vertex;
 

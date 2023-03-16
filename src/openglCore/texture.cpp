@@ -11,6 +11,10 @@
 
 using namespace texture;
 
+BaseTexture::BaseTexture() : m_impl{ std::make_unique<BaseImpl>() }
+{
+}
+
 BaseTexture::BaseTexture(std::unique_ptr<BaseImpl> impl) : m_impl{ std::move(impl) }
 {
 }

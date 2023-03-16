@@ -16,7 +16,7 @@ namespace texture
     class BaseTexture : public ICloneable
     {
         public:
-            BaseTexture() = default;
+            BaseTexture();
 
             DEFAULT_MOVABLE(BaseTexture)
 
@@ -28,7 +28,7 @@ namespace texture
 
         protected:
             struct BaseImpl;
-            std::unique_ptr<BaseImpl> m_impl = std::make_unique<BaseImpl>();
+            std::unique_ptr<BaseImpl> m_impl;
 
         protected:
             BaseTexture(std::unique_ptr<BaseImpl> impl);
@@ -46,9 +46,6 @@ namespace texture
 	{
         static_assert(DimensionsNumber >= 1 && DimensionsNumber <= 3,
             "The number of dimensions must be in range [1, 3].");
-
-        private:
-            struct Impl;
 
         public:
             using TexImageTarget = TexDimensionSpecificTypes<DimensionsNumber>::TexImageTarget;
@@ -97,6 +94,7 @@ namespace texture
         private:
             Texture(const Texture& obj);
 
+            struct Impl;
             Impl* impl() const noexcept;
 
 	};
