@@ -1,6 +1,10 @@
 #ifndef TEXTURE_IMPL_H
 #define TEXTURE_IMPL_H
 
+#include <glad/glad.h>
+
+#include "helpers/helpers.h"
+#include "openglHelpers.h"
 #include "texture.h"
 
 namespace texture
@@ -18,6 +22,9 @@ namespace texture
 
         void genTexture();
         void deleteTexture() noexcept;
+
+
+        // DATA
 
         /**
          * \brief Id of referenced OpenGL texture.
@@ -71,8 +78,12 @@ namespace texture
         static void bindToTarget(TextureTarget target, GLuint textureId) noexcept;
         static TextureBindingTarget getTargetAssociatedGetParameter(TextureTarget target) noexcept;
 
+        void bind() const noexcept;
         void specifyTextureStorageFormat(const std::shared_ptr<TextureData>& textureData) const noexcept;
         void setData(TexImageTarget texImageTarget, std::shared_ptr<TextureData> textureData);
+
+
+        //DATA
 
         TexDimensionSpecificFunc<DimensionsNumber> m_specific;
         const GLuint m_dimensionsNumber = DimensionsNumber;
@@ -80,6 +91,9 @@ namespace texture
         TexImageTarget m_lastTexImageTarget;
         std::shared_ptr<TextureData> m_data;
         mutable bool m_isStorageFormatSpecified = false;
+
+        template<openglCore::OpenGLBindableObject Type>
+        friend void openglCore::bindForAMomentAndExecute(const Type&, const std::function<void()>&);
 
     };
 }

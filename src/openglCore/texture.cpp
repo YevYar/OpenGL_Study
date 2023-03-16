@@ -74,7 +74,7 @@ Texture<DimensionsNumber>* Texture<DimensionsNumber>::clone() const
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::bind() const noexcept
 {
-    Texture::Impl::bindToTarget(m_impl->m_target, m_impl->m_rendererId);
+    impl()->bind();
 }
 
 template<unsigned int DimensionsNumber>
@@ -106,6 +106,51 @@ template<unsigned int DimensionsNumber>
 std::shared_ptr<TextureData> Texture<DimensionsNumber>::getData() const noexcept
 {
     return impl()->m_data;
+}
+
+template<unsigned int DimensionsNumber>
+template<typename Type>
+requires std::is_same_v<GLfloat, Type> || std::is_same_v<GLint, Type>
+void Texture<DimensionsNumber>::setParameter(TexParameterName parameter, Type value)
+{
+    if constexpr (std::is_same_v<GLfloat, Type>)
+    {
+        GLCall(glTextureParameterf(impl()->m_rendererId, helpers::toUType(parameter), value));
+    }
+    else
+    {
+        GLCall(glTextureParameteri(impl()->m_rendererId, helpers::toUType(parameter), value));
+    }
+}
+
+template<unsigned int DimensionsNumber>
+template<typename Type>
+    requires std::is_same_v<GLfloat, Type> || std::is_same_v<GLint, Type>
+void Texture<DimensionsNumber>::setParameterV(TexParameterName parameter, const Type* values)
+{
+    if constexpr (std::is_same_v<GLfloat, Type>)
+    {
+        GLCall(glTextureParameterfv(impl()->m_rendererId, helpers::toUType(parameter), values));
+    }
+    else
+    {
+        GLCall(glTextureParameteriv(impl()->m_rendererId, helpers::toUType(parameter), values));
+    }
+}
+
+template<unsigned int DimensionsNumber>
+template<typename Type>
+    requires std::is_same_v<GLint, Type> || std::is_same_v<GLuint, Type>
+void Texture<DimensionsNumber>::setParameterIV(TexParameterName parameter, const Type* values)
+{
+    if constexpr (std::is_same_v<GLint, Type>)
+    {
+        GLCall(glTextureParameterIiv(impl()->m_rendererId, helpers::toUType(parameter), values));
+    }
+    else
+    {
+        GLCall(glTextureParameterIuiv(impl()->m_rendererId, helpers::toUType(parameter), values));
+    }
 }
 
 template<unsigned int DimensionsNumber>
@@ -244,6 +289,12 @@ TextureBindingTarget Texture<DimensionsNumber>::Impl::getTargetAssociatedGetPara
 }
 
 template<unsigned int DimensionsNumber>
+void Texture<DimensionsNumber>::Impl::bind() const noexcept
+{
+    Impl::bindToTarget(m_target, m_rendererId);
+}
+
+template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::Impl::
     specifyTextureStorageFormat(const std::shared_ptr<TextureData>& textureData) const noexcept
 {
@@ -268,6 +319,15 @@ void Texture<DimensionsNumber>::Impl::setData(TexImageTarget texImageTarget,
     m_lastTexImageTarget = texImageTarget;
 }
 
-template class Texture<1>;
-template class Texture<2>;
-template class Texture<3>;
+#define INSTANTIATE_TEXTURE(N) \
+    template class Texture<N>;\
+    template void Texture<N>::setParameter(TexParameterName, GLfloat);\
+    template void Texture<N>::setParameter(TexParameterName, GLint);\
+    template void Texture<N>::setParameterV(TexParameterName, const GLfloat*);\
+    template void Texture<N>::setParameterV(TexParameterName, const GLint*);\
+    template void Texture<N>::setParameterIV(TexParameterName, const GLint*);\
+    template void Texture<N>::setParameterIV(TexParameterName, const GLuint*);\
+
+INSTANTIATE_TEXTURE(1)
+INSTANTIATE_TEXTURE(2)
+INSTANTIATE_TEXTURE(3)

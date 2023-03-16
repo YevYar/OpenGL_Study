@@ -1,13 +1,10 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include <functional>
 #include <memory>
 
 #include "generalTypes.h"
-#include "helpers/helpers.h"
 #include "helpers/macros.h"
-// #include "openglHelpers.h"
 #include "textureTypes.h"
 #include "textureUnit.h"
 
@@ -84,45 +81,15 @@ namespace texture
 
 			template<typename Type>
             requires std::is_same_v<GLfloat, Type> || std::is_same_v<GLint, Type>
-            void setParameter(TexParameterName parameter, Type value)
-            {
-                if constexpr (std::is_same_v<GLfloat, Type>)
-                {
-                    // GLCall(glTextureParameterf(m_rendererId, helpers::toUType(parameter), value));
-                }
-                else
-                {
-                    // GLCall(glTextureParameteri(m_rendererId, helpers::toUType(parameter), value));
-                }
-            }
+            void setParameter(TexParameterName parameter, Type value);
 
             template<typename Type>
             requires std::is_same_v<GLfloat, Type> || std::is_same_v<GLint, Type>
-            void setParameterV(TexParameterName parameter, const Type* values)
-            {
-                if constexpr (std::is_same_v<GLfloat, Type>)
-                {
-                    // GLCall(glTextureParameterfv(m_rendererId, helpers::toUType(parameter), values));
-                }
-                else
-                {
-                    // GLCall(glTextureParameteriv(m_rendererId, helpers::toUType(parameter), values));
-                }
-            }
+            void setParameterV(TexParameterName parameter, const Type* values);
 
             template<typename Type>
             requires std::is_same_v<GLint, Type> || std::is_same_v<GLuint, Type>
-            void setParameterIV(TexParameterName parameter, const Type* values)
-            {
-                if constexpr (std::is_same_v<GLint, Type>)
-                {
-                    // GLCall(glTextureParameterIiv(m_rendererId, helpers::toUType(parameter), values));
-                }
-                else
-                {
-                    // GLCall(glTextureParameterIuiv(m_rendererId, helpers::toUType(parameter), values));
-                }
-            }
+            void setParameterIV(TexParameterName parameter, const Type* values);
 
             TextureTarget getTarget() const noexcept;
 			std::shared_ptr<TextureData> getData() const noexcept;
@@ -131,9 +98,6 @@ namespace texture
             Texture(const Texture& obj);
 
             Impl* impl() const noexcept;
-
-            /*template<typename Type>
-            friend class helpers::OpenGLBindableObject;*/
 
 	};
 
