@@ -183,19 +183,13 @@ namespace
     }
 }
 
-template BaseUniform& ShaderProgram::findUniform<GLfloat, 1>(std::string);
-template BaseUniform& ShaderProgram::findUniform<GLfloat, 2>(std::string);
-template BaseUniform& ShaderProgram::findUniform<GLfloat, 3>(std::string);
-template BaseUniform& ShaderProgram::findUniform<GLfloat, 4>(std::string);
-template BaseUniform& ShaderProgram::findUniform<GLdouble, 1>(std::string);
-template BaseUniform& ShaderProgram::findUniform<GLdouble, 2>(std::string);
-template BaseUniform& ShaderProgram::findUniform<GLdouble, 3>(std::string);
-template BaseUniform& ShaderProgram::findUniform<GLdouble, 4>(std::string);
-template BaseUniform& ShaderProgram::findUniform<GLint, 1>(std::string);
-template BaseUniform& ShaderProgram::findUniform<GLint, 2>(std::string);
-template BaseUniform& ShaderProgram::findUniform<GLint, 3>(std::string);
-template BaseUniform& ShaderProgram::findUniform<GLint, 4>(std::string);
-template BaseUniform& ShaderProgram::findUniform<GLuint, 1>(std::string);
-template BaseUniform& ShaderProgram::findUniform<GLuint, 2>(std::string);
-template BaseUniform& ShaderProgram::findUniform<GLuint, 3>(std::string);
-template BaseUniform& ShaderProgram::findUniform<GLuint, 4>(std::string);
+#define INSTANTIATE_FIND_UNIFORM(Type) \
+    template BaseUniform& ShaderProgram::findUniform<Type, 1>(std::string);\
+    template BaseUniform& ShaderProgram::findUniform<Type, 2>(std::string);\
+    template BaseUniform& ShaderProgram::findUniform<Type, 3>(std::string);\
+    template BaseUniform& ShaderProgram::findUniform<Type, 4>(std::string);\
+
+INSTANTIATE_FIND_UNIFORM(GLfloat)
+INSTANTIATE_FIND_UNIFORM(GLdouble)
+INSTANTIATE_FIND_UNIFORM(GLint)
+INSTANTIATE_FIND_UNIFORM(GLuint)

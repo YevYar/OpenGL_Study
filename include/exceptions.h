@@ -23,7 +23,7 @@ namespace exceptions
              * 
              * \param message - error message.
              */
-            BaseException(const std::string& message) : std::exception(message.c_str())
+            explicit inline BaseException(const std::string& message) : std::exception(message.c_str())
             {
             }
     };

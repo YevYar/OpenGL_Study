@@ -7,27 +7,29 @@ namespace vertex
 {
 	struct VertexArray::Impl
 	{
-		Impl();
+		public:
+			Impl();
 
-		NOT_COPYABLE_MOVABLE(Impl)
+			NOT_COPYABLE_MOVABLE(Impl)
 		
-		/**
-		 * \brief Deletes vertex array object in OpenGL state machine.
-		 *
-		 * Wraps [glDeleteVertexArrays()](https://docs.gl/gl4/glDeleteVertexArrays).
-		 */
-		~Impl();
+			/**
+			 * \brief Deletes vertex array object in OpenGL state machine.
+			 *
+			 * Wraps [glDeleteVertexArrays()](https://docs.gl/gl4/glDeleteVertexArrays).
+			 */
+			~Impl();
 
-		static void bindSpecificVao(GLuint vaoId) noexcept;
+			static void bindSpecificVao(GLuint vaoId) noexcept;
 
-		void genVertexArray();
-		void deleteVertexArray();
+			void genVertexArray();
+			void deleteVertexArray();
 
-		/**
-		 * \brief Id of referenced OpenGL vertex array object.
-		 */
-		GLuint m_rendererId = 0;
-		std::vector<std::shared_ptr<Buffer>> m_buffers;
+		public:
+			/**
+			 * \brief Id of referenced OpenGL vertex array object.
+			 */
+			GLuint m_rendererId = 0;
+			std::vector<std::shared_ptr<Buffer>> m_buffers;
 
 	};
 }

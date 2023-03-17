@@ -7,19 +7,21 @@ namespace vertex
 {
 	struct VertexBufferLayout::Impl
 	{
-		Impl() = default;
-		Impl(const Impl& obj);
+		public:
+			Impl() = default;
+			Impl(const Impl& obj);
 
-		DEFAULT_MOVABLE(Impl)
+			DEFAULT_MOVABLE(Impl)
 
-		Impl& operator=(const Impl&) = delete;
+			Impl& operator=(const Impl&) = delete;
 		
-		std::vector<VertexAttribute> m_vertexAttributes;
+		public:
+			std::vector<VertexAttribute> m_vertexAttributes;
 
-		/**
-		 * \brief See getStride(). It is automatically calculated value, when new VertexAttribute is added via addVertexAttribute().
-		 */
-		GLsizei m_stride = 0;
+			/**
+			 * \brief See getStride(). It is automatically calculated value, when new VertexAttribute is added via addVertexAttribute().
+			 */
+			GLsizei m_stride = 0;
 
 	};
 }

@@ -26,12 +26,14 @@ namespace
 
 struct TextureUnit::Impl
 {
-    explicit Impl(GLuint index) : m_index{ index }
-    {
-    }
+	public:
+		explicit Impl(GLuint index) : m_index{ index }
+		{
+		}
 
-    const GLuint m_index = 0;
-    std::map<TextureTarget, std::shared_ptr<BaseTexture>> m_unitTextures;
+	public:
+		const GLuint m_index = 0;
+		std::map<TextureTarget, std::shared_ptr<BaseTexture>> m_unitTextures;
 
 };
 

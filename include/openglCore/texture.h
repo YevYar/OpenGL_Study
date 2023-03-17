@@ -31,7 +31,7 @@ namespace texture
             std::unique_ptr<BaseImpl> m_impl;
 
         protected:
-            BaseTexture(std::unique_ptr<BaseImpl> impl);
+            explicit BaseTexture(std::unique_ptr<BaseImpl> impl);
             BaseTexture(const BaseTexture& obj);
 
         friend class TextureUnit;
@@ -51,7 +51,7 @@ namespace texture
             using TexImageTarget = TexDimensionSpecificTypes<DimensionsNumber>::TexImageTarget;
 
 		public:
-            Texture(TextureTarget target);
+            explicit Texture(TextureTarget target);
             Texture(TextureTarget target, TexImageTarget texImageTarget, std::shared_ptr<TextureData> textureData);
             
             DEFAULT_MOVABLE(Texture)

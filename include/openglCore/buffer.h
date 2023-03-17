@@ -10,9 +10,6 @@
 
 namespace vertex
 {
-	enum class BufferTarget : GLenum;
-	enum class BufferBindingTarget : GLenum;
-	enum class BufferDataUsage : GLenum;
     class VertexArray;
 
 	/**

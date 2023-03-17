@@ -38,7 +38,7 @@ namespace texture
             const std::map<TextureTarget, std::shared_ptr<BaseTexture>>& getAllTextures() const noexcept;
 
         private:
-            TextureUnit(GLuint index);
+            explicit TextureUnit(GLuint index);
 
         private:
             struct Impl;
