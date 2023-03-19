@@ -29,11 +29,11 @@ namespace renderer
 			void setColorCoefficient(const float* k);
 
 		private:
-			MulticoloredRectangle(std::shared_ptr<vertex::VertexArray> vao,
-				std::shared_ptr<shader::ShaderProgram> shaderProgram);
+			MulticoloredRectangle(std::shared_ptr<openglCore::vertex::VertexArray> vao,
+				std::shared_ptr<openglCore::shader::ShaderProgram> shaderProgram);
 
 		private:
-			shader::Uniform<float, 1>& m_colorCoefficient;
+            openglCore::shader::Uniform<float, 1>& m_colorCoefficient;
 			int m_counter = 0;
 
 		friend std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle();

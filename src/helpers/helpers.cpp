@@ -36,7 +36,7 @@ std::string helpers::readStringFromFile(const std::string& pathToFile)
     return stream.str();
 }
 
-std::unique_ptr<texture::TextureData> helpers::readTextureFromFile(const std::string& pathToFile)
+std::unique_ptr<openglCore::texture::TextureData> helpers::readTextureFromFile(const std::string& pathToFile)
 {
     if (!std::filesystem::exists(pathToFile))
     {
@@ -54,10 +54,11 @@ std::unique_ptr<texture::TextureData> helpers::readTextureFromFile(const std::st
         throw exceptions::FileReadingException(excMes);
     }
     // TODO: image format auto detection
-    return std::make_unique<texture::TextureData>(data, width, height, nChannels, texture::TexturePixelFormat::RGB);
+    return std::make_unique<openglCore::texture::TextureData>(data, width, height, nChannels,
+        openglCore::texture::TexturePixelFormat::RGB);
 }
 
-void helpers::freeTextureData(texture::TextureData& textureData)
+void helpers::freeTextureData(openglCore::texture::TextureData& textureData)
 {
     stbi_image_free(textureData.m_data);
 }

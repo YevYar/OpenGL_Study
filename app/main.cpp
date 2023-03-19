@@ -30,7 +30,7 @@ int main()
     
     // glfwSwapInterval(4);
 
-    initOpenglLimits();
+    openglCore::initOpenglLimits();
 
     std::unique_ptr<renderer::MulticoloredRectangle> mColoredRectangle = nullptr;
     try

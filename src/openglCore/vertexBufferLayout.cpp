@@ -7,7 +7,7 @@
 
 #include "openglLimits.h"
 
-using namespace vertex;
+using namespace openglCore::vertex;
 
 VertexBufferLayout::VertexBufferLayout() : m_impl{ std::make_unique<Impl>() }
 {
@@ -52,7 +52,7 @@ GLsizei VertexBufferLayout::getStride() const noexcept
 	return m_impl->m_stride;
 }
 
-unsigned int vertex::getByteSizeOfType(VertexAttrType type) noexcept
+unsigned int openglCore::vertex::getByteSizeOfType(VertexAttrType type) noexcept
 {
 	switch (type)
 	{

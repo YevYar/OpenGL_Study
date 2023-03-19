@@ -3,7 +3,7 @@
 
 #include "vertexBufferLayout.h"
 
-namespace vertex
+namespace openglCore::vertex
 {
 	struct VertexBufferLayout::Impl
 	{

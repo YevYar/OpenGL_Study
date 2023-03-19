@@ -10,7 +10,7 @@
 #include "helpers/helpers.h"
 #include "vertexBufferLayout.h"
 
-using namespace vertex;
+using namespace openglCore::vertex;
 
 VertexArray::VertexArray() : m_impl{ std::make_unique<Impl>() }
 {

@@ -6,7 +6,7 @@
 #include "helpers/helpers.h"
 #include "vertexBufferLayoutImpl.h"
 
-using namespace vertex;
+using namespace openglCore::vertex;
 
 Buffer::Buffer(BufferTarget target, ArrayData data, BufferDataUsage usage,
     std::optional<VertexBufferLayout> bufferLayout) :

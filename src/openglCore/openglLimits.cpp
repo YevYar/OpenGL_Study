@@ -3,12 +3,14 @@
 #include "helpers/helpers.h"
 #include "helpers/openglHelpers.h"
 
+using namespace openglCore;
+
 namespace
 {
     std::map<LimitName, GLint> limits;
 }
 
-void initOpenglLimits()
+void openglCore::initOpenglLimits()
 {
     using namespace helpers;
     GLint limitValue = 0;
@@ -20,12 +22,12 @@ void initOpenglLimits()
     limits.insert({ LimitName::MAX_VERTEX_ATTRIBS, limitValue });
 }
 
-const std::map<LimitName, GLint>& getOpenglLimits() noexcept
+const std::map<LimitName, GLint>& openglCore::getOpenglLimits() noexcept
 {
     return limits;
 }
 
-GLint getOpenglLimit(LimitName limitName) noexcept
+GLint openglCore::getOpenglLimit(LimitName limitName) noexcept
 {
     return limits.find(limitName)->second;
 }

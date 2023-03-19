@@ -26,8 +26,8 @@ namespace renderer
              * \param vao - vertex array object.
              * \param shaderProgram - shader program.
              */
-			SceneObject(std::shared_ptr<vertex::VertexArray> vao,
-				std::shared_ptr<shader::ShaderProgram> shaderProgram);
+			SceneObject(std::shared_ptr<openglCore::vertex::VertexArray> vao,
+				std::shared_ptr<openglCore::shader::ShaderProgram> shaderProgram);
 
             DEFAULT_COPYABLE_MOVABLE(SceneObject)
 
@@ -41,7 +41,7 @@ namespace renderer
 			 */
 			virtual void draw() = 0;
 
-            virtual void setTexturesConfiguration(texture::TexturesConfiguration texturesConfiguration);
+            virtual void setTexturesConfiguration(openglCore::texture::TexturesConfiguration texturesConfiguration);
 
         protected:
             void applyTexturesConfiguration();
@@ -50,14 +50,14 @@ namespace renderer
             /**
              * \brief Vertex array object of the object.
              */
-			std::shared_ptr<vertex::VertexArray> m_vao = nullptr;
+			std::shared_ptr<openglCore::vertex::VertexArray> m_vao = nullptr;
 
             /**
              * \brief Shader program, which is used to render this object.
              */
-			std::shared_ptr<shader::ShaderProgram> m_shaderProgram = nullptr;
+			std::shared_ptr<openglCore::shader::ShaderProgram> m_shaderProgram = nullptr;
 
-            texture::TexturesConfiguration m_texturesConfiguration;
+            openglCore::texture::TexturesConfiguration m_texturesConfiguration;
 
 	};
 }

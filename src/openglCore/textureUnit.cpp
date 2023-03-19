@@ -9,7 +9,7 @@
 #include "texture.h"
 #include "textureImpl.h"
 
-using namespace texture;
+using namespace openglCore::texture;
 
 namespace
 {
@@ -37,7 +37,7 @@ struct TextureUnit::Impl
 
 };
 
-namespace texture::TextureUnitsManager
+namespace openglCore::texture::TextureUnitsManager
 {
 	namespace
 	{
@@ -47,6 +47,8 @@ namespace texture::TextureUnitsManager
 		{
 			if (!checkIsValidTextureUnitIndex(textureUnitIndex))
 			{
+                using namespace openglCore;
+
 				const auto maxTUnitIndex = getOpenglLimit(LimitName::MAX_COMBINED_TEXTURE_IMAGE_UNITS);
 				const auto errorMessage = std::format("Texture unit index must be less than {}.", maxTUnitIndex);
 				throw std::out_of_range(errorMessage);
@@ -153,15 +155,17 @@ const std::map<TextureTarget, std::shared_ptr<BaseTexture>>& TextureUnit::getAll
 	return m_impl->m_unitTextures;
 }
 
-bool texture::checkIsValidTextureUnitIndex(GLuint textureUnitIndex) noexcept
+bool openglCore::texture::checkIsValidTextureUnitIndex(GLuint textureUnitIndex) noexcept
 {
+    using namespace openglCore;
+
 	return textureUnitIndex <= getOpenglLimit(LimitName::MAX_COMBINED_TEXTURE_IMAGE_UNITS) - 1;
 }
 
-void texture::applyTexturesConfiguration(const TexturesConfiguration& texturesConfiguration)
+void openglCore::texture::applyTexturesConfiguration(const TexturesConfiguration& texturesConfiguration)
 {
     for (const auto& tUnit : texturesConfiguration)
     {
-        texture::TextureUnitsManager::get(tUnit.first)->setTextures(tUnit.second);
+        openglCore::texture::TextureUnitsManager::get(tUnit.first)->setTextures(tUnit.second);
     }
 }

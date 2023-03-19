@@ -9,7 +9,7 @@
 #include "helpers/debugHelpers.h"
 #include "helpers/helpers.h"
 
-using namespace shader;
+using namespace openglCore::shader;
 
 namespace
 {
@@ -54,7 +54,7 @@ BaseUniform& ShaderProgram::getUniform(const std::string& name) const
     return *(m_impl->m_uniforms.at(name).get());
 }
 
-std::unique_ptr<shader::ShaderProgram> shader::makeShaderProgram(const std::string& pathToVertexShader,
+std::unique_ptr<ShaderProgram> openglCore::shader::makeShaderProgram(const std::string& pathToVertexShader,
 	const std::string& pathToFragmentShader)
 {
 	auto vShaderSource = helpers::readStringFromFile(pathToVertexShader);

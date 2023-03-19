@@ -8,7 +8,7 @@
 
 #include "helpers/macros.h"
 
-namespace texture
+namespace openglCore::texture
 {
     class BaseTexture;
     class TextureUnit;

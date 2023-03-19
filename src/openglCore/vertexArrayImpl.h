@@ -3,7 +3,7 @@
 
 #include "vertexArray.h"
 
-namespace vertex
+namespace openglCore::vertex
 {
 	struct VertexArray::Impl
 	{

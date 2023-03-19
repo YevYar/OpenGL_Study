@@ -3,7 +3,7 @@
 
 #include <glad/glad.h>
 
-namespace vertex
+namespace openglCore::vertex
 {
     /**
      * \brief BufferTarget represents 'target' parameter of [glBindBuffer()](https://docs.gl/gl4/glBindBuffer).

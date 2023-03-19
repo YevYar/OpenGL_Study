@@ -3,7 +3,7 @@
 #include "helpers/debugHelpers.h"
 #include "helpers/helpers.h"
 
-using namespace texture;
+using namespace openglCore::texture;
 
 TextureData::TextureData(unsigned char* textureData, GLsizei width, GLsizei height, unsigned int nChannels, 
     TexturePixelFormat format) : 

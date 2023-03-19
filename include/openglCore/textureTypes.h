@@ -5,7 +5,7 @@
 
 #include "helpers/macros.h"
 
-namespace texture
+namespace openglCore::texture
 {
     /**
      * \brief TexturePixelFormat is a format of the texture, which represents 'format' parameter of such functions as

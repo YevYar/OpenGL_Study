@@ -13,8 +13,8 @@
 
 using namespace renderer;
 
-MulticoloredRectangle::MulticoloredRectangle(std::shared_ptr<vertex::VertexArray> vao,
-	std::shared_ptr<shader::ShaderProgram> shaderProgram) :
+MulticoloredRectangle::MulticoloredRectangle(std::shared_ptr<openglCore::vertex::VertexArray> vao,
+	std::shared_ptr<openglCore::shader::ShaderProgram> shaderProgram) :
 	SceneObject(std::move(vao), shaderProgram),
 	m_colorCoefficient{ static_cast<decltype(m_colorCoefficient)>(shaderProgram->findUniform<float, 1>("k")) }
 {
@@ -22,6 +22,8 @@ MulticoloredRectangle::MulticoloredRectangle(std::shared_ptr<vertex::VertexArray
 
 void MulticoloredRectangle::draw()
 {
+    using namespace openglCore;
+
 	m_vao->bind();
 	m_shaderProgram->use();
 	applyTexturesConfiguration();
@@ -50,8 +52,10 @@ void MulticoloredRectangle::setColorCoefficient(const float* k)
 
 std::unique_ptr<MulticoloredRectangle> renderer::makeMulticoloredRectangle()
 {
-	using namespace shader;
-	using namespace vertex;
+	using namespace openglCore::shader;
+    using namespace openglCore::texture;
+    using namespace openglCore::vertex;
+
 
 	static const float points[] = {
 		-0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
@@ -90,13 +94,13 @@ std::unique_ptr<MulticoloredRectangle> renderer::makeMulticoloredRectangle()
 		"resources/shaders/fs/fragmentShader.frag");
 
 	// Load textures only once
-	static auto textureData = std::shared_ptr<texture::TextureData>(
+	static auto textureData = std::shared_ptr<TextureData>(
 		helpers::readTextureFromFile("resources/textures/wooden_container.jpg"));
-	static auto texture2D = std::make_shared<texture::Texture<2>>(texture::TextureTarget::TEXTURE_2D,
-		texture::TexImage2DTarget::TEXTURE_2D, textureData);
-	static texture::TexturesConfiguration texturesConfig{{
+	static auto texture2D = std::make_shared<Texture<2>>(TextureTarget::TEXTURE_2D,
+		TexImage2DTarget::TEXTURE_2D, textureData);
+	static TexturesConfiguration texturesConfig{{
 		0,
-		std::vector<std::shared_ptr<texture::BaseTexture>>{ texture2D }
+		std::vector<std::shared_ptr<BaseTexture>>{ texture2D }
 		}};
 
 

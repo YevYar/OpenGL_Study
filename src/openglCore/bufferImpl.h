@@ -4,7 +4,7 @@
 #include "buffer.h"
 #include "openglHelpersImpl.h"
 
-namespace vertex
+namespace openglCore::vertex
 {
     struct Buffer::Impl
     {

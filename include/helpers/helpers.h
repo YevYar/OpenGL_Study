@@ -20,9 +20,9 @@ namespace helpers
      */
 	std::string readStringFromFile(const std::string& pathToFile);
 
-    std::unique_ptr<texture::TextureData> readTextureFromFile(const std::string& pathToFile);
+    std::unique_ptr<openglCore::texture::TextureData> readTextureFromFile(const std::string& pathToFile);
 
-    void freeTextureData(texture::TextureData& textureData);
+    void freeTextureData(openglCore::texture::TextureData& textureData);
 
     /**
      * \brief Casts an object to a type of elements of its enum type.

@@ -11,7 +11,7 @@
 /**
  * \brief shader namespace contains types, related to OpenGL shaders, shader programs, uniforms etc.
  */
-namespace shader
+namespace openglCore::shader
 {
 	/**
 	 * \brief ShaderType represents 'shaderType' parameter of [glCreateShader()](https://docs.gl/gl4/glCreateShader).

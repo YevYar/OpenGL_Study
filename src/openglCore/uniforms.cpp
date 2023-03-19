@@ -5,7 +5,7 @@
 #include "helpers/debugHelpers.h"
 #include "helpers/openglHelpers.h"
 
-using namespace shader;
+using namespace openglCore::shader;
 
 namespace
 {

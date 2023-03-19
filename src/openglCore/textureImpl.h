@@ -7,7 +7,7 @@
 #include "openglHelpersImpl.h"
 #include "texture.h"
 
-namespace texture
+namespace openglCore::texture
 {
     struct BaseTexture::BaseImpl
     {

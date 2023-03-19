@@ -12,7 +12,7 @@
  * \brief vertex namespace contains types and functions, which are related to vertex array objects,
  * vertex buffer objects etc.
  */
-namespace vertex
+namespace openglCore::vertex
 {
 	class Buffer;
 	

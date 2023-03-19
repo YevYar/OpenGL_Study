@@ -3,7 +3,7 @@
 
 #include "uniforms.h"
 
-namespace shader
+namespace openglCore::shader
 {
     struct BaseUniform::BaseImpl
     {

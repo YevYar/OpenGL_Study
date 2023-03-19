@@ -7,7 +7,7 @@
 #include "helpers/macros.h"
 #include "vertexTypes.h"
 
-namespace vertex
+namespace openglCore::vertex
 {
 	/**
 	 * \brief VertexAttribute represents one vertex attribute and contains all arguments,
@@ -88,7 +88,6 @@ namespace vertex
      * \return size in bytes of the type.
      */
 	unsigned int getByteSizeOfType(VertexAttrType type) noexcept;
-
 }
 
 #endif

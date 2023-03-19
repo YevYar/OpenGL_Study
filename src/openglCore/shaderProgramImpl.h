@@ -3,7 +3,7 @@
 
 #include "shaderProgram.h"
 
-namespace shader
+namespace openglCore::shader
 {
     struct Shader::Impl
     {

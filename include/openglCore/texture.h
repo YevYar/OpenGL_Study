@@ -11,7 +11,7 @@
 /**
  * \brief texture namespace contains types, related to OpenGL textures.  
  */
-namespace texture
+namespace openglCore::texture
 {
     class BaseTexture : public ICloneable
     {

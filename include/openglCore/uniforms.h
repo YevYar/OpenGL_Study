@@ -8,7 +8,7 @@
 
 #include "helpers/macros.h"
 
-namespace shader
+namespace openglCore::shader
 {
 	class ShaderProgram;
 

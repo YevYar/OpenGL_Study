@@ -9,7 +9,7 @@
 #include "helpers/helpers.h"
 #include "textureTypes.h"
 
-using namespace texture;
+using namespace openglCore::texture;
 
 BaseTexture::BaseTexture() : m_impl{ std::make_unique<BaseImpl>() }
 {
@@ -101,7 +101,7 @@ void Texture<DimensionsNumber>::setData(TexImageTarget texImageTarget,
 }
 
 template<unsigned int DimensionsNumber>
-TextureTarget texture::Texture<DimensionsNumber>::getTarget() const noexcept
+TextureTarget Texture<DimensionsNumber>::getTarget() const noexcept
 {
     return m_impl->m_target;
 }

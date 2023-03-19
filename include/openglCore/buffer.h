@@ -8,7 +8,7 @@
 #include "vertexBufferLayout.h"
 #include "vertexTypes.h"
 
-namespace vertex
+namespace openglCore::vertex
 {
     class VertexArray;
 
