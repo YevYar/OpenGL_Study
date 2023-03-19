@@ -2,7 +2,7 @@
 #define BUFFER_IMPL_H
 
 #include "buffer.h"
-#include "openglHelpers.h"
+#include "openglHelpersImpl.h"
 
 namespace vertex
 {

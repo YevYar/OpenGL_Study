@@ -3,32 +3,32 @@
 #include <glad/glad.h>
 #include <iostream>
 
-void clearGlError()
+void helpers::clearGlError()
 {
-	if (Window::isGLFWTerminated())
-	{
-		return;
-	}
+    if (Window::isGLFWTerminated())
+    {
+        return;
+    }
 
-	while (glGetError());
+    while (glGetError());
 }
 
-bool checkAndLogGLErrors(const char* file, const char* function, int line)
+bool helpers::checkAndLogGLErrors(const char* file, const char* function, int line)
 {
-	if (Window::isGLFWTerminated())
-	{
-		return false;
-	}
+    if (Window::isGLFWTerminated())
+    {
+        return false;
+    }
 
-	bool isErrorRaised = false;
+    bool isErrorRaised = false;
 
-	while (auto errorCode = glGetError())
-	{
-		std::cerr << "[OpenGL error]: code 0x" << std::hex << errorCode << std::dec
-			<< " in function " << function << ", in file " << file << ", at line " << line << std::endl;
+    while (auto errorCode = glGetError())
+    {
+        std::cerr << "[OpenGL error]: code 0x" << std::hex << errorCode << std::dec
+            << " in function " << function << ", in file " << file << ", at line " << line << std::endl;
 
-		isErrorRaised = true;
-	}
+        isErrorRaised = true;
+    }
 
-	return isErrorRaised;
+    return isErrorRaised;
 }

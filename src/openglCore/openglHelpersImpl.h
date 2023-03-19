@@ -1,10 +1,11 @@
-#ifndef OPENGL_HELPERS_H
-#define OPENGL_HELPERS_H
+#ifndef OPENGL_HELPERS_IMPL_H
+#define OPENGL_HELPERS_IMPL_H
 
 #include <concepts>
 #include <functional>
 
-#include "helpers.h"
+#include "helpers/helpers.h"
+#include "helpers/openglHelpers.h"
 
 namespace openglCore
 {    

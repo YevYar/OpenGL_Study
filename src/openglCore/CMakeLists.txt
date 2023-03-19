@@ -12,14 +12,14 @@ set(PUBLIC_HEADERS ${PATH_TO_PUBLIC_INCLUDE}/openglCore/buffer.h
     ${PATH_TO_PUBLIC_INCLUDE}/openglCore/vertexTypes.h)
 	
 set(PRIVATE_HEADERS bufferImpl.h
-	openglHelpers.h
+	openglHelpersImpl.h
     shaderProgramImpl.h
+    textureImpl.h
 	vertexArrayImpl.h
-	vertexBufferLayoutImpl.h
-    textureImpl.h)
+	vertexBufferLayoutImpl.h)
 	
 set(SOURCES buffer.cpp
-	openglHelpers.cpp
+	openglHelpersImpl.cpp
 	openglLimits.cpp
 	shaderProgram.cpp
 	texture.cpp

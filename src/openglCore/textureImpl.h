@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 
 #include "helpers/helpers.h"
-#include "openglHelpers.h"
+#include "openglHelpersImpl.h"
 #include "texture.h"
 
 namespace texture

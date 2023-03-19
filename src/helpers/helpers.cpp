@@ -3,13 +3,11 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
-#include <glad/glad.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 #include "exceptions.h"
-#include "helpers/debugHelpers.h"
 
 std::string helpers::readStringFromFile(const std::string& pathToFile)
 {
@@ -62,11 +60,4 @@ std::unique_ptr<texture::TextureData> helpers::readTextureFromFile(const std::st
 void helpers::freeTextureData(texture::TextureData& textureData)
 {
     stbi_image_free(textureData.m_data);
-}
-
-GLint helpers::getOpenGLIntegerValue(GLenum parameterName)
-{
-    GLint result = 0;
-    GLCall(glGetIntegerv(parameterName, &result));
-    return result;
 }

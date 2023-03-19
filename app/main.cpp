@@ -3,6 +3,8 @@
 #include <iostream>
 #include <memory>
 
+#include "exceptions.h"
+#include "helpers/debugHelpers.h"
 #include "multicoloredRectangle.h"
 #include "openglLimits.h"
 #include "window.h"

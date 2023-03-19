@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "exceptions.h"
+#include "helpers/debugHelpers.h"
 #include "helpers/helpers.h"
 
 using namespace shader;

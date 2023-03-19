@@ -6,6 +6,7 @@
 
 #include "buffer.h"
 #include "generalTypes.h"
+#include "helpers/debugHelpers.h"
 #include "helpers/helpers.h"
 #include "shaderProgram.h"
 #include "texture.h"
