@@ -19,7 +19,7 @@
 </pre>
 
 ## Function, method, macros
-```
+<pre>
 /**
  * \brief <b>Add<u>S</u></b>, <b>find<u>S</u></b> ...
  *
@@ -29,4 +29,4 @@
  * \return description.
  * \throw list of exceptions.
  */
-```
+</pre>
