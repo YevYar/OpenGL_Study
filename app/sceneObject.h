@@ -9,7 +9,7 @@
 #include "textureUnit.h"
 #include "vertexArray.h"
 
-namespace renderer
+namespace app::renderer
 {
 	/**
 	 * \brief SceneObject is a base abstract class for all classes, which represents something, what can be rendered.

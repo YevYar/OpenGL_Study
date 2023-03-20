@@ -11,7 +11,7 @@
 #include "shaderProgram.h"
 #include "texture.h"
 
-using namespace renderer;
+using namespace app;
 
 MulticoloredRectangle::MulticoloredRectangle(std::shared_ptr<openglCore::vertex::VertexArray> vao,
 	std::shared_ptr<openglCore::shader::ShaderProgram> shaderProgram) :
@@ -50,7 +50,7 @@ void MulticoloredRectangle::setColorCoefficient(const float* k)
     }	
 }
 
-std::unique_ptr<MulticoloredRectangle> renderer::makeMulticoloredRectangle()
+std::unique_ptr<MulticoloredRectangle> app::makeMulticoloredRectangle()
 {
 	using namespace openglCore::shader;
     using namespace openglCore::texture;

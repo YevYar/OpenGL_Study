@@ -1,12 +1,12 @@
 #include <glad/glad.h>
 // #include <GLFW/glfw3.h>
-#include <iostream>
-#include <memory>
 
+#include <memory>
+#include <iostream>
 #include "exceptions.h"
 #include "helpers/debugHelpers.h"
-#include "multicoloredRectangle.h"
-#include "openglLimits.h"
+
+#include "renderer.h"
 #include "window.h"
 
 namespace
@@ -29,38 +29,21 @@ int main()
     }
     
     // glfwSwapInterval(4);
-
-    openglCore::initOpenglLimits();
-
-    std::unique_ptr<renderer::MulticoloredRectangle> mColoredRectangle = nullptr;
+    std::unique_ptr<app::renderer::Renderer> renderer = nullptr;
     try
     {
-        mColoredRectangle = renderer::makeMulticoloredRectangle();
+        renderer = std::make_unique<app::renderer::Renderer>();
     }
-    catch (std::exception& err)
+    catch (exceptions::GLRecAcquisitionException& exc)
     {
-        std::cerr << err.what() << std::endl;
+        std::cerr << exc.what() << std::endl;
         return -2;
     }
-
-    float currentK = 0.0f;
-    float increment = 0.05f;
-
+    
     // Render loop
     while (!window->shouldClose())
     {
-        GLCall(glClearColor(0.1176f, 0.5647, 1.0f, 1.0f));
-        GLCall(glClear(GL_COLOR_BUFFER_BIT));
-
-        if (currentK >= 1.0f)
-            increment = -0.05f;
-        if (currentK <= 0)
-            increment = 0.05f;
-
-        mColoredRectangle->setColorCoefficient(&currentK);
-        mColoredRectangle->draw();
-        
-        currentK += increment;
+        renderer->draw();        
 
         window->swapBuffers();
         // glfwPollEvents();

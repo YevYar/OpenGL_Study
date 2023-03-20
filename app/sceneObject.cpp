@@ -1,6 +1,6 @@
 #include "sceneObject.h"
 
-using namespace renderer;
+using namespace app::renderer;
 
 SceneObject::SceneObject(std::shared_ptr<openglCore::vertex::VertexArray> vao,
 	std::shared_ptr<openglCore::shader::ShaderProgram> shaderProgram) :

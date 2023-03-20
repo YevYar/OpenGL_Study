@@ -2,10 +2,12 @@ add_executable(OpenGL_Study_Exe)
 
 
 set(HEADERS multicoloredRectangle.h
+	renderer.h
 	sceneObject.h)
 	
 set(SOURCES main.cpp
 	multicoloredRectangle.cpp
+	renderer.cpp
 	sceneObject.cpp)
 	
 	

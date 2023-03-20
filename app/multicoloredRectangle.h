@@ -4,12 +4,12 @@
 #include "sceneObject.h"
 #include "uniforms.h"
 
-namespace renderer
+namespace app
 {
 	/**
 	 * \brief MulticoloredRectangle is a rectangle, the color of which can blinks by using setColorCoefficient().
 	 */
-	class MulticoloredRectangle : public SceneObject
+	class MulticoloredRectangle : public renderer::SceneObject
 	{
 		public:
 			MulticoloredRectangle() = delete;
