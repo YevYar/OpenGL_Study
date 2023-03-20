@@ -1,5 +1,6 @@
 add_library(OpenGL_Study_Helpers)
 
+
 set(HEADERS ${PATH_TO_PUBLIC_INCLUDE}/helpers/debugHelpers.h
 	${PATH_TO_PUBLIC_INCLUDE}/helpers/helpers.h
 	${PATH_TO_PUBLIC_INCLUDE}/helpers/macros.h

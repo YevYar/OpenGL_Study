@@ -112,11 +112,17 @@ namespace openglCore::shader // all declarations in header files must be in some
 ```
 
 ### Source file template
-Example of uniform.cpp file: 
+Example of uniform.cpp file (see [Names and Order of Includes](https://google.github.io/styleguide/cppguide.html#Names_and_Order_of_Includes)):
 ```
 // Include header files, which this source file implements
 #include "uniforms.h"
 #include "uniformsImpl.h"
+
+// Include C-libs
+#include <unistd.h>
+
+// Include C++ libs
+#include <vector>
 
 // Include 3td-parties 
 #inlcude <glad/glad.h>
@@ -161,3 +167,5 @@ template class Uniform<GLfloat, 1>;
 - In **core** PIMPL should be used. When PIMPL is used, the **Impl** struct should be declared in separate ***Impl.h** file in **src** folder. It is useful in cases, when class, which owns **Impl**, has friends, which must have access to internal details of the class. In such a case these friends must know declaration of **Impl** struct to use it. 
 - In **app** using of PIMPL is not obligatory.
 
+## Some rules from [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
+- Try to avoid forward declarations of entities defined in another project.

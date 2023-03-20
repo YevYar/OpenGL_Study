@@ -6,6 +6,7 @@ project(OpenGL_Study
 	HOMEPAGE_URL "https://github.com/YevYarWolf/OpenGL_Study"
 	LANGUAGES CXX C)
 
+
 # === SET OPTIONS
 option(BUILD_DOC "Build documentation" ON)
 

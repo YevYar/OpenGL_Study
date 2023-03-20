@@ -1,5 +1,6 @@
 add_library(OpenGL_Study_General)
 
+
 # Define variable with path to project include folder
 set(PATH_TO_PUBLIC_INCLUDE ${OpenGL_Study_SOURCE_DIR}/include)
 
