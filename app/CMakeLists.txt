@@ -12,6 +12,7 @@ set(SOURCES main.cpp
 	
 	
 target_sources(OpenGL_Study_Exe PRIVATE ${SOURCES} ${HEADERS})
+target_include_directories(OpenGL_Study_Exe PRIVATE ${OpenGL_Study_SOURCE_DIR}/libs/include/GLFW)
 target_link_libraries(OpenGL_Study_Exe PRIVATE glad
 	${GLFW3}
 	OpenGL_Study_compiler_flags

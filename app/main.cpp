@@ -1,11 +1,10 @@
 #include <glad/glad.h>
-// #include <GLFW/glfw3.h>
+#include <glfw3.h>
 
-#include <memory>
 #include <iostream>
-#include "exceptions.h"
-#include "helpers/debugHelpers.h"
+#include <memory>
 
+#include "exceptions.h"
 #include "renderer.h"
 #include "window.h"
 
@@ -28,7 +27,8 @@ int main()
         return -1;
     }
     
-    // glfwSwapInterval(4);
+    glfwSwapInterval(4);
+
     std::unique_ptr<app::renderer::Renderer> renderer = nullptr;
     try
     {
@@ -46,12 +46,9 @@ int main()
         renderer->draw();        
 
         window->swapBuffers();
-        // glfwPollEvents();
+        
+        glfwPollEvents();
     }
-
-    /*VBO->unbind();
-    EBO->unbind();
-    VAO.unbind();*/
 
     return 0;
 }
