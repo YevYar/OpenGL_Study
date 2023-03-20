@@ -40,22 +40,28 @@ class MyClass
 
     // METHODS
     public:
+        static
         ...
 
     protected:
+        static
         ...
 
     private:
+        static
         ...
 
     // DATA
     public:
+        static
         ...
 
     protected:
+        static
         ...
 
     private:
+        static
         ...
 
 }
@@ -75,7 +81,8 @@ class MyClass
 
 #include "uniforms.h"
 
-namespace openglCore::shader
+namespace openglCore::shader // all declarations in header files must be in some namespace,
+    // NO DECLARATIONS IN GLOBAL SCOPE
 {
     struct BaseUniform::BaseImpl
     {
@@ -128,12 +135,14 @@ namespace
     void someFunc();
 }
 
-// Declare methods and functions from uniforms.h
+// Declare and define Impl struct, if separate *Impl.h file is not created.
+
+// Define methods and functions from uniforms.h
 ...
 
 
 // IMPLEMENTATION
-// Declare methods and functions from uniformsImpl.h. // IMPLEMENTATION comment is necessary
+// Define methods and functions from uniformsImpl.h. // IMPLEMENTATION comment and two empty lines before it are necessary
 ...
 
 // Define functions from local namespace
@@ -149,5 +158,6 @@ template class Uniform<GLfloat, 1>;
 
 ```
 ## Patterns
-- In **core** PIMPL should be used.
+- In **core** PIMPL should be used. When PIMPL is used, the **Impl** struct should be declared in separate ***Impl.h** file in **src** folder. It is useful in cases, when class, which owns **Impl**, has friends, which must have access to internal details of the class. In such a case these friends must know declaration of **Impl** struct to use it. 
+- In **app** using of PIMPL is not obligatory.
 
