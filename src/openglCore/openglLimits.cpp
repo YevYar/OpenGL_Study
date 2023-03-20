@@ -7,11 +7,17 @@ using namespace openglCore;
 
 namespace
 {
+    bool isInitialised = false;
     std::map<LimitName, GLint> limits;
 }
 
 void openglCore::initOpenglLimits()
 {
+    if (isInitialised)
+    {
+        return;
+    }
+
     using namespace helpers;
     GLint limitValue = 0;
 
@@ -20,6 +26,8 @@ void openglCore::initOpenglLimits()
 
     limitValue = getOpenGLIntegerValue(toUType(LimitName::MAX_VERTEX_ATTRIBS));
     limits.insert({ LimitName::MAX_VERTEX_ATTRIBS, limitValue });
+
+    isInitialised = true;
 }
 
 const std::map<LimitName, GLint>& openglCore::getOpenglLimits() noexcept
