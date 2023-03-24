@@ -66,6 +66,7 @@ class MyClass
 
 }
 ```
+As long as you can, stick to the **Rule of Zero**, but if you have to write at least one of the Big Five, default the rest.
 
 ## Files and folders
 - The source code of the project is separated on two parts - **app** and **core**. **Core** is a library, **app** is a demo application, which uses **core** library. 
@@ -163,9 +164,27 @@ namespace
 template class Uniform<GLfloat, 1>;
 
 ```
+
+## AAA (Almost Always Auto) and AAU (Almost Always Unicorn)
+Based on ['ES.11: Use auto to avoid redundant repetition of type names'](http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es11-use-auto-to-avoid-redundant-repetition-of-type-names), ['Using auto whenever possible'](https://subscription.packtpub.com/book/programming/9781786465184/1/ch01lvl1sec5/using-auto-whenever-possible), ['“auto to stick” and Changing Your Style'](https://www.fluentcpp.com/2018/09/28/auto-stick-changing-style/), ['Auto for Types, but Not for Concepts'](https://www.fluentcpp.com/2020/12/04/auto-for-types-but-not-for-concepts/) and [this Stackoverflow answer with good links](https://stackoverflow.com/a/69467830)
+it was decided to use the following conventions:
+- `auto a = std::string{"text"}; // from C++17 the compiler is required to elide the temporary object as well as the move operation` (see ['“auto to stick” and Changing Your Style'](https://www.fluentcpp.com/2018/09/28/auto-stick-changing-style/)).
+
+    For initialization of non-primitive types `{}` should be used (see [GotW #1 Solution: Variable Initialization – or Is It?](https://herbsutter.com/2013/05/09/gotw-1-solution/)).
+However be aware of overloads, which accepts `std::initializer_list`;
+- `auto i = int{42}; // when creating some variable of primitive type`.
+
+    Such declaration allows to be more explicit with the type of the variable without using of types literals, make variable always initialized and 
+avoid possible misunderstanding between `auto lst = {1}; // lst is an initializer list` and `auto x{1}; // x is an int (in C++17; initializer_list in C++11)` (see ['ES.11'](http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es11-use-auto-to-avoid-redundant-repetition-of-type-names));
+- `auto iFromFun = someType{getSomeIntValue()}; // when it is important to specify, that i is of someType type and to not allow narrowing`
+
 ## Patterns
 - In **core** PIMPL should be used. When PIMPL is used, the **Impl** struct should be declared in separate ***Impl.h** file in **src** folder. It is useful in cases, when class, which owns **Impl**, has friends, which must have access to internal details of the class. In such a case these friends must know declaration of **Impl** struct to use it. 
 - In **app** using of PIMPL is not obligatory.
 
 ## Some rules from [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
-- Try to avoid forward declarations of entities defined in another project.
+- Try to avoid forward declarations of entities defined in another project ([see Forward Declarations](https://google.github.io/styleguide/cppguide.html#Forward_Declarations)).
+- Default arguments are banned on virtual functions, where they don't work properly, and in cases where the specified default might not evaluate to the same value depending on when it was evaluated ([see Default Arguments](https://google.github.io/styleguide/cppguide.html#Default_Arguments)).
+- Use brace initialization to convert arithmetic types (e.g., int64_t{x}) ([see Casting](https://google.github.io/styleguide/cppguide.html#Casting)).
+- Use the prefix form (++i) of the increment and decrement operators unless you need postfix semantics ([see Preincrement and Predecrement](https://google.github.io/styleguide/cppguide.html#Preincrement_and_Predecrement)).
+- Do not use an unsigned type merely to assert that a variable is non-negative ([see On Unsigned Integers](https://google.github.io/styleguide/cppguide.html#Integer_Types)).
