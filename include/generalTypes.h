@@ -55,12 +55,15 @@ struct ArrayData
 class ICloneable
 {
     public:
+        virtual ~ICloneable() = 0;
+
         /**
          * \brief Creates a deep copy of yourself.
          * 
          * \return deep copy of yourself.
          */
         virtual ICloneable* clone() const = 0;
+
 };
 
 #endif

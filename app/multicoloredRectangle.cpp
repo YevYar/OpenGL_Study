@@ -28,7 +28,7 @@ void MulticoloredRectangle::draw()
 	m_shaderProgram->use();
 	applyTexturesConfiguration();
 
-	m_counter++;
+	++m_counter;
 	if (m_counter == 300)
 	{
 		auto textureData = std::shared_ptr<texture::TextureData>(
