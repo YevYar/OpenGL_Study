@@ -7,9 +7,10 @@
 - **Camel case** is used.
 - **Class name** begins with a capital letter. Example of **class name**: class **M**y**C**lass.
 - **Function name** begins with a lower case letter, but all following words begin with a capital letter. Example of **function name**: void **m**y**F**unc().
-- **variable name** begins with a lower case letter, but all following words begin with a capital letter. Example of **variable name**: int **m**y**V**ariable.
+- **Variable name** begins with a lower case letter, but all following words begin with a capital letter. Example of **variable name**: int **m**y**V**ariable.
 - **Class field name** begins with a prefix **m_**, but after the rule for variables naming is applied. Example of **class field name**: int **m_**class**F**ield.
 - **Enum** are named as classes (**Note**: *enum class* is preferred). **Enum members** are in upper case. Example of enum: `enum class BufferBindingTarget : GLenum { ARRAY_BUFFER_BINDING = 0x8894, ATOMIC_COUNTER_BUFFER_BINDING = 0x92C1 }`.
+- **The names of all types** — classes, structs, type aliases, enums, and type template parameters — have the same naming convention. Type names should **start with a capital letter** and have a **capital letter for each new word**. No underscores.
 - **Interface name** starts with **I**: class **IC**loneable { }.
 - **File name** and **folder name** starts with a lower case letter, but all following words begin with a capital letter. Example of **file name**: **m**y**H**eader**F**ile.h.
 
@@ -19,6 +20,12 @@
 
 ## Reference/pointer
 & and * in declaration of such variable is a part of a type, not a part of the name: `int* p1 = &a;` NOT `int *p1 = &a`.
+
+## Namespaces
+- Every header file must declare all elements in some namespace.
+- The base namespace of *include* folder in the root folder of the project is `openglStudy`.
+- All headers in subfolders of *include* folder declare elements in namespace with the name of the folder. For example, some header from *helpers* folder must declares its stuff in namespace `openglStudy::helpers`.
+- Don't use using-statements like `using namespace openglStudy::shader` in the top of **.cpp* files. Using of using-statements is allowed only in class declarations or inside the function scope. 
 
 ## Class/struct declaration
 The following template of class declaration is used:
@@ -77,12 +84,12 @@ As long as you can, stick to the **Rule of Zero**, but if you have to write at l
 
 ### Header file template
 ```
-#ifndef OPENGLCORE_SHADER_UNIFORMS_IMPL_H // contains namespace and file name
-#define OPENGLCORE_SHADER_UNIFORMS_IMPL_H
+#ifndef OPENGLSTUDY_OPENGLCORE_SHADER_UNIFORMS_IMPL_H // contains namespace and file name
+#define OPENGLSTUDY_OPENGLCORE_SHADER_UNIFORMS_IMPL_H
 
 #include "uniforms.h"
 
-namespace openglCore::shader // all declarations in header files must be in some namespace,
+namespace openglStudy::openglCore::shader // all declarations in header files must be in some namespace,
     // NO DECLARATIONS IN GLOBAL SCOPE
 {
     struct BaseUniform::BaseImpl
@@ -132,9 +139,6 @@ Example of uniform.cpp file (see [Names and Order of Includes](https://google.gi
 #include "exceptions.h"
 #include "helpers/debugHelpers.h"
 #include "helpers/openglHelpers.h"
-
-// Use namespace, which implements
-using namespace openglCore::shader;
 
 // Declare local anonymous namespace, which is visible only inside this translation unit
 namespace
