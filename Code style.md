@@ -192,3 +192,5 @@ avoid possible misunderstanding between `auto lst = {1}; // lst is an initialize
 - Use brace initialization to convert arithmetic types (e.g., int64_t{x}) ([see Casting](https://google.github.io/styleguide/cppguide.html#Casting)).
 - Use the prefix form (++i) of the increment and decrement operators unless you need postfix semantics ([see Preincrement and Predecrement](https://google.github.io/styleguide/cppguide.html#Preincrement_and_Predecrement)).
 - Do not use an unsigned type merely to assert that a variable is non-negative ([see On Unsigned Integers](https://google.github.io/styleguide/cppguide.html#Integer_Types)).
+- Switch statements should always have a default case. If the default case should never execute, treat this as an error ([see Loops and Switch Statements](https://google.github.io/styleguide/cppguide.html#Loops_and_Switch_Statements)).
+- Fall-through from one case label to another must be annotated using the `[[fallthrough]];` attribute ([see Loops and Switch Statements](https://google.github.io/styleguide/cppguide.html#Loops_and_Switch_Statements)). 
