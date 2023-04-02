@@ -63,7 +63,7 @@ Uniform<Type, Count>::operator Type() noexcept
 }
 
 template<typename Type, unsigned int Count>
-Uniform<Type, Count>::Impl* Uniform<Type, Count>::impl() const noexcept
+typename Uniform<Type, Count>::Impl* Uniform<Type, Count>::impl() const noexcept
 {
     return static_cast<Uniform<Type, Count>::Impl*>(m_impl.get());
 }

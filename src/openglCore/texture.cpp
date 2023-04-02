@@ -158,7 +158,7 @@ void Texture<DimensionsNumber>::setParameterIV(TexParameterName parameter, const
 }
 
 template<unsigned int DimensionsNumber>
-Texture<DimensionsNumber>::Impl* Texture<DimensionsNumber>::impl() const noexcept
+typename Texture<DimensionsNumber>::Impl* Texture<DimensionsNumber>::impl() const noexcept
 {
     return static_cast<Texture<DimensionsNumber>::Impl*>(m_impl.get());
 }
