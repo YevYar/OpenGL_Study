@@ -8,10 +8,11 @@
 - **Class name** begins with a capital letter. Example of **class name**: class **M**y**C**lass.
 - **Function name** begins with a lower case letter, but all following words begin with a capital letter. Example of **function name**: void **m**y**F**unc().
 - **Variable name** begins with a lower case letter, but all following words begin with a capital letter. Example of **variable name**: int **m**y**V**ariable.
-- **Class field name** begins with a prefix **m_**, but after the rule for variables naming is applied. Example of **class field name**: int **m_**class**F**ield.
-- **Enum** are named as classes (**Note**: *enum class* is preferred). **Enum members** are in upper case. Example of enum: `enum class BufferBindingTarget : GLenum { ARRAY_BUFFER_BINDING = 0x8894, ATOMIC_COUNTER_BUFFER_BINDING = 0x92C1 }`.
+- **Private class field name** begins with a prefix **m_**, but after the rule for variables naming is applied. **Public fields of classes or structs** should be named without prefix. Example of **class field name**: int **m_**class**F**ield.
+- **Enum** are named as classes (**Note**: *enum class* is preferred). **Enum members** are named in camel case with the first capital letter. Example of enum: `enum class BufferBindingTarget : GLenum { ArrayBufferBinding = 0x8894, AtomicCounterBufferBinding = 0x92C1 }`.
 - **The names of all types** — classes, structs, type aliases, enums, and type template parameters — have the same naming convention. Type names should **start with a capital letter** and have a **capital letter for each new word**. No underscores.
 - **Interface name** starts with **I**: class **IC**loneable { }.
+- **Global constants** in header or source files are named in uppercase with underscores as separator between words: `constexpr auto SOME_INT_CONSTANT = int{1};`
 - **File name** and **folder name** starts with a lower case letter, but all following words begin with a capital letter. Example of **file name**: **m**y**H**eader**F**ile.h.
 
 ## Braces
@@ -25,7 +26,9 @@
 - Every header file must declare all elements in some namespace.
 - The base namespace of *include* folder in the root folder of the project is `openglStudy`.
 - All headers in subfolders of *include* folder declare elements in namespace with the name of the folder. For example, some header from *helpers* folder must declares its stuff in namespace `openglStudy::helpers`.
-- Don't use using-statements like `using namespace openglStudy::shader` in the top of **.cpp* files. Using of using-statements is allowed only in class declarations or inside the function scope. 
+- Don't use using-statements like `using namespace openglStudy::openglStudy::shader` in the top of **.cpp* files. Using of using-statements is allowed only in class declarations or inside the function scope.
+- All code in **.cpp** files must be defined inside `namespace some_namespace { ... }`. Anonymous namespaces are also defined inside this namespace to not pollute global namespace of the translation unit (see [this Stackoverflow answer](https://stackoverflow.com/a/29368872/11658801)).
+- The end `}` of namespace must be followed by two whitespaces and a line comment with the namespace name: `}  // namespace openglStudy::openglStudy::shader`
 
 ## Class/struct declaration
 The following template of class declaration is used:
@@ -110,10 +113,10 @@ namespace openglStudy::openglCore::shader // all declarations in header files mu
         /**
          * \brief Location (id) of the referenced OpenGL uniform variable in a shader program.
          */
-        const GLint m_location = -1;
+        const auto m_location = GLint{-1};
 
     };
-}
+}  // namespace openglStudy::openglCore::shader
 
 #endif
 
@@ -140,6 +143,8 @@ Example of uniform.cpp file (see [Names and Order of Includes](https://google.gi
 #include "helpers/debugHelpers.h"
 #include "helpers/openglHelpers.h"
 
+namespace openglStudy::openglCore::shader
+{
 // Declare local anonymous namespace, which is visible only inside this translation unit
 namespace
 {
@@ -162,10 +167,11 @@ namespace
     void someFunc()
     { // for empty definition do like here
     }
-}
+}  // namespace
 
 // In the end of file create template instantiations if necessary
 template class Uniform<GLfloat, 1>;
+}  // namespace openglStudy::openglCore::shader
 
 ```
 
@@ -192,5 +198,5 @@ avoid possible misunderstanding between `auto lst = {1}; // lst is an initialize
 - Use brace initialization to convert arithmetic types (e.g., int64_t{x}) ([see Casting](https://google.github.io/styleguide/cppguide.html#Casting)).
 - Use the prefix form (++i) of the increment and decrement operators unless you need postfix semantics ([see Preincrement and Predecrement](https://google.github.io/styleguide/cppguide.html#Preincrement_and_Predecrement)).
 - Do not use an unsigned type merely to assert that a variable is non-negative ([see On Unsigned Integers](https://google.github.io/styleguide/cppguide.html#Integer_Types)).
-- Switch statements should always have a default case. If the default case should never execute, treat this as an error ([see Loops and Switch Statements](https://google.github.io/styleguide/cppguide.html#Loops_and_Switch_Statements)).
-- Fall-through from one case label to another must be annotated using the `[[fallthrough]];` attribute ([see Loops and Switch Statements](https://google.github.io/styleguide/cppguide.html#Loops_and_Switch_Statements)). 
+- Switch statements should always have a default case. If the default case should never execute, treat this as an error ([see Switch Statements](https://google.github.io/styleguide/cppguide.html#Switch_Statements)).
+- Fall-through from one case label to another must be annotated using the `[[fallthrough]];` attribute ([see Switch Statements](https://google.github.io/styleguide/cppguide.html#Switch_Statements)). 
