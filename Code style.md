@@ -51,14 +51,50 @@ class MyClass
     // METHODS
     public:
         static
+
+        constructors = default;
+        constructors, which have custom implementation
+        constructors = delete;
+        destructor
+
+        operations
+
+        methods (own)
+        methods (own virtual)
+        methods (override)
+        methods (pure virtual)
         ...
 
     protected:
         static
+        
+        constructors = default;
+        constructors, which have custom implementation
+        constructors = delete;
+        destructor
+
+        operations
+
+        methods (own)
+        methods (own virtual)
+        methods (override)
+        methods (pure virtual)
         ...
 
     private:
         static
+        
+        constructors = default;
+        constructors, which have custom implementation
+        constructors = delete;
+        destructor
+
+        operations
+
+        methods (own)
+        methods (own virtual)
+        methods (override)
+        methods (pure virtual)
         ...
 
     // DATA
@@ -73,6 +109,9 @@ class MyClass
     private:
         static
         ...
+
+    friend classes
+    friend functions
 
 }
 ```
@@ -187,10 +226,16 @@ However be aware of overloads, which accepts `std::initializer_list`;
     Such declaration allows to be more explicit with the type of the variable without using of types literals, make variable always initialized and 
 avoid possible misunderstanding between `auto lst = {1}; // lst is an initializer list` and `auto x{1}; // x is an int (in C++17; initializer_list in C++11)` (see ['ES.11'](http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es11-use-auto-to-avoid-redundant-repetition-of-type-names));
 - `auto iFromFun = someType{getSomeIntValue()}; // when it is important to specify, that i is of someType type and to not allow narrowing`
+- **BUT** in type declarations type is specified before the field name: `int m_someField = {0};`.
 
 ## Patterns
 - In **core** PIMPL should be used. When PIMPL is used, the **Impl** struct should be declared in separate ***Impl.h** file in **src** folder. It is useful in cases, when class, which owns **Impl**, has friends, which must have access to internal details of the class. In such a case these friends must know declaration of **Impl** struct to use it. 
 - In **app** using of PIMPL is not obligatory.
+
+## Macroses
+- Using of macroses must be limited.
+- Macors names consist of upper case letters, words in names are separated by underscores: `#define INSTANTIATE_UNIFORM(Type)`.
+- After macros call `;` is necessary: `SOME_MACROS(x);`.
 
 ## Some rules from [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
 - Try to avoid forward declarations of entities defined in another project ([see Forward Declarations](https://google.github.io/styleguide/cppguide.html#Forward_Declarations)).
@@ -199,4 +244,4 @@ avoid possible misunderstanding between `auto lst = {1}; // lst is an initialize
 - Use the prefix form (++i) of the increment and decrement operators unless you need postfix semantics ([see Preincrement and Predecrement](https://google.github.io/styleguide/cppguide.html#Preincrement_and_Predecrement)).
 - Do not use an unsigned type merely to assert that a variable is non-negative ([see On Unsigned Integers](https://google.github.io/styleguide/cppguide.html#Integer_Types)).
 - Switch statements should always have a default case. If the default case should never execute, treat this as an error ([see Switch Statements](https://google.github.io/styleguide/cppguide.html#Switch_Statements)).
-- Fall-through from one case label to another must be annotated using the `[[fallthrough]];` attribute ([see Switch Statements](https://google.github.io/styleguide/cppguide.html#Switch_Statements)). 
+- Fall-through from one case label to another must be annotated using the `[[fallthrough]];` attribute ([see Switch Statements](https://google.github.io/styleguide/cppguide.html#Switch_Statements)).

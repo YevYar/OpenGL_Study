@@ -1,8 +1,9 @@
-#include <glad/glad.h>
-
 #include "multicoloredRectangle.h"
 
+#include <array>
 #include <exception>
+
+#include <glad/glad.h>
 
 #include "buffer.h"
 #include "generalTypes.h"
@@ -11,18 +12,27 @@
 #include "shaderProgram.h"
 #include "texture.h"
 
-using namespace app;
-
-MulticoloredRectangle::MulticoloredRectangle(std::shared_ptr<openglCore::vertex::VertexArray> vao,
-	std::shared_ptr<openglCore::shader::ShaderProgram> shaderProgram) :
-	SceneObject(std::move(vao), shaderProgram),
-	m_colorCoefficient{ static_cast<decltype(m_colorCoefficient)>(shaderProgram->findUniform<float, 1>("k")) }
+namespace openglStudy::app
 {
+MulticoloredRectangle::MulticoloredRectangle(std::shared_ptr<openglStudy::openglCore::vertex::VertexArray> vao,
+	std::shared_ptr<openglStudy::openglCore::shader::ShaderProgram> shaderProgram) :
+	    SceneObject{std::move(vao), shaderProgram},
+	    m_colorCoefficient{static_cast<decltype(m_colorCoefficient)>(shaderProgram->findUniform<float, 1>("k"))}
+{
+}
+
+void MulticoloredRectangle::setColorCoefficient(float k)
+{
+    if (k >= 0 && k <= 1.0)
+    {
+        m_shaderProgram->use();
+        m_colorCoefficient.setData(&k);
+    }
 }
 
 void MulticoloredRectangle::draw()
 {
-    using namespace openglCore;
+    using namespace openglStudy::openglCore;
 
 	m_vao->bind();
 	m_shaderProgram->use();
@@ -31,8 +41,8 @@ void MulticoloredRectangle::draw()
 	++m_counter;
 	if (m_counter == 300)
 	{
-		auto textureData = std::shared_ptr<texture::TextureData>(
-			helpers::readTextureFromFile("resources/textures/awesomeface.png"));
+        auto textureData = std::shared_ptr<texture::TextureData>{
+            helpers::readTextureFromFile("resources/textures/awesomeface.png")};
 		textureData->m_format = texture::TexturePixelFormat::RGBA;
 		texture::castBaseTextureToTexture<2>(m_texturesConfiguration, 0, 0)
 			->setData(texture::TexImage2DTarget::TEXTURE_2D, textureData);
@@ -41,29 +51,20 @@ void MulticoloredRectangle::draw()
 	GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 }
 
-void MulticoloredRectangle::setColorCoefficient(const float* k)
+std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle()
 {
-    if (*k >= 0 && *k <= 1.0)
-    {
-        m_shaderProgram->use();
-        m_colorCoefficient.setData(k);
-    }	
-}
-
-std::unique_ptr<MulticoloredRectangle> app::makeMulticoloredRectangle()
-{
-	using namespace openglCore::shader;
-    using namespace openglCore::texture;
-    using namespace openglCore::vertex;
+	using namespace openglStudy::openglCore::shader;
+    using namespace openglStudy::openglCore::texture;
+    using namespace openglStudy::openglCore::vertex;
 
 
-	static const float points[] = {
+	static const auto points = std::array<GLfloat, 28>{
 		-0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
 		-0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
 		 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
 		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f
 	};
-	static const unsigned int indices[] = {
+	static const auto indices = std::array<GLuint, 6>{
 		0, 1, 2,
 		2, 3, 0
 	};
@@ -71,16 +72,18 @@ std::unique_ptr<MulticoloredRectangle> app::makeMulticoloredRectangle()
 	// Configure VAO, VBO and EBO only once
 	static auto VAO = std::make_shared<VertexArray>();
 
-	static VertexAttribute coordinateMap(0, 2, VertexAttrType::FLOAT, false, 0),
-		colorMap(1, 3, VertexAttrType::FLOAT, false, getByteSizeOfType(VertexAttrType::FLOAT) * 2),
-		texCoords(2, 2, VertexAttrType::FLOAT, false, getByteSizeOfType(VertexAttrType::FLOAT) * 5);
+	static auto coordinateMap = VertexAttribute{0, 2, VertexAttrType::FLOAT, false, 0};
+    static auto colorMap = VertexAttribute{1, 3, VertexAttrType::FLOAT, false,
+        getByteSizeOfType(VertexAttrType::FLOAT) * 2};
+    static auto texCoords = VertexAttribute{2, 2, VertexAttrType::FLOAT, false,
+        getByteSizeOfType(VertexAttrType::FLOAT) * 5};
 
-	static VertexBufferLayout layout;
+    static auto layout = VertexBufferLayout{};
 	layout.addVertexAttribute(coordinateMap);
 	layout.addVertexAttribute(colorMap);
 	layout.addVertexAttribute(texCoords);
 
-	static ArrayData data{ reinterpret_cast<const void*>(points), sizeof(points) };
+	static auto data = ArrayData{reinterpret_cast<const void*>(points), sizeof(points)};
 	static auto VBO = std::make_shared<Buffer>(BufferTarget::ARRAY_BUFFER, data, BufferDataUsage::STATIC_DRAW, layout);
 
 	VAO->addBuffer(VBO);
@@ -90,12 +93,12 @@ std::unique_ptr<MulticoloredRectangle> app::makeMulticoloredRectangle()
 	VAO->addBuffer(EBO);
 
 	// Create shader program only once
-	static std::shared_ptr<ShaderProgram> shaderProgram = makeShaderProgram("resources/shaders/vs/vertexShader.vert",
+	static auto shaderProgram = makeShaderProgram("resources/shaders/vs/vertexShader.vert",
 		"resources/shaders/fs/fragmentShader.frag");
 
 	// Load textures only once
-	static auto textureData = std::shared_ptr<TextureData>(
-		helpers::readTextureFromFile("resources/textures/wooden_container.jpg"));
+    static auto textureData = std::shared_ptr<TextureData>{
+        helpers::readTextureFromFile("resources/textures/wooden_container.jpg")};
 	static auto texture2D = std::make_shared<Texture<2>>(TextureTarget::TEXTURE_2D,
 		TexImage2DTarget::TEXTURE_2D, textureData);
 	static TexturesConfiguration texturesConfig{{
@@ -105,7 +108,8 @@ std::unique_ptr<MulticoloredRectangle> app::makeMulticoloredRectangle()
 
 
 	// Create new MulticoloredRectangle
-	auto rect = new MulticoloredRectangle(VAO, shaderProgram);
+	auto rect = new MulticoloredRectangle{VAO, shaderProgram};
 	rect->setTexturesConfiguration(texturesConfig);
 	return std::unique_ptr<MulticoloredRectangle>(rect);
 }
+}  // namespace openglStudy::app

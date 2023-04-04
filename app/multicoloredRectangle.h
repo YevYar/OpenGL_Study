@@ -1,42 +1,56 @@
-#ifndef RECTANGLE_H
-#define RECTANGLE_H
+#ifndef OPENGLSTUDY_APP_MULTICOLOREDRECTANGLE_H
+#define OPENGLSTUDY_APP_MULTICOLOREDRECTANGLE_H
 
 #include "sceneObject.h"
 #include "uniforms.h"
 
-namespace app
+namespace openglStudy::app
 {
 	/**
 	 * \brief MulticoloredRectangle is a rectangle, the color of which can blinks by using setColorCoefficient().
 	 */
-	class MulticoloredRectangle : public renderer::SceneObject
+	class MulticoloredRectangle : public openglStudy::renderer::SceneObject
 	{
+        // METHODS
 		public:
-			MulticoloredRectangle() = delete;
-		
-			DEFAULT_COPYABLE_MOVABLE(MulticoloredRectangle)
+            DEFAULT_COPYABLE_MOVABLE(MulticoloredRectangle);
+			MulticoloredRectangle() = delete;        
+
+            /**
+             * \brief Sets the color coefficient.
+             *
+             * \param k - is a number in the range [0, 1].
+             */
+            void setColorCoefficient(float k);
 
 			/**
 			 * \brief Draws multicolored rectangle on the scene.
 			 */
 			void draw() override;
 
-			/**
-			 * \brief Sets the color coefficient.
-			 * 
-			 * \param k - is a number in the range [0, 1].
-			 */
-			void setColorCoefficient(const float* k);
-
 		private:
-			MulticoloredRectangle(std::shared_ptr<openglCore::vertex::VertexArray> vao,
-				std::shared_ptr<openglCore::shader::ShaderProgram> shaderProgram);
+            /**
+             * \brief Constructs an object with specified VAO and shader program.
+             * 
+             * \param vao - a vertex array object, which contains necessary vertex configuration.
+             * \param shaderProgram - a shader program, which is used for rendering of the rectangle.
+             */
+			MulticoloredRectangle(std::shared_ptr<openglStudy::openglCore::vertex::VertexArray> vao,
+				std::shared_ptr<openglStudy::openglCore::shader::ShaderProgram> shaderProgram);
 
+        // DATA
 		private:
-            openglCore::shader::Uniform<float, 1>& m_colorCoefficient;
-			int m_counter = 0;
+            /**
+             * \brief Coefficient, which is used to change the color while blinking.
+             */
+            openglStudy::openglCore::shader::Uniform<float, 1>& m_colorCoefficient;
+            /**
+             * \brief Counter to count a number of rendering iterations.
+             */
+            int m_counter = {0};
 
 		friend std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle();
+
 	};
 
 	/**
@@ -47,6 +61,6 @@ namespace app
 	 */
 	std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle();
 
-}
+}  // namespace openglStudy::app
 
 #endif
