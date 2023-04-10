@@ -302,7 +302,7 @@ template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::Impl::
     specifyTextureStorageFormat(const std::shared_ptr<TextureData>& textureData) const noexcept
 {
-    ASSERT(!m_isStorageFormatSpecified);
+    OGLS_ASSERT(!m_isStorageFormatSpecified);
     m_specific.setTexStorageFormat(m_rendererId, textureData);
     m_isStorageFormatSpecified = true;
 }

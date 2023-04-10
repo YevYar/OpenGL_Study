@@ -30,3 +30,6 @@
  * \throw list of exceptions.
  */
 </pre>
+
+- **Default and deleted** methods mustn't have any comment!
+- **Impl structs** in *.cpp files don't have to provide any comments.

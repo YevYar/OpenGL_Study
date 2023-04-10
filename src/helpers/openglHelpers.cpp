@@ -5,33 +5,37 @@
 
 #include "helpers/debugHelpers.h"
 
-GLint helpers::getOpenGLIntegerValue(GLenum parameterName)
+namespace ogls::helpers
 {
-    GLint result = 0;
-    GLCall(glGetIntegerv(parameterName, &result));
+GLint getOpenGLIntegerValue(GLenum parameterName)
+{
+    auto result = GLint{0};
+    OGLS_GLCall(glGetIntegerv(parameterName, &result));
     return result;
 }
 
-bool helpers::isGLfloat(const char* typeName) noexcept
+bool isGLdouble(const char* typeName) noexcept
 {
-    GLfloat floatIndicator = 0;
-    return strcmp(typeName, typeid(floatIndicator).name()) == 0;
-}
-
-bool helpers::isGLdouble(const char* typeName) noexcept
-{
-    GLdouble doubleIndicator = 0;
+    auto doubleIndicator = GLdouble{0};
     return strcmp(typeName, typeid(doubleIndicator).name()) == 0;
 }
 
-bool helpers::isGLint(const char* typeName) noexcept
+bool isGLfloat(const char* typeName) noexcept
 {
-    GLint intIndicator = 0;
+    auto floatIndicator = GLfloat{0};
+    return strcmp(typeName, typeid(floatIndicator).name()) == 0;
+}
+
+bool isGLint(const char* typeName) noexcept
+{
+    auto intIndicator = GLint{0};
     return strcmp(typeName, typeid(intIndicator).name()) == 0;
 }
 
-bool helpers::isGLunsignedInt(const char* typeName) noexcept
+bool isGLuint(const char* typeName) noexcept
 {
-    GLuint unsignedIndicator = 0;
+    auto unsignedIndicator = GLuint{0};
     return strcmp(typeName, typeid(unsignedIndicator).name()) == 0;
 }
+
+}  // namespace ogls::helpers

@@ -1,8 +1,8 @@
-#include <glad/glad.h>
-#include <glfw3.h>
-
 #include <iostream>
 #include <memory>
+
+#include <glad/glad.h>
+#include <glfw3.h>
 
 #include "exceptions.h"
 #include "renderer.h"
@@ -10,43 +10,50 @@
 
 namespace
 {
-    constexpr int WIDTH = 800, HEIGHT = 600;
-    constexpr char TITLE[] = "OpenGL Study Project";
-}
+constexpr auto WIDTH           = int{800};
+constexpr auto HEIGHT          = int{600};
+constexpr decltype(auto) TITLE = "OpenGL Study Project";
+
+}  // namespace
 
 int main()
 {
-    std::unique_ptr<Window> window;
+    using namespace app::renderer;
+    using namespace ogls;
+    using namespace ogls::exceptions;
+
+
+    auto window = std::unique_ptr<Window>{};
     try
     {
         window = std::make_unique<Window>(WIDTH, HEIGHT, TITLE);
     }
-    catch (exceptions::WindowInitializationException& exc)
+    catch (const WindowInitializationException& exc)
     {
         std::cerr << exc.what() << std::endl;
         return -1;
     }
-    
+
     glfwSwapInterval(4);
 
-    std::unique_ptr<app::renderer::Renderer> renderer = nullptr;
+    auto renderer = std::unique_ptr<Renderer>{};
     try
     {
-        renderer = std::make_unique<app::renderer::Renderer>();
+        renderer = std::make_unique<Renderer>();
     }
-    catch (exceptions::GLRecAcquisitionException& exc)
+    catch (const GLRecAcquisitionException& exc)
     {
         std::cerr << exc.what() << std::endl;
         return -2;
     }
-    
+
     // Render loop
     while (!window->shouldClose())
     {
-        renderer->draw();        
+        renderer->render();
 
         window->swapBuffers();
-        
+
         glfwPollEvents();
     }
 

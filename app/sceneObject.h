@@ -1,5 +1,5 @@
-#ifndef SCENE_OBJECT_H
-#define SCENE_OBJECT_H
+#ifndef APP_RENDERER_SCENE_OBJECT_H
+#define APP_RENDERER_SCENE_OBJECT_H
 
 #include <memory>
 #include <vector>
@@ -11,55 +11,60 @@
 
 namespace app::renderer
 {
-	/**
-	 * \brief SceneObject is a base abstract class for all classes, which represents something, what can be rendered.
-	 */
-	class SceneObject
-	{
-		public:
-			SceneObject() = default;
+/**
+ * \brief SceneObject is a base abstract class for all classes, which represents something, what can be rendered.
+ */
+class SceneObject
+{
+    public:
+        SceneObject() = default;
+        OGLS_DEFAULT_COPYABLE_MOVABLE(SceneObject)
+        /**
+         * \brief Constructs new SceneObject using a vertex array object and a shader program.
+         *
+         * \param vao           - a vertex array object, which contains necessary vertex configuration.
+         * \param shaderProgram - a shader program, which is used for rendering.
+         */
+        SceneObject(std::shared_ptr<ogls::oglCore::vertex::VertexArray> vao,
+                    std::shared_ptr<ogls::oglCore::shader::ShaderProgram> shaderProgram);
+        virtual ~SceneObject() = default;
 
-            /**
-             * \brief Constructs new SceneObject using a vertex array object and 
-             * a shader program.
-             * 
-             * \param vao - vertex array object.
-             * \param shaderProgram - shader program.
-             */
-			SceneObject(std::shared_ptr<openglCore::vertex::VertexArray> vao,
-				std::shared_ptr<openglCore::shader::ShaderProgram> shaderProgram);
+        /**
+         * \brief Sets a configuration of texture units, which is used for rendering of the object.
+         *
+         * \param texturesConfiguration - a configuration of texture units.
+         */
+        virtual void setTexturesConfiguration(ogls::oglCore::texture::TexturesConfiguration texturesConfiguration);
 
-            DEFAULT_COPYABLE_MOVABLE(SceneObject)
+        /**
+         * \brief Renders something on the scene.
+         */
+        virtual void render() = 0;
 
-            /**
-             * \brief Destructs the object.
-             */
-			virtual ~SceneObject() = default;			
+    protected:
+        /**
+         * \brief Applies set textures configuration to be used while the following rendering.
+         *
+         * See ogls::oglCore::texture::applyTexturesConfiguration().
+         */
+        void applyTexturesConfiguration();
 
-			/**
-			 * \brief Draws something on the scene.
-			 */
-			virtual void draw() = 0;
+    protected:
+        /**
+         * \brief Shader program, which is used to render this object.
+         */
+        std::shared_ptr<ogls::oglCore::shader::ShaderProgram> m_shaderProgram = nullptr;
+        /**
+         * \brief Configuration of texture units, which is used to render this object.
+         */
+        ogls::oglCore::texture::TexturesConfiguration m_texturesConfiguration;
+        /**
+         * \brief Vertex array object, which is used to render this object.
+         */
+        std::shared_ptr<ogls::oglCore::vertex::VertexArray> m_vao = nullptr;
 
-            virtual void setTexturesConfiguration(openglCore::texture::TexturesConfiguration texturesConfiguration);
+};  // SceneObject
 
-        protected:
-            void applyTexturesConfiguration();
-
-		protected:
-            /**
-             * \brief Vertex array object of the object.
-             */
-			std::shared_ptr<openglCore::vertex::VertexArray> m_vao = nullptr;
-
-            /**
-             * \brief Shader program, which is used to render this object.
-             */
-			std::shared_ptr<openglCore::shader::ShaderProgram> m_shaderProgram = nullptr;
-
-            openglCore::texture::TexturesConfiguration m_texturesConfiguration;
-
-	};
-}
+}  // namespace app::renderer
 
 #endif

@@ -24,11 +24,11 @@
 
 ## Namespaces
 - Every header file must declare all elements in some namespace.
-- The base namespace of *include* folder in the root folder of the project is `openglStudy`.
-- All headers in subfolders of *include* folder declare elements in namespace with the name of the folder. For example, some header from *helpers* folder must declares its stuff in namespace `openglStudy::helpers`.
-- Don't use using-statements like `using namespace openglStudy::openglStudy::shader` in the top of **.cpp* files. Using of using-statements is allowed only in class declarations or inside the function scope.
+- The base namespace of *include* folder in the root folder of the project is `ogls` (abbreviation for *OpenGL Study*).
+- All headers in subfolders of *include* folder declare elements in namespace with the name of the folder. For example, some header from *helpers* folder must declares its stuff in namespace `ogls::helpers`.
+- Don't use using-statements like `using namespace ogls::oglCore::shader` in the top of **.cpp* files. Using of using-statements is allowed only in class declarations or inside the function scope. In such case *using-statements* must be in alphabetical order and followed by **2 empty lines**.
 - All code in **.cpp** files must be defined inside `namespace some_namespace { ... }`. Anonymous namespaces are also defined inside this namespace to not pollute global namespace of the translation unit (see [this Stackoverflow answer](https://stackoverflow.com/a/29368872/11658801)).
-- The end `}` of namespace must be followed by two whitespaces and a line comment with the namespace name: `}  // namespace openglStudy::openglStudy::shader`
+- The end `}` of namespace must be followed by two whitespaces and a line comment with the namespace name: `}  // namespace ogls::oglCore::shader`
 
 ## Class/struct declaration
 The following template of class declaration is used:
@@ -59,10 +59,13 @@ class MyClass
 
         operations
 
-        methods (own)
-        methods (own virtual)
-        methods (override)
-        methods (pure virtual)
+        methods (own) in alphabetical order
+
+        methods (own virtual) in alphabetical order
+
+        methods (override) in alphabetical order
+
+        methods (pure virtual) in alphabetical order
         ...
 
     protected:
@@ -75,10 +78,13 @@ class MyClass
 
         operations
 
-        methods (own)
-        methods (own virtual)
-        methods (override)
-        methods (pure virtual)
+        methods (own) in alphabetical order
+
+        methods (own virtual) in alphabetical order
+
+        methods (override) in alphabetical order
+
+        methods (pure virtual) in alphabetical order
         ...
 
     private:
@@ -91,10 +97,13 @@ class MyClass
 
         operations
 
-        methods (own)
-        methods (own virtual)
-        methods (override)
-        methods (pure virtual)
+        methods (own) in alphabetical order
+
+        methods (own virtual) in alphabetical order
+
+        methods (override) in alphabetical order
+
+        methods (pure virtual) in alphabetical order
         ...
 
     // DATA
@@ -110,33 +119,45 @@ class MyClass
         static
         ...
 
-    friend classes
-    friend functions
 
-}
+        friend classes
+        friend functions
+
+};  // class MyClass
 ```
-As long as you can, stick to the **Rule of Zero**, but if you have to write at least one of the Big Five, default the rest.
+- As long as you can, stick to the **Rule of Zero**, but if you have to write at least one of the Big Five, default the rest.
+- Order methods of one group in alphabetical order.
+- Use alphabetical order of class fields. If necessary, group class fields and apply alphabetical order inside this groups.
+### Line breaks in type declaration:
+- 2 empty lines after static asserts.
+- 1 empty line before access modifier.
+- 1 empty line after each of methods groups, but no empty lines between methods of one group.
+- 1 empty line after static fields.
+- 2 empty lines before *friends*. It's needed to emphasize, that *friends* aren't part of private section.
+- 1 empty line before closing `}`.
 
 ## Files and folders
 - The source code of the project is separated on two parts - **app** and **core**. **Core** is a library, **app** is a demo application, which uses **core** library. 
 - Source code of the **core** is placed in **src** folder, public headers of the **core** - in **root include** folder. **app** folder contains sources and headers of the demo application.
 - Header and source files are placed in the same folder, except cases, when header file is a part of public **core** interface. In such a case header file is placed in **root include** folder and source file in **src** folder.
+- **core** base namespace is `ogls`, **app** base namespace is `app`.
 - In case of PIMPL, **struct Impl** must be declared in the file with the same name as the name of the class, which owns this Impl, suffixed by **Impl** in the name of the header file. For example if a class **MyClass** is declared in the file **myClass.h** in *include* folder, the header file with Impl must be declared in **src/.../myClassImpl.h**.
 - Every file ends with one empty line.
 
 ### Header file template
 ```
-#ifndef OPENGLSTUDY_OPENGLCORE_SHADER_UNIFORMS_IMPL_H // contains namespace and file name
-#define OPENGLSTUDY_OPENGLCORE_SHADER_UNIFORMS_IMPL_H
+#ifndef OGLS_OGLCORE_SHADER_UNIFORMS_IMPL_H // template is OGLS_<namespace>_<file name>_H
+ // or OGLS_<path to file starting from include folder>_<file name>_H if no namespace in header file (for example, helpers/macros.h).
+#define OGLS_OGLCORE_SHADER_UNIFORMS_IMPL_H
 
 #include "uniforms.h"
 
-namespace openglStudy::openglCore::shader // all declarations in header files must be in some namespace,
+namespace ogls::oglCore::shader // all declarations in header files must be in some namespace,
     // NO DECLARATIONS IN GLOBAL SCOPE
 {
-    struct BaseUniform::BaseImpl
-    {
-        // METHODS
+struct BaseUniform::BaseImpl
+{
+    public:
         /**
          * \brief Constructs new object.
          *
@@ -145,17 +166,17 @@ namespace openglStudy::openglCore::shader // all declarations in header files mu
          * \throw exceptions::GLRecAcquisitionException(), if location is 0
          */
         BaseImpl(GLuint shaderProgram, GLint location, std::string name);
+        NOT_COPYABLE_MOVABLE(BaseImpl);
 
-        NOT_COPYABLE_MOVABLE(BaseImpl)
-
-        // DATA
+    public:
         /**
          * \brief Location (id) of the referenced OpenGL uniform variable in a shader program.
          */
-        const auto m_location = GLint{-1};
+        const GLint m_location = {-1};
 
-    };
-}  // namespace openglStudy::openglCore::shader
+};  // struct BaseUniform::BaseImpl
+
+}  // namespace ogls::oglCore::shader
 
 #endif
 
@@ -182,7 +203,7 @@ Example of uniform.cpp file (see [Names and Order of Includes](https://google.gi
 #include "helpers/debugHelpers.h"
 #include "helpers/openglHelpers.h"
 
-namespace openglStudy::openglCore::shader
+namespace ogls::oglCore::shader
 {
 // Declare local anonymous namespace, which is visible only inside this translation unit
 namespace
@@ -210,9 +231,11 @@ namespace
 
 // In the end of file create template instantiations if necessary
 template class Uniform<GLfloat, 1>;
-}  // namespace openglStudy::openglCore::shader
+}  // namespace ogls::oglCore::shader
 
 ```
+- First, constructors and destructors are defined: constructor without parameters, constructors with parameters, copy and move constructors, destructor.
+- Method definitions must be provided in the same order, in which they were declared in header file.
 
 ## AAA (Almost Always Auto) and AAU (Almost Always Unicorn)
 Based on ['ES.11: Use auto to avoid redundant repetition of type names'](http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es11-use-auto-to-avoid-redundant-repetition-of-type-names), ['Using auto whenever possible'](https://subscription.packtpub.com/book/programming/9781786465184/1/ch01lvl1sec5/using-auto-whenever-possible), ['“auto to stick” and Changing Your Style'](https://www.fluentcpp.com/2018/09/28/auto-stick-changing-style/), ['Auto for Types, but Not for Concepts'](https://www.fluentcpp.com/2020/12/04/auto-for-types-but-not-for-concepts/) and [this Stackoverflow answer with good links](https://stackoverflow.com/a/69467830)
@@ -225,6 +248,7 @@ However be aware of overloads, which accepts `std::initializer_list`;
 
     Such declaration allows to be more explicit with the type of the variable without using of types literals, make variable always initialized and 
 avoid possible misunderstanding between `auto lst = {1}; // lst is an initializer list` and `auto x{1}; // x is an int (in C++17; initializer_list in C++11)` (see ['ES.11'](http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es11-use-auto-to-avoid-redundant-repetition-of-type-names));
+- `auto isTrue = true; // only for bool type`
 - `auto iFromFun = someType{getSomeIntValue()}; // when it is important to specify, that i is of someType type and to not allow narrowing`
 - **BUT** in type declarations type is specified before the field name: `int m_someField = {0};`.
 
@@ -232,10 +256,18 @@ avoid possible misunderstanding between `auto lst = {1}; // lst is an initialize
 - In **core** PIMPL should be used. When PIMPL is used, the **Impl** struct should be declared in separate ***Impl.h** file in **src** folder. It is useful in cases, when class, which owns **Impl**, has friends, which must have access to internal details of the class. In such a case these friends must know declaration of **Impl** struct to use it. 
 - In **app** using of PIMPL is not obligatory.
 
-## Macroses
-- Using of macroses must be limited.
-- Macors names consist of upper case letters, words in names are separated by underscores: `#define INSTANTIATE_UNIFORM(Type)`.
-- After macros call `;` is necessary: `SOME_MACROS(x);`.
+## Macros
+- Using of macros must be limited.
+- Macros names consist of upper case letters, words in names are separated by underscores: `#define INSTANTIATE_UNIFORM(Type)`.
+- `#define` macros right before you use them, and `#undef` them right after ([see Preprocessor Macros](https://google.github.io/styleguide/cppguide.html#Preprocessor_Macros)).
+- Macros should be prefixed by `OGLS_` ([see Macro Names](https://google.github.io/styleguide/cppguide.html#Macro_Names)).
+- After macros call `;` is necessary: `SOME_MACROS(x);`. However, in type declaration `;` must be omitted: `SOME_MACROS(x)`.
+
+## Some necessary empty lines
+- Before closing `}` of type declaration.
+- Before closing `}` of namespace.
+- Before `#endif`.
+- Between functions (not type methods) and between function and type declaration.
 
 ## Some rules from [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
 - Try to avoid forward declarations of entities defined in another project ([see Forward Declarations](https://google.github.io/styleguide/cppguide.html#Forward_Declarations)).

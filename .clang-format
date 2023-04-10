@@ -41,7 +41,7 @@ AllowShortIfStatementsOnASingleLine: Never
 AllowShortLambdasOnASingleLine: Empty
 AllowShortLoopsOnASingleLine: false
 
-AlwaysBreakAfterReturnType: TopLevel
+AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: Yes
 
@@ -83,19 +83,23 @@ InsertNewlineAtEOF: true
 
 IntegerLiteralSeparator:
   Binary: 4
-  BinaryMinDigits: 4
+  # BinaryMinDigits: 4
   Decimal: 3
-  DecimalMinDigits: 5
+  # DecimalMinDigits: 5
   Hex: 2
-  HexMinDigits: 6
+  # HexMinDigits: 6
 
 KeepEmptyLinesAtTheStartOfBlocks: false
 
 LambdaBodyIndentation: Signature
-LineEnding: LF
+LineEnding: CRLF
 
 MaxEmptyLinesToKeep: 2
 
+# [file=*.h]
+# NamespaceIndentation: All
+# [file=*.cpp]
+# NamespaceIndentation: None
 NamespaceIndentation: Inner
 
 PPIndentWidth: -1
@@ -103,22 +107,22 @@ PackConstructorInitializers: BinPack
 
 PenaltyBreakAssignment: 20
 PenaltyBreakBeforeFirstCallParameter: 20
-PenaltyBreakComment: 50
+PenaltyBreakComment: 10000000
 PenaltyBreakFirstLessLess: 50
 PenaltyBreakOpenParenthesis: 200
 PenaltyBreakString: 0
 PenaltyBreakTemplateDeclaration: 0
-PenaltyExcessCharacter: 150
+PenaltyExcessCharacter: 90000
 PenaltyIndentedWhitespace: 0
 PenaltyReturnTypeOnItsOwnLine: 60
 
 PointerAlignment: Left
 
 QualifierAlignment: Leave
-QualifierOrder: [ 'friend', 'static', 'inline', 'constexpr', 'const', 'volatile', 'type' ]
+# QualifierOrder: [ 'friend', 'static', 'inline', 'constexpr', 'const', 'volatile', 'type' ]
 
 ReferenceAlignment: Left
-ReflowComments: false
+ReflowComments: true
 RequiresClausePosition: OwnLine
 RequiresExpressionIndentation: OuterScope
 
@@ -144,6 +148,8 @@ SpacesBeforeTrailingComments: 2
 SpacesInAngles: Never
 SpacesInConditionalStatement: false
 SpacesInContainerLiterals: false
+SpacesInLineCommentPrefix:
+  Minimum: 1
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 

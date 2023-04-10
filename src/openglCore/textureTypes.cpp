@@ -10,10 +10,10 @@ TextureData::TextureData(unsigned char* textureData, GLsizei width, GLsizei heig
     m_data{ textureData }, m_height{ height }, m_width{ width }, m_nChannels{ nChannels }, 
     m_format{ format }
 {
-    ASSERT(m_data);
-    ASSERT(m_height > 0);
-    ASSERT(m_width > 0);
-    ASSERT(m_nChannels > 0);
+    OGLS_ASSERT(m_data);
+    OGLS_ASSERT(m_height > 0);
+    OGLS_ASSERT(m_width > 0);
+    OGLS_ASSERT(m_nChannels > 0);
 }
 
 TextureData::TextureData(unsigned char* textureData, GLsizei width, GLsizei height, GLsizei depth,
@@ -22,10 +22,10 @@ TextureData::TextureData(unsigned char* textureData, GLsizei width, GLsizei heig
     m_data{ textureData }, m_depth{ depth }, m_height{ height }, m_width{ width }, m_nChannels{ nChannels },
     m_level{ level }, m_format{ format }, m_internalFormat{ internalFormat }, m_type{ pixelType }
 {
-    ASSERT(m_data);
-    ASSERT(m_height > 0);
-    ASSERT(m_width > 0);
-    ASSERT(m_nChannels > 0);
+    OGLS_ASSERT(m_data);
+    OGLS_ASSERT(m_height > 0);
+    OGLS_ASSERT(m_width > 0);
+    OGLS_ASSERT(m_nChannels > 0);
 }
 
 TextureData::~TextureData()

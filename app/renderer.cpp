@@ -4,44 +4,46 @@
 #include "multicoloredRectangle.h"
 #include "openglLimits.h"
 
-using namespace app::renderer;
-
+namespace app::renderer
+{
 struct Renderer::Impl
 {
-	// METHODS
-	Impl()
-	{
-		openglCore::initOpenglLimits();
-		m_ColoredRectangle = app::makeMulticoloredRectangle();
-	}
+    public:
+        Impl()
+        {
+            ogls::oglCore::initOpenglLimits();
+            coloredRectangle = makeMulticoloredRectangle();
+        }
 
-	// DATA
-	std::unique_ptr<app::MulticoloredRectangle> m_ColoredRectangle = nullptr;
-	float m_currentK = 0.0f;
-	float m_increment = 0.05f;
+    public:
+        std::unique_ptr<MulticoloredRectangle> coloredRectangle = nullptr;
+        float currentK                                          = {0.0};
+        float increment                                         = {0.05};
 
-};
+};  // Renderer::Impl
 
-Renderer::Renderer() : m_impl{ std::make_unique<Impl>()}
+Renderer::Renderer() : m_impl{std::make_unique<Impl>()}
 {
 }
 
-Renderer::Renderer(std::unique_ptr<Impl> impl) : m_impl{ std::move(impl) }
+void Renderer::render()
 {
+    OGLS_GLCall(glClearColor(0.1176f, 0.5647, 1.0f, 1.0f));
+    OGLS_GLCall(glClear(GL_COLOR_BUFFER_BIT));
+
+    if (m_impl->currentK >= 1.0f)
+    {
+        m_impl->increment = -0.05f;
+    }
+    else if (m_impl->currentK <= 0)
+    {
+        m_impl->increment = 0.05f;
+    }
+
+    m_impl->coloredRectangle->setColorCoefficient(m_impl->currentK);
+    m_impl->coloredRectangle->render();
+
+    m_impl->currentK += m_impl->increment;
 }
 
-void Renderer::draw()
-{
-	GLCall(glClearColor(0.1176f, 0.5647, 1.0f, 1.0f));
-	GLCall(glClear(GL_COLOR_BUFFER_BIT));
-
-	if (m_impl->m_currentK >= 1.0f)
-		m_impl->m_increment = -0.05f;
-	if (m_impl->m_currentK <= 0)
-		m_impl->m_increment = 0.05f;
-
-	m_impl->m_ColoredRectangle->setColorCoefficient(&m_impl->m_currentK);
-	m_impl->m_ColoredRectangle->draw();
-
-	m_impl->m_currentK += m_impl->m_increment;
-}
+}  // namespace app::renderer
