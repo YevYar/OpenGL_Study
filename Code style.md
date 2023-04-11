@@ -40,17 +40,22 @@ class MyClass
 
     // TYPES
     public:
+        using
         ...
 
     protected:
+        using
         ...
 
     private:
+        using
         ...
 
     // METHODS
     public:
         static
+
+        using-declarations
 
         constructors = default;
         constructors, which have custom implementation
@@ -70,6 +75,8 @@ class MyClass
 
     protected:
         static
+
+        using-declarations
         
         constructors = default;
         constructors, which have custom implementation
@@ -89,6 +96,8 @@ class MyClass
 
     private:
         static
+
+        using-declarations
         
         constructors = default;
         constructors, which have custom implementation
