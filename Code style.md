@@ -218,15 +218,16 @@ namespace ogls::oglCore::shader
 namespace
 {
     void someFunc();
-}
+
+}  // namespace
 
 // Declare and define Impl struct, if separate *Impl.h file is not created.
 
 // Define methods and functions from uniforms.h
 ...
 
+//------ IMPLEMENTATION
 
-// IMPLEMENTATION
 // Define methods and functions from uniformsImpl.h. // IMPLEMENTATION comment and two empty lines before it are necessary
 ...
 
@@ -236,10 +237,12 @@ namespace
     void someFunc()
     { // for empty definition do like here
     }
+
 }  // namespace
 
 // In the end of file create template instantiations if necessary
 template class Uniform<GLfloat, 1>;
+
 }  // namespace ogls::oglCore::shader
 
 ```

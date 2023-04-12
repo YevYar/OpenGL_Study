@@ -1,60 +1,57 @@
-#ifndef BUFFER_IMPL_H
-#define BUFFER_IMPL_H
+#ifndef OGLS_OGLCORE_VERTEX_BUFFER_IMPL_H
+#define OGLS_OGLCORE_VERTEX_BUFFER_IMPL_H
 
 #include "buffer.h"
 #include "openglHelpersImpl.h"
 
-namespace openglCore::vertex
+namespace ogls::oglCore::vertex
 {
-    struct Buffer::Impl
-    {
-        public:
-            Impl(BufferTarget target, ArrayData data, BufferDataUsage usage,
-                std::optional<VertexBufferLayout> bufferLayout);
-            Impl(const Impl& obj);
-            Impl(Impl&& obj) noexcept;
+struct Buffer::Impl
+{
+    public:
+        static void bindToTarget(BufferTarget target, GLuint bufferId) noexcept;
+        static BufferBindingTarget getTargetAssociatedGetParameter(BufferTarget target) noexcept;
 
-            Impl& operator=(const Impl&) = delete;
-            Impl& operator=(Impl&&) noexcept = delete;
+        Impl(BufferTarget target, ArrayData data, BufferDataUsage usage,
+             std::optional<VertexBufferLayout> bufferLayout);
+        Impl(const Impl& obj);
+        Impl(Impl&& obj) noexcept;
+        /**
+         * \brief Deletes the object and the buffer object in OpenGL state machine.
+         *
+         * Wraps [glDeleteBuffers()](https://docs.gl/gl4/glDeleteBuffers).
+         */
+        ~Impl();
 
-            /**
-             * \brief Deletes the object and the buffer object in OpenGL state machine.
-             *
-             * Wraps [glDeleteBuffers()](https://docs.gl/gl4/glDeleteBuffers).
-             */
-            ~Impl();
+        Impl& operator=(const Impl&)     = delete;
+        Impl& operator=(Impl&&) noexcept = delete;
 
-            static void bindToTarget(BufferTarget target, GLuint bufferId) noexcept;
+        void bind() const noexcept;
+        bool checkAndGenerateNewStorage(const ArrayData& data) noexcept;
+        void deleteBuffer() noexcept;
+        /**
+         * \brief Generates OpenGL buffer object.
+         *
+         * Wraps [glGenBuffers()](https://docs.gl/gl4/glGenBuffers).
+         */
+        void genBuffer();
 
-            static BufferBindingTarget getTargetAssociatedGetParameter(BufferTarget target) noexcept;
+    public:
+        ArrayData data;
+        std::optional<VertexBufferLayout> layout = std::nullopt;
+        /**
+         * \brief Id of referenced OpenGL buffer.
+         */
+        GLuint rendererId                        = {0};
+        BufferTarget target                      = BufferTarget::ARRAY_BUFFER;
+        BufferDataUsage usage                    = BufferDataUsage::STATIC_DRAW;
 
-            /**
-             * \brief Generates OpenGL buffer object.
-             *
-             * Wraps [glGenBuffers()](https://docs.gl/gl4/glGenBuffers).
-             */
-            void genBuffer();
 
-            void bind() const noexcept;
+        template<ogls::oglCore::OpenGLBindableObject Type>
+        friend void ogls::oglCore::bindForAMomentAndExecute(const Type&, const std::function<void()>&);
 
-            bool checkAndGenerateNewStorage(const ArrayData& data) noexcept;
+};  // struct Buffer::Impl
 
-            void deleteBuffer() noexcept;
-
-        public:
-            /**
-             * \brief Id of referenced OpenGL buffer.
-             */
-            GLuint m_rendererId = 0;
-            BufferTarget m_target = BufferTarget::ARRAY_BUFFER;
-            ArrayData m_data;
-            BufferDataUsage m_usage = BufferDataUsage::STATIC_DRAW;
-            std::optional<VertexBufferLayout> m_layout = std::nullopt;
-
-        template<openglCore::OpenGLBindableObject Type>
-        friend void openglCore::bindForAMomentAndExecute(const Type&, const std::function<void()>&);
-
-    };
-}
+}  // namespace ogls::oglCore::vertex
 
 #endif

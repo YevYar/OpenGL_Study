@@ -1,67 +1,69 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef OGLS_WINDOW_H
+#define OGLS_WINDOW_H
 
+#include <memory>
 #include <string>
 
 #include "helpers/macros.h"
 
-class GLFWwindow;
-
+namespace ogls
+{
 /**
- * \brief Window is a wrapper over 
+ * \brief Window is a wrapper over
  * [GLFWwindow](https://www.glfw.org/docs/3.3/group__window.html#ga3c96d80d363e67d13a41b5d1821f3242).
  */
 class Window
 {
-	public:
+    private:
+        /**
+         * \brief Impl contains private data and methods of Window.
+         */
+        struct Impl;
+
+    public:
+        /**
+         * \brief Returns bool value: true is the window was terminated, false otherwise.
+         */
+        static bool isGLFWTerminated() noexcept;
+
         /**
          * \brief Constructs new GLFWwindow with the specified width, height and title.
-         * 
-         * \param width - width of the window in pixels.
+         *
+         * \param width  - width of the window in pixels.
          * \param height - height of the window in pixels.
-         * \param title - title of the window.
-         * \throw exceptions::WindowInitializationException().
+         * \param title  - title of the window.
+         * \throw std::out_of_range, ogls::exceptions::WindowInitializationException().
          */
-		Window(int width, int height, const std::string& title);
-
-        NOT_COPYABLE_MOVABLE(Window)
-
+        Window(int width, int height, const std::string& title);
+        Window() = delete;
+        OGLS_NOT_COPYABLE_MOVABLE(Window)
         /**
          * \brief Destructs the window and OpenGL context by calling
          * [glfwTerminate()](https://www.glfw.org/docs/3.3/group__init.html#gaaae48c0a18607ea4a4ba951d939f0901).
          */
-		~Window();
+        ~Window();
 
         /**
-         * \brief Returns bool value: true is the window was terminated, false otherwise.
-         */
-		static bool isGLFWTerminated();
-
-        /**
-         * \brief Wraps 
-         * [glfwSwapBuffers()](https://www.glfw.org/docs/3.3/group__window.html#ga15a5a1ee5b3c2ca6b15ca209a12efd14).
-         */
-		void swapBuffers() const;
-
-        /**
-         * \brief Wraps 
+         * \brief Wraps
          * [glfwWindowShouldClose()](https://www.glfw.org/docs/3.3/group__window.html#ga24e02fbfefbb81fc45320989f8140ab5).
-         * 
+         *
          * \return true if should be closed, false otherwise.
          */
-		bool shouldClose() const;
+        bool shouldClose() const;
+        /**
+         * \brief Wraps
+         * [glfwSwapBuffers()](https://www.glfw.org/docs/3.3/group__window.html#ga15a5a1ee5b3c2ca6b15ca209a12efd14).
+         */
+        void swapBuffers() const;
 
     private:
-        void cleanAndThrowOnInitException(const std::string& errorMessage);
-
-	private:
-        static bool s_isTerminated;
-
         /**
-         * \brief Pointer to controlled GLFWwindow object.
+         * \brief Pointer to implementation.
          */
-		GLFWwindow* m_window = nullptr;
+        std::unique_ptr<Impl> m_impl;
 
-};
+};  // class Window
+
+}  // namespace ogls
 
 #endif
