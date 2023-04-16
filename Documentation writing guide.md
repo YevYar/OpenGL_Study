@@ -26,6 +26,7 @@
  * Detailed description.
  *
  * \param <b>param name</b> - description.
+ * \see reference.
  * \return description.
  * \throw list of exceptions.
  */

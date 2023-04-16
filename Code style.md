@@ -279,7 +279,7 @@ avoid possible misunderstanding between `auto lst = {1}; // lst is an initialize
 - Before closing `}` of type declaration.
 - Before closing `}` of namespace.
 - Before `#endif`.
-- Between functions (not type methods) and between function and type declaration.
+- Between functions (except methods in type declaration) and between function and type declaration.
 
 ## Some rules from [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
 - Try to avoid forward declarations of entities defined in another project ([see Forward Declarations](https://google.github.io/styleguide/cppguide.html#Forward_Declarations)).

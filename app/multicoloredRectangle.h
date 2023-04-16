@@ -24,7 +24,7 @@ class MulticoloredRectangle : public renderer::SceneObject
         /**
          * \brief Sets the color coefficient.
          *
-         * \param k - is a number in the range [0, 1].
+         * \param k - a number in the range [0, 1].
          * \throw std::out_of_range.
          */
         void setColorCoefficient(float k);

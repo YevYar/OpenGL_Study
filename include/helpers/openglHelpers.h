@@ -18,7 +18,7 @@ GLint getOpenGLIntegerValue(GLenum parameterName);
 /**
  * \brief Checks if the provided typeName corresponds to a type of GLdouble.
  *
- * \param typeName - is a result of calling typeid(some_type).name().
+ * \param typeName - a result of calling typeid(some_type).name().
  * \return true if typeName corresponds to GLdouble, false otherwise.
  */
 bool isGLdouble(const char* typeName) noexcept;
@@ -26,7 +26,7 @@ bool isGLdouble(const char* typeName) noexcept;
 /**
  * \brief Checks if the provided typeName corresponds to a type of GLfloat.
  *
- * \param typeName - is a result of calling typeid(some_type).name().
+ * \param typeName - a result of calling typeid(some_type).name().
  * \return true if typeName corresponds to GLfloat, false otherwise.
  */
 bool isGLfloat(const char* typeName) noexcept;
@@ -34,7 +34,7 @@ bool isGLfloat(const char* typeName) noexcept;
 /**
  * \brief Checks if the provided typeName corresponds to a type of GLint.
  *
- * \param typeName - is a result of calling typeid(some_type).name().
+ * \param typeName - a result of calling typeid(some_type).name().
  * \return true if typeName corresponds to GLint, false otherwise.
  */
 bool isGLint(const char* typeName) noexcept;
@@ -42,7 +42,7 @@ bool isGLint(const char* typeName) noexcept;
 /**
  * \brief Checks if the provided typeName corresponds to a type of GLuint.
  *
- * \param typeName - is a result of calling typeid(some_type).name().
+ * \param typeName - a result of calling typeid(some_type).name().
  * \return true if typeName corresponds to GLuint, false otherwise.
  */
 bool isGLuint(const char* typeName) noexcept;

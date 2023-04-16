@@ -1,41 +1,56 @@
 #include "openglLimits.h"
 
+#include <format>
+#include <stdexcept>
+
 #include "helpers/helpers.h"
 #include "helpers/openglHelpers.h"
 
-using namespace openglCore;
-
+namespace ogls::oglCore
+{
 namespace
 {
-    bool isInitialised = false;
-    std::map<LimitName, GLint> limits;
+    auto isInitialised = false;
+    auto limits        = std::map<LimitName, GLint>{};
+
+}  // namespace
+
+GLint getOpenglLimit(LimitName limitName)
+{
+    if (!limits.contains(limitName))
+    {
+        const auto errMes =
+          std::format("The limit {} is not presented. Check, if initOpenglLimits() was called before.", limitName);
+        throw std::logic_error(errMes);
+    }
+
+    return limits.find(limitName)->second;
 }
 
-void openglCore::initOpenglLimits()
+const std::map<LimitName, GLint>& getOpenglLimits() noexcept
 {
+    return limits;
+}
+
+void initOpenglLimits()
+{
+    using namespace helpers;
+
+
     if (isInitialised)
     {
         return;
     }
 
-    using namespace helpers;
-    GLint limitValue = 0;
+    auto limitValue = GLint{0};
 
-    limitValue = getOpenGLIntegerValue(toUType(LimitName::MAX_COMBINED_TEXTURE_IMAGE_UNITS));
-    limits.insert({ LimitName::MAX_COMBINED_TEXTURE_IMAGE_UNITS, limitValue });
+    limitValue = getOpenGLIntegerValue(toUType(LimitName::MaxCombinedTextureImageUnits));
+    limits.insert({LimitName::MaxCombinedTextureImageUnits, limitValue});
 
-    limitValue = getOpenGLIntegerValue(toUType(LimitName::MAX_VERTEX_ATTRIBS));
-    limits.insert({ LimitName::MAX_VERTEX_ATTRIBS, limitValue });
+    limitValue = getOpenGLIntegerValue(toUType(LimitName::MaxVertexAttribs));
+    limits.insert({LimitName::MaxVertexAttribs, limitValue});
 
     isInitialised = true;
 }
 
-const std::map<LimitName, GLint>& openglCore::getOpenglLimits() noexcept
-{
-    return limits;
-}
-
-GLint openglCore::getOpenglLimit(LimitName limitName) noexcept
-{
-    return limits.find(limitName)->second;
-}
+}  // namespace ogls::oglCore
