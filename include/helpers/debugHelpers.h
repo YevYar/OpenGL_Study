@@ -32,7 +32,7 @@ namespace ogls::helpers
  * \param x - statement to execute.
  */
 #define OGLS_GLCall(x)                                                            \
-    if (!Window::isGLFWTerminated())                                              \
+    if (!ogls::Window::isGLFWTerminated())                                        \
     {                                                                             \
         ogls::helpers::clearGlError();                                            \
         x;                                                                        \

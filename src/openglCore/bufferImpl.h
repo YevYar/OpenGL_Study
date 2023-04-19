@@ -9,7 +9,7 @@ namespace ogls::oglCore::vertex
 struct Buffer::Impl
 {
     public:
-        static void bindToTarget(BufferTarget target, GLuint bufferId) noexcept;
+        static void                bindToTarget(BufferTarget target, GLuint bufferId) noexcept;
         static BufferBindingTarget getTargetAssociatedGetParameter(BufferTarget target) noexcept;
 
         Impl(BufferTarget target, ArrayData data, BufferDataUsage usage,
@@ -37,14 +37,14 @@ struct Buffer::Impl
         void genBuffer();
 
     public:
-        ArrayData data;
-        std::optional<VertexBufferLayout> layout = std::nullopt;
+        ArrayData                         data;
+        std::optional<VertexBufferLayout> layout     = std::nullopt;
         /**
          * \brief Id of referenced OpenGL buffer.
          */
-        GLuint rendererId                        = {0};
-        BufferTarget target                      = BufferTarget::ARRAY_BUFFER;
-        BufferDataUsage usage                    = BufferDataUsage::STATIC_DRAW;
+        GLuint                            rendererId = {0};
+        BufferTarget                      target     = BufferTarget::ARRAY_BUFFER;
+        BufferDataUsage                   usage      = BufferDataUsage::STATIC_DRAW;
 
 
         template<ogls::oglCore::OpenGLBindableObject Type>

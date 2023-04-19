@@ -10,9 +10,9 @@
 
 namespace
 {
-constexpr auto WIDTH           = int{800};
-constexpr auto HEIGHT          = int{600};
-constexpr decltype(auto) TITLE = "OpenGL Study Project";
+constexpr auto           WIDTH  = int{800};
+constexpr auto           HEIGHT = int{600};
+constexpr decltype(auto) TITLE  = "OpenGL Study Project";
 
 }  // namespace
 

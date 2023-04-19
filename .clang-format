@@ -19,7 +19,9 @@ AlignConsecutiveBitFields:
   AcrossEmptyLines: false
   AcrossComments: true
 AlignConsecutiveDeclarations:
-  Enabled: false
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
 AlignConsecutiveMacros:
   Enabled: true
   AcrossEmptyLines: false

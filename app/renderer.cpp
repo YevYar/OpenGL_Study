@@ -17,8 +17,8 @@ struct Renderer::Impl
 
     public:
         std::unique_ptr<MulticoloredRectangle> coloredRectangle = nullptr;
-        float currentK                                          = {0.0};
-        float increment                                         = {0.05};
+        float                                  currentK         = {0.0};
+        float                                  increment        = {0.05};
 
 };  // Renderer::Impl
 

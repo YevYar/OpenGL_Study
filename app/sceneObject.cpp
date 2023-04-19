@@ -2,7 +2,7 @@
 
 namespace app::renderer
 {
-SceneObject::SceneObject(std::shared_ptr<ogls::oglCore::vertex::VertexArray> vao,
+SceneObject::SceneObject(std::shared_ptr<ogls::oglCore::vertex::VertexArray>   vao,
                          std::shared_ptr<ogls::oglCore::shader::ShaderProgram> shaderProgram) :
     m_vao{std::move(vao)},
     m_shaderProgram{std::move(shaderProgram)}

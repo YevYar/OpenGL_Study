@@ -74,7 +74,7 @@ class Buffer : public ICloneable
          *
          * Also sets Buffer data in OpenGL buffer if it was not set before.
          */
-        void bind() const noexcept;
+        void                              bind() const noexcept;
         /**
          * \brief Returns data of the Buffer.
          *
@@ -86,7 +86,7 @@ class Buffer : public ICloneable
          *
          * \return data of the Buffer.
          */
-        const ArrayData& getData() const noexcept;
+        const ArrayData&                  getData() const noexcept;
         /**
          * \brief Returns layout of the buffer.
          */
@@ -98,11 +98,11 @@ class Buffer : public ICloneable
          *
          * \param data - data, which must be set in OpenGL buffer.
          */
-        void setData(ArrayData data);
+        void                              setData(ArrayData data);
         /**
          * \brief Calls unbindTarget() with the target of the buffer.
          */
-        void unbind() const noexcept;
+        void                              unbind() const noexcept;
 
         Buffer* clone() const override;
 

@@ -46,7 +46,7 @@ struct ArrayData
         /**
          * \brief Size in bytes of the data.
          */
-        size_t size         = {0};
+        size_t      size    = {0};
 
 };  // struct ArrayData
 

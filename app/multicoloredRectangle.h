@@ -41,7 +41,7 @@ class MulticoloredRectangle : public renderer::SceneObject
          * \param vao           - a vertex array object, which contains necessary vertex configuration.
          * \param shaderProgram - a shader program, which is used for rendering of the rectangle.
          */
-        MulticoloredRectangle(std::shared_ptr<ogls::oglCore::vertex::VertexArray> vao,
+        MulticoloredRectangle(std::shared_ptr<ogls::oglCore::vertex::VertexArray>   vao,
                               std::shared_ptr<ogls::oglCore::shader::ShaderProgram> shaderProgram);
 
     private:
@@ -52,7 +52,7 @@ class MulticoloredRectangle : public renderer::SceneObject
         /**
          * \brief Counter to count a number of rendering iterations.
          */
-        int m_counter = {0};
+        int                                       m_counter = {0};
 
 
         friend std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle();

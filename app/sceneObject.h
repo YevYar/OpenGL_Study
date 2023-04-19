@@ -25,7 +25,7 @@ class SceneObject
          * \param vao           - a vertex array object, which contains necessary vertex configuration.
          * \param shaderProgram - a shader program, which is used for rendering.
          */
-        SceneObject(std::shared_ptr<ogls::oglCore::vertex::VertexArray> vao,
+        SceneObject(std::shared_ptr<ogls::oglCore::vertex::VertexArray>   vao,
                     std::shared_ptr<ogls::oglCore::shader::ShaderProgram> shaderProgram);
         virtual ~SceneObject() = default;
 
@@ -57,11 +57,11 @@ class SceneObject
         /**
          * \brief Configuration of texture units, which is used to render this object.
          */
-        ogls::oglCore::texture::TexturesConfiguration m_texturesConfiguration;
+        ogls::oglCore::texture::TexturesConfiguration         m_texturesConfiguration;
         /**
          * \brief Vertex array object, which is used to render this object.
          */
-        std::shared_ptr<ogls::oglCore::vertex::VertexArray> m_vao = nullptr;
+        std::shared_ptr<ogls::oglCore::vertex::VertexArray>   m_vao = nullptr;
 
 };  // SceneObject
 
