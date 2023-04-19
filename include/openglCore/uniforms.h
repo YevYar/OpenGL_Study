@@ -67,7 +67,7 @@ class BaseUniform
 /**
  * \brief Uniform represents one dimensional uniform variable, which contains [1, 4] elements.
  *
- * \param Type  - one of the list: float, double, int, unsigned int.
+ * \param Type  - one of the list: GLfloat, GLdouble, GLint, GLuint.
  * \param Count - the integer value in the range [1, 4].
  */
 template<typename Type, unsigned int Count>
@@ -90,11 +90,15 @@ class Uniform : public BaseUniform
 
         /**
          * \brief Returns a Type representation of Uniform object.
+         *
+         * The same as getValue().
          */
         explicit operator Type() noexcept;
 
         /**
-         * \brief Returns a Type representation of Uniform object.
+         * \brief Returns current value, which is stored in OpenGL uniform variable.
+         *
+         * The same as operator Type().
          */
         Type getValue();
 

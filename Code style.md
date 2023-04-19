@@ -12,7 +12,8 @@
 - **Enum** are named as classes (**Note**: *enum class* is preferred). **Enum members** are named in camel case with the first capital letter. Example of enum: `enum class BufferBindingTarget : GLenum { ArrayBufferBinding = 0x8894, AtomicCounterBufferBinding = 0x92C1 }`.
 - **The names of all types** — classes, structs, type aliases, enums, and type template parameters — have the same naming convention. Type names should **start with a capital letter** and have a **capital letter for each new word**. No underscores.
 - **Interface name** starts with **I**: class **IC**loneable { }.
-- **Global constants** in header or source files are named in uppercase with underscores as separator between words: `constexpr auto SOME_INT_CONSTANT = int{1};`
+- **Global constants** in header or source files are named in uppercase with underscores as separator between words: `constexpr auto SOME_INT_CONSTANT = int{1};`.
+- **Namespace name** begins with a lower case letter, but all following words begin with a capital letter. Example of **namespace name**: namespace **m**y**N**amespace.
 - **File name** and **folder name** starts with a lower case letter, but all following words begin with a capital letter. Example of **file name**: **m**y**H**eader**F**ile.h.
 
 ## Braces
@@ -27,8 +28,40 @@
 - The base namespace of *include* folder in the root folder of the project is `ogls` (abbreviation for *OpenGL Study*).
 - All headers in subfolders of *include* folder declare elements in namespace with the name of the folder. For example, some header from *helpers* folder must declares its stuff in namespace `ogls::helpers`.
 - Don't use using-statements like `using namespace ogls::oglCore::shader` in the top of **.cpp* files. Using of using-statements is allowed only in class declarations or inside the function scope. In such case *using-statements* must be in alphabetical order and followed by **2 empty lines**.
-- All code in **.cpp** files must be defined inside `namespace some_namespace { ... }`. Anonymous namespaces are also defined inside this namespace to not pollute global namespace of the translation unit (see [this Stackoverflow answer](https://stackoverflow.com/a/29368872/11658801)).
+- All code in **.cpp** files must be defined inside `namespace someNamespace { ... }`. Anonymous namespaces are also defined inside this namespace to not pollute global namespace of the translation unit (see [this Stackoverflow answer](https://stackoverflow.com/a/29368872/11658801)).
 - The end `}` of namespace must be followed by two whitespaces and a line comment with the namespace name: `}  // namespace ogls::oglCore::shader`
+- The order of declaration and empty lines inside the namespace must be as follow:
+  ```
+  namespace someNamespace
+  {
+  // Position of nested namespace can be different. In general it should be on the start of parent namespace,
+  // but if something from parent namespace is used inside the inner namespace, inner namespace can be declared
+  // after it.
+  namespace
+  {
+  }  // namespace
+
+  using 1
+  using 2
+
+  type 1
+  // this empty line can be omitted if type 1 is declaration, not a definition 
+  type 2
+
+  function 1
+  // this empty line can be omitted if function 1 is declaration, not a definition 
+  function 2
+
+
+  variable 1
+  variable 2
+
+  /* anonymous namespace definition */ namespace
+  {
+  }  // namespace
+
+  }  // namespace someNamespace
+  ```
 
 ## Class/struct declaration
 The following template of class declaration is used:

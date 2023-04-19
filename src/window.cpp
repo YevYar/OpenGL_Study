@@ -17,6 +17,7 @@ namespace
 {
     void windowFramebufferSizeCalback(GLFWwindow* window, int width, int height);
 
+
     auto isTerminated = false;
 
 }  // namespace
