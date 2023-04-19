@@ -23,7 +23,7 @@ std::string readStringFromFile(const std::string& pathToFile)
 
     if (!std::filesystem::exists(pathToFile))
     {
-        const auto excMes = std::format{"File does not exist at path {}.", pathToFile};
+        const auto excMes = std::format("File does not exist at path {}.", pathToFile);
         throw exceptions::FileOpeningException{excMes};
     }
 
@@ -39,7 +39,7 @@ std::string readStringFromFile(const std::string& pathToFile)
     catch (const std::exception& exc)
     {
         file.close();
-        const auto excMes = std::format{"File loading error (path: {}): {}", pathToFile, exc.what()};
+        const auto excMes = std::format("File loading error (path: {}): {}", pathToFile, exc.what());
         throw exceptions::FileReadingException{excMes};
     }
 
@@ -53,19 +53,17 @@ std::unique_ptr<ogls::oglCore::texture::TextureData> readTextureFromFile(const s
 
     if (!std::filesystem::exists(pathToFile))
     {
-        const auto excMes = std::format{"Image does not exist at path {}.", pathToFile};
+        const auto excMes = std::format("Image does not exist at path {}.", pathToFile);
         throw exceptions::FileOpeningException{excMes};
     }
 
     stbi_set_flip_vertically_on_load(true);
-    auto width     = int{0};
-    auto height    = int{0};
-    auto nChannels = int{0};
-    auto data      = stbi_load(pathToFile.c_str(), &width, &height, &nChannels, 0);
+    auto width = int{0}, height = int{0}, nChannels = int{0};
+    auto data = stbi_load(pathToFile.c_str(), &width, &height, &nChannels, 0);
 
     if (!data)
     {
-        const auto excMes = std::format{"Cannot read an image at path {}.", pathToFile};
+        const auto excMes = std::format("Cannot read an image at path {}.", pathToFile);
         throw exceptions::FileReadingException{excMes};
     }
     // TODO: image format auto detection

@@ -121,6 +121,9 @@ class Buffer : public ICloneable
         Buffer(const Buffer& obj);
 
     private:
+        /**
+         * \brief Pointer to implementation.
+         */
         std::unique_ptr<Impl> m_impl;
 
 

@@ -29,7 +29,7 @@ struct Window::Impl
         {
             if (width <= 0 || height <= 0)
             {
-                throw std::out_of_range("Width and height must be more than 0.");
+                throw std::out_of_range{"Width and height must be more than 0."};
             }
 
             if (!glfwInit())
@@ -50,7 +50,7 @@ struct Window::Impl
             glfwMakeContextCurrent(tempWindow);
             glfwSetFramebufferSizeCallback(tempWindow, windowFramebufferSizeCalback);
 
-            if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+            if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
             {
                 cleanAndThrowOnInitException("Failed to initialize GLAD.");
             }
@@ -64,7 +64,7 @@ struct Window::Impl
         {
             glfwTerminate();
             isTerminated = true;
-            throw exceptions::WindowInitializationException(errorMessage);
+            throw exceptions::WindowInitializationException{errorMessage};
         };
 
     public:

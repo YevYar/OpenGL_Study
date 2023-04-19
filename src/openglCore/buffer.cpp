@@ -68,7 +68,7 @@ void Buffer::unbind() const noexcept
 
 Buffer* Buffer::clone() const
 {
-    return new Buffer(*this);
+    return new Buffer{*this};
 }
 
 //------ IMPLEMENTATION
@@ -168,7 +168,7 @@ void Buffer::Impl::genBuffer()
     OGLS_GLCall(glCreateBuffers(1, &rendererId));
     if (rendererId == 0)
     {
-        throw exceptions::GLRecAcquisitionException("Buffer cannot be generated.");
+        throw exceptions::GLRecAcquisitionException{"Buffer cannot be generated."};
     }
 }
 

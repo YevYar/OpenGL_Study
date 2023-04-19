@@ -21,7 +21,7 @@ GLint getOpenglLimit(LimitName limitName)
     {
         const auto errMes =
           std::format("The limit {} is not presented. Check, if initOpenglLimits() was called before.", limitName);
-        throw std::logic_error(errMes);
+        throw std::logic_error{errMes};
     }
 
     return limits.find(limitName)->second;

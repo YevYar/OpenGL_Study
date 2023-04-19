@@ -24,14 +24,15 @@ class BaseException : public std::exception
          *
          * \param message - error message.
          */
-        explicit inline BaseException(const std::string& message) : std::exception(message.c_str())
+        explicit inline BaseException(const std::string& message) : std::exception{message.c_str()}
         {
         }
 
 };  // class BaseException
 
 /**
- * \brief GLRecAcquisitionException is an exception to indicate error while generating some resources in OpenGL state machine.
+ * \brief GLRecAcquisitionException is an exception to indicate error while generating some resources in OpenGL state
+ * machine.
  */
 class GLRecAcquisitionException : public BaseException
 {

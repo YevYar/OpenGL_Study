@@ -45,7 +45,7 @@ BaseUniform::~BaseUniform() = default;
 
 template<typename Type, unsigned int Count>
 Uniform<Type, Count>::Uniform(GLuint shaderProgram, GLint location, std::string name) :
-    BaseUniform(std::make_unique<Impl>(shaderProgram, location, std::move(name)))
+    BaseUniform{std::make_unique<Impl>(shaderProgram, location, std::move(name))}
 {
 }
 
@@ -80,23 +80,23 @@ BaseUniform::BaseImpl::BaseImpl(GLuint sProgram, GLint loc, std::string n) :
 {
     if (shaderProgram == 0 || location < 0)
     {
-        throw exceptions::GLRecAcquisitionException("Uniform is not attached to a shader program.");
+        throw exceptions::GLRecAcquisitionException{"Uniform is not attached to a shader program."};
     }
 }
 
 template<typename Type, unsigned int Count>
 Uniform<Type, Count>::Impl::Impl(GLuint shaderProgram, GLint location, std::string name) :
-    BaseImpl(shaderProgram, location, std::move(name)),
+    BaseImpl{shaderProgram, location, std::move(name)},
     getter{reinterpret_cast<ConcreteUniformGetter>(getUniformGetter(typeid(Type).name()))},
     setter{reinterpret_cast<ConcreteUniformSetter>(getUniformSetter(typeid(Type).name(), Count))}
 {
     if (getter == nullptr)
     {
-        throw exceptions::GLRecAcquisitionException("No uniform getter function for specified template arguments.");
+        throw exceptions::GLRecAcquisitionException{"No uniform getter function for specified template arguments."};
     }
     if (setter == nullptr)
     {
-        throw exceptions::GLRecAcquisitionException("No uniform setter function for specified template arguments.");
+        throw exceptions::GLRecAcquisitionException{"No uniform setter function for specified template arguments."};
     }
 }
 

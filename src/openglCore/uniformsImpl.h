@@ -35,7 +35,7 @@ struct BaseUniform::BaseImpl
         /**
          * \brief Location (ID) of the referenced OpenGL uniform variable in a shader program.
          */
-        const GLint       location = -1;
+        const GLint       location = {-1};
         /**
          * \brief Name of the referenced OpenGL uniform variable, which is used in a code of a shader.
          */
@@ -43,7 +43,7 @@ struct BaseUniform::BaseImpl
         /*
          * \brief ID of parent shader program.
          */
-        const GLuint      shaderProgram = 0;
+        const GLuint      shaderProgram = {0};
 
 };  // struct BaseUniform::BaseImpl
 
@@ -92,7 +92,7 @@ struct Uniform<Type, Count>::Impl : public BaseUniform::BaseImpl
         /**
          * \brief The number of elements in the uniform variable.
          */
-        const unsigned int          count  = Count;
+        const unsigned int          count  = {Count};
         /**
          * \brief The pointer to OpenGL function to get value of this uniform in OpenGL state machine.
          */
