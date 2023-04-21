@@ -1,142 +1,162 @@
-#ifndef SHADER_PROGRAM_H
-#define SHADER_PROGRAM_H
+#ifndef OGLS_OGLCORE_SHADER_SHADER_PROGRAM_H
+#define OGLS_OGLCORE_SHADER_SHADER_PROGRAM_H
 
-#include <glad/glad.h>
 #include <map>
 #include <string>
+
+#include <glad/glad.h>
 
 #include "helpers/macros.h"
 #include "uniforms.h"
 
 /**
+ * \namespace shader
  * \brief shader namespace contains types, related to OpenGL shaders, shader programs, uniforms etc.
  */
-namespace openglCore::shader
+namespace ogls::oglCore::shader
 {
-	/**
-	 * \brief ShaderType represents 'shaderType' parameter of [glCreateShader()](https://docs.gl/gl4/glCreateShader).
-	 */
-	enum class ShaderType : GLenum
-	{
-        COMPUTE_SHADER = 0x91B9, VERTEX_SHADER = 0x8B31, TESS_CONTROL_SHADER = 0x8E88, TESS_EVALUATION_SHADER = 0x8E87,
-        GEOMETRY_SHADER = 0x8DD9, FRAGMENT_SHADER = 0x8B30
-	};
+/**
+ * \brief ShaderType represents 'shaderType' parameter of [glCreateShader()](https://docs.gl/gl4/glCreateShader).
+ */
+enum class ShaderType : GLenum
+{
+    COMPUTE_SHADER         = 0x91'B9,
+    VERTEX_SHADER          = 0x8B'31,
+    TESS_CONTROL_SHADER    = 0x8E'88,
+    TESS_EVALUATION_SHADER = 0x8E'87,
+    GEOMETRY_SHADER        = 0x8D'D9,
+    FRAGMENT_SHADER        = 0x8B'30
+};
 
-	/**
-	 * \brief Shader is a wrapper over OpenGL shader.
-	 */
-	class Shader
-	{
-		public:
-			/**
-			 * \brief Constructs new Shader object and generates new 1 shader in OpenGL state machine.
-			 * 
-			 * Wraps [glCreateShader()](https://docs.gl/gl4/glCreateShader), [glShaderSource()](https://docs.gl/gl4/glShaderSource), 
-			 * [glCompileShader()](https://docs.gl/gl4/glCompileShader), [glGetShaderiv()](https://docs.gl/gl4/glGetShader), 
-			 * [glGetShaderInfoLog()](https://docs.gl/gl4/glGetShaderInfoLog).
-			 * 
-			 * \param type - the type of created shader.
-			 * \param shaderSource - a source code of the shader.
-			 * \throw exceptions::GLRecAcquisitionException().
-			 */
-			Shader(ShaderType type, const std::string& shaderSource);
+/**
+ * \brief Shader is a wrapper over OpenGL shader.
+ */
+class Shader
+{
+    private:
+        /**
+         * \brief Impl contains private data and methods of Shader.
+         */
+        struct Impl;
 
-            NOT_COPYABLE_MOVABLE(Shader)
+    public:
+        /**
+         * \brief Constructs new Shader object and generates new 1 shader in OpenGL state machine.
+         *
+         * Wraps [glCreateShader()](https://docs.gl/gl4/glCreateShader),
+         * [glShaderSource()](https://docs.gl/gl4/glShaderSource),
+         * [glCompileShader()](https://docs.gl/gl4/glCompileShader), [glGetShaderiv()](https://docs.gl/gl4/glGetShader),
+         * [glGetShaderInfoLog()](https://docs.gl/gl4/glGetShaderInfoLog).
+         *
+         * \param type         - the type of created shader.
+         * \param shaderSource - a source code of the shader.
+         * \throw ogls::exceptions::GLRecAcquisitionException().
+         */
+        Shader(ShaderType type, const std::string& shaderSource);
+        OGLS_NOT_COPYABLE_MOVABLE(Shader)
+        /**
+         * \brief Deletes shader in OpenGL state machine.
+         *
+         * Wraps [glDeleteShader()](https://docs.gl/gl4/glDeleteShader).
+         */
+        ~Shader();
 
-			/**
-			 * \brief Deletes shader in OpenGL state machine.
-			 * 
-			 * Wraps [glDeleteShader()](https://docs.gl/gl4/glDeleteShader).
-			 */
-			~Shader();	
+    private:
+        /**
+         * \brief Pointer to implementation.
+         */
+        std::unique_ptr<Impl> m_impl;
 
-		private:
-            struct Impl;
-            std::unique_ptr<Impl> m_impl;
 
-		friend class ShaderProgram;
+        friend class ShaderProgram;
 
-	};
+};  // class Shader
 
-	/**
-	 * \brief ShaderProgram is a wrapper over OpenGL shader program.
-	 */
-	class ShaderProgram
-	{
-		public:
-			/**
-			 * \brief Constructs new ShaderProgram object, generates and compiles new 1 shader program
-			 * in OpenGL state machine.
-			 * 
-			 * Wraps [glCreateProgram()](https://docs.gl/gl4/glCreateProgram), [glAttachShader()](https://docs.gl/gl4/glAttachShader), 
-			 * [glLinkProgram()](https://docs.gl/gl4/glLinkProgram), [glValidateProgram()](https://docs.gl/gl4/glValidateProgram), 
-			 * [glGetProgramiv()](https://docs.gl/gl4/glGetProgram), [glGetProgramInfoLog()](https://docs.gl/gl4/glGetProgramInfoLog).
-			 *
-			 * \param vertexShader - an object of Shader class with the type ShaderType::VERTEX_SHADER.
-			 * \param fragmentShader - an object of Shader class with the type ShaderType::FRAGMENT_SHADER.
-			 * \throw exceptions::GLRecAcquisitionException().
-			 */
-			ShaderProgram(const Shader& vertexShader, const Shader& fragmentShader);
+/**
+ * \brief ShaderProgram is a wrapper over OpenGL shader program.
+ */
+class ShaderProgram
+{
+    private:
+        /**
+         * \brief Impl contains private data and methods of ShaderProgram.
+         */
+        struct Impl;
 
-            NOT_COPYABLE_MOVABLE(ShaderProgram)
+    public:
+        /**
+         * \brief Constructs new ShaderProgram object, generates and compiles new 1 shader program
+         * in OpenGL state machine.
+         *
+         * Wraps [glCreateProgram()](https://docs.gl/gl4/glCreateProgram),
+         * [glAttachShader()](https://docs.gl/gl4/glAttachShader), [glLinkProgram()](https://docs.gl/gl4/glLinkProgram),
+         * [glValidateProgram()](https://docs.gl/gl4/glValidateProgram),
+         * [glGetProgramiv()](https://docs.gl/gl4/glGetProgram),
+         * [glGetProgramInfoLog()](https://docs.gl/gl4/glGetProgramInfoLog).
+         *
+         * \param vertexShader   - an object of Shader class with the type ShaderType::VERTEX_SHADER.
+         * \param fragmentShader - an object of Shader class with the type ShaderType::FRAGMENT_SHADER.
+         * \throw exceptions::GLRecAcquisitionException().
+         */
+        ShaderProgram(const Shader& vertexShader, const Shader& fragmentShader);
+        OGLS_NOT_COPYABLE_MOVABLE(ShaderProgram)
+        /**
+         * \brief Deletes shader program in OpenGL state machine.
+         *
+         * Wraps [glDeleteProgram()](https://docs.gl/gl4/glDeleteProgram).
+         */
+        ~ShaderProgram();
 
-			/**
-			 * \brief Deletes shader program in OpenGL state machine.
-			 * 
-			 * Wraps [glDeleteProgram()](https://docs.gl/gl4/glDeleteProgram).
-			 */
-			~ShaderProgram();
+        /**
+         * \brief Finds uniform location and creates BaseUniform object,
+         * which wraps the OpenGL uniform variable with specified name.
+         *
+         * Uses [glGetUniformLocation()](https://docs.gl/gl4/glGetUniformLocation).
+         *
+         * \param Type  - one of the list: GLfloat, GLdouble, GLint, GLuint.
+         * \param Count - the integer value in the range [1, 4].
+         * \param name  - a name of uniform variable, which is used in OpenGL shader program.
+         * \return created BaseUniform object or throws an exception if nothing is found.
+         * \throw exceptions::GLRecAcquisitionException().
+         */
+        template<typename Type, unsigned int Count>
+        BaseUniform& findUniform(std::string name);
+        /**
+         * \brief Returns BaseUniform, which wraps the OpenGL uniform variable with specified name.
+         *
+         * To get BaseUniform for specified uniform variable this uniform must be previously found and created
+         * by calling findUniform().
+         *
+         * \param name - a name of uniform variable, which is used in OpenGL shader program.
+         * \return found BaseUniform object or throws an exception if nothing is found.
+         * \throw std::out_of_range.
+         */
+        BaseUniform& getUniform(const std::string& name) const;
+        /**
+         * \brief Wraps [glUseProgram()](https://docs.gl/gl4/glUseProgram).
+         */
+        void         use() const noexcept;
 
-			/**
-			 * \brief Wraps [glUseProgram()](https://docs.gl/gl4/glUseProgram).
-			 */
-			void use() const noexcept;
-			
-			/**
-			 * \brief Finds uniform location and creates BaseUniform object,
-			 * which wraps the OpenGL uniform variable with specified name.
-			 * 
-			 * Uses [glGetUniformLocation()](https://docs.gl/gl4/glGetUniformLocation).
-			 * 
-			 * \param Type - one of the list: float, double, int, unsigned int.
-			 * \param Count - the integer value in the range [1, 4].
-			 * \param name - a name of uniform variable, which is used in OpenGL shader program.
-			 * \return created BaseUniform object or throws an exception if nothing is found.
-			 * \throw exceptions::GLRecAcquisitionException().
-			 */
-			template<typename Type, unsigned int Count>
-            BaseUniform& findUniform(std::string name);
+    private:
+        /**
+         * \brief Pointer to implementation.
+         */
+        std::unique_ptr<Impl> m_impl;
 
-			/**
-			 * \brief Returns BaseUniform, which wraps the OpenGL uniform variable with specified name.
-			 * 
-			 * To get BaseUniform for specified uniform variable this uniform must be previously found and created
-			 * by calling findUniform().
-			 * 
-			 * \param name - a name of uniform variable, which is used in OpenGL shader program.
-			 * \return found BaseUniform object or throws an exception if nothing is found.
-			 * \throw std::out_of_range.
-			 */
-			BaseUniform& getUniform(const std::string& name) const;
+};  // class ShaderProgram
 
-		private:
-            struct Impl;
-            std::unique_ptr<Impl> m_impl;
+/**
+ * \brief Creates object of ShaderProgram class, which uses specified shader sources.
+ *
+ * \param pathToVertexShader   - relative to the root folder path to vertex shader source code.
+ * \param pathToFragmentShader - relative to the root folder path to fragment shader source code.
+ * \return created ShaderProgram object.
+ * \throw std::runtime_error,
+ * exceptions, which can be thrown by constructors of Shader and ShaderProgram classes.
+ */
+std::unique_ptr<shader::ShaderProgram> makeShaderProgram(const std::string& pathToVertexShader,
+                                                         const std::string& pathToFragmentShader);
 
-	};
-
-	/**
-	 * \brief Creates object of ShaderProgram class, which uses specified shader sources.
-	 * 
-	 * \param pathToVertexShader - relative to the root folder path to vertex shader source code.
-	 * \param pathToFragmentShader - relative to the root folder path to fragment shader source code.
-	 * \return created ShaderProgram object.
-	 * \throw std::runtime_error, 
-	 * exceptions, which can be thrown by constructors of Shader and ShaderProgram classes. 
-	 */
-	std::unique_ptr<shader::ShaderProgram> makeShaderProgram(const std::string& pathToVertexShader,
-		const std::string& pathToFragmentShader);
-
-}
+}  // namespace ogls::oglCore::shader
 
 #endif

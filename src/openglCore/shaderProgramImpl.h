@@ -1,47 +1,44 @@
-#ifndef SHADER_PROGRAM_IMPL_H
-#define SHADER_PROGRAM_IMPL_H
+#ifndef OGLS_OGLCORE_SHADER_SHADER_PROGRAM_IMPL_H
+#define OGLS_OGLCORE_SHADER_SHADER_PROGRAM_IMPL_H
 
 #include "shaderProgram.h"
 
-namespace openglCore::shader
+namespace ogls::oglCore::shader
 {
-    struct Shader::Impl
-    {
-        public:
-            Impl(ShaderType type, const std::string& shaderSource);
+struct Shader::Impl
+{
+    public:
+        Impl(ShaderType type, const std::string& shaderSource);
+        OGLS_NOT_COPYABLE_MOVABLE(Impl)
+        ~Impl();
 
-            NOT_COPYABLE_MOVABLE(Impl)
+    public:
+        /**
+         * \brief Id of referenced OpenGL shader object.
+         */
+        GLuint           rendererId = {0};
+        const ShaderType type       = ShaderType::VERTEX_SHADER;
 
-            ~Impl();
+};  // struct Shader::Impl
 
-        public:
-            /**
-             * \brief Id of referenced OpenGL shader object.
-             */
-            GLuint m_rendererId = 0;
-            const ShaderType m_type = ShaderType::VERTEX_SHADER;
+struct ShaderProgram::Impl
+{
+    public:
+        Impl(const Shader& vertexShader, const Shader& fragmentShader);
+        OGLS_NOT_COPYABLE_MOVABLE(Impl)
+        ~Impl();
 
-    };
+        GLint getUniformLocation(const std::string& uniformName) const;
 
-    struct ShaderProgram::Impl
-    {
-        public:
-            Impl(const Shader& vertexShader, const Shader& fragmentShader);
+    public:
+        /**
+         * \brief Id of referenced OpenGL shader program.
+         */
+        GLuint                                              rendererId = {0};
+        std::map<std::string, std::unique_ptr<BaseUniform>> uniforms;
 
-            NOT_COPYABLE_MOVABLE(Impl)
+};  // ShaderProgram::Impl
 
-            ~Impl();
-
-            GLint getUniformLocation(const std::string& uniformName) const;
-
-        public:
-            /**
-             * \brief Id of referenced OpenGL shader program.
-             */
-            GLuint m_rendererId = 0;
-            std::map<std::string, std::unique_ptr<BaseUniform>> m_uniforms;
-
-    };
-}
+}  // namespace ogls::oglCore::shader
 
 #endif
