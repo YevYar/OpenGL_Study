@@ -170,7 +170,7 @@ class MyClass
 - As long as you can, stick to the **Rule of Zero**, but if you have to write at least one of the Big Five, default the rest.
 - Order methods of one group in alphabetical order.
 - Use alphabetical order of class fields. If necessary, group class fields and apply alphabetical order inside this groups.
-### Line breaks in type declaration:
+### Line breaks in class/struct declaration:
 - 2 empty lines after static asserts.
 - 1 empty line before access modifier.
 - 1 empty line after each of methods groups, but no empty lines between methods of one group.
@@ -309,7 +309,7 @@ avoid possible misunderstanding between `auto lst = {1}; // lst is an initialize
 - After macros call `;` is necessary: `SOME_MACROS(x);`. However, in type declaration `;` must be omitted: `SOME_MACROS(x)`.
 
 ## Some necessary empty lines
-- Before closing `}` of type declaration.
+- Before closing `}` of class/struct declaration.
 - Before closing `}` of namespace.
 - Before `#endif`.
 - Between functions (except methods in type declaration) and between function and type declaration.

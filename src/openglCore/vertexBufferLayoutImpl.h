@@ -1,29 +1,34 @@
-#ifndef VERTEX_BUFFER_LAYOUT_IMPL_H
-#define VERTEX_BUFFER_LAYOUT_IMPL_H
+#ifndef OGLS_OGLCORE_VERTEX_VERTEX_BUFFER_LAYOUT_IMPL_H
+#define OGLS_OGLCORE_VERTEX_VERTEX_BUFFER_LAYOUT_IMPL_H
 
 #include "vertexBufferLayout.h"
 
-namespace openglCore::vertex
+namespace ogls::oglCore::vertex
 {
-	struct VertexBufferLayout::Impl
-	{
-		public:
-			Impl() = default;
-			Impl(const Impl& obj);
+struct VertexBufferLayout::Impl
+{
+    public:
+        Impl()                = default;
+        Impl(const Impl& obj) = default;
+        OGLS_DEFAULT_MOVABLE(Impl)
 
-			DEFAULT_MOVABLE(Impl)
+        Impl& operator=(const Impl&) = delete;
 
-			Impl& operator=(const Impl&) = delete;
-		
-		public:
-			std::vector<VertexAttribute> m_vertexAttributes;
+    public:
+        /**
+         * \brief Automatically calculated value, when new VertexAttribute is added via
+         * addVertexAttribute().
+         *
+         * \see VertexBufferLayout::getStride().
+         */
+        GLsizei                      stride = {0};
+        /**
+         * \brief The vector of added to layout vertex attributes.
+         */
+        std::vector<VertexAttribute> vertexAttributes;
 
-			/**
-			 * \brief See getStride(). It is automatically calculated value, when new VertexAttribute is added via addVertexAttribute().
-			 */
-			GLsizei m_stride = 0;
+};  // struct VertexBufferLayout::Impl
 
-	};
-}
+}  // namespace ogls::oglCore::vertex
 
 #endif

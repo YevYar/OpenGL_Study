@@ -74,11 +74,11 @@ std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle()
     // Configure VAO, VBO and EBO only once
     static auto VAO = std::make_shared<VertexArray>();
 
-    static auto coordinateMap = VertexAttribute{0, 2, VertexAttrType::FLOAT, false, 0};
+    static auto coordinateMap = VertexAttribute{0, 2, VertexAttrType::Float, false, 0};
     static auto colorMap =
-      VertexAttribute{1, 3, VertexAttrType::FLOAT, false, getByteSizeOfType(VertexAttrType::FLOAT) * 2};
+      VertexAttribute{1, 3, VertexAttrType::Float, false, getByteSizeOfType(VertexAttrType::Float) * 2};
     static auto texCoords =
-      VertexAttribute{2, 2, VertexAttrType::FLOAT, false, getByteSizeOfType(VertexAttrType::FLOAT) * 5};
+      VertexAttribute{2, 2, VertexAttrType::Float, false, getByteSizeOfType(VertexAttrType::Float) * 5};
 
     static auto layout = VertexBufferLayout{};
     layout.addVertexAttribute(coordinateMap);
@@ -86,13 +86,13 @@ std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle()
     layout.addVertexAttribute(texCoords);
 
     static auto data = ArrayData{reinterpret_cast<const void*>(points), sizeof(points)};
-    static auto VBO  = std::make_shared<Buffer>(BufferTarget::ARRAY_BUFFER, data, BufferDataUsage::STATIC_DRAW, layout);
+    static auto VBO  = std::make_shared<Buffer>(BufferTarget::ArrayBuffer, data, BufferDataUsage::StaticDraw, layout);
 
     VAO->addBuffer(VBO);
 
-    static auto EBO = std::make_shared<Buffer>(BufferTarget::ELEMENT_ARRAY_BUFFER,
+    static auto EBO = std::make_shared<Buffer>(BufferTarget::ElementArrayBuffer,
                                                ArrayData{reinterpret_cast<const void*>(indices), sizeof(indices)},
-                                               BufferDataUsage::STATIC_DRAW);
+                                               BufferDataUsage::StaticDraw);
     VAO->addBuffer(EBO);
 
     // Create shader program only once

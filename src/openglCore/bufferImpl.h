@@ -43,8 +43,8 @@ struct Buffer::Impl
          * \brief Id of referenced OpenGL buffer.
          */
         GLuint                            rendererId = {0};
-        BufferTarget                      target     = BufferTarget::ARRAY_BUFFER;
-        BufferDataUsage                   usage      = BufferDataUsage::STATIC_DRAW;
+        BufferTarget                      target     = BufferTarget::ArrayBuffer;
+        BufferDataUsage                   usage      = BufferDataUsage::StaticDraw;
 
 
         template<ogls::oglCore::OpenGLBindableObject Type>

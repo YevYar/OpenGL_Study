@@ -20,7 +20,6 @@ set(PRIVATE_HEADERS bufferImpl.h
 	vertexBufferLayoutImpl.h)
 	
 set(SOURCES buffer.cpp
-	openglHelpersImpl.cpp
 	openglLimits.cpp
 	shaderProgram.cpp
 	texture.cpp

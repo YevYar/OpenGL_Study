@@ -1,52 +1,90 @@
-#ifndef VERTEX_TYPES_H
-#define VERTEX_TYPES_H
+#ifndef OGLS_OGLCORE_VERTEX_VERTEX_TYPES_H
+#define OGLS_OGLCORE_VERTEX_VERTEX_TYPES_H
 
 #include <glad/glad.h>
 
-namespace openglCore::vertex
+namespace ogls::oglCore::vertex
 {
-    /**
-     * \brief BufferTarget represents 'target' parameter of [glBindBuffer()](https://docs.gl/gl4/glBindBuffer).
-     */
-    enum class BufferTarget : GLenum
-    {
-        ARRAY_BUFFER = 0x8892, ATOMIC_COUNTER_BUFFER = 0x92C0, COPY_READ_BUFFER = 0x8F36, COPY_WRITE_BUFFER = 0x8F37,
-        DISPATCH_INDIRECT_BUFFER = 0x90EE, DRAW_INDIRECT_BUFFER = 0x8F3F, ELEMENT_ARRAY_BUFFER = 0x8893,
-        PIXEL_PACK_BUFFER = 0x88EB, PIXEL_UNPACK_BUFFER = 0x88EC, QUERY_BUFFER = 0x9192, SHADER_STORAGE_BUFFER = 0x90D2,
-        TEXTURE_BUFFER = 0x8C2A, TRANSFORM_FEEDBACK_BUFFER = 0x8C8E, UNIFORM_BUFFER = 0x8A11
-    };
+/**
+ * \brief BufferTarget represents 'target' parameter of [glBindBuffer()](https://docs.gl/gl4/glBindBuffer).
+ */
+enum class BufferTarget : GLenum
+{
+    ArrayBuffer             = 0x88'92,
+    AtomicCounterBuffer     = 0x92'C0,
+    CopyReadBuffer          = 0x8F'36,
+    CopyWriteBuffer         = 0x8F'37,
+    DispatchIndirectBuffer  = 0x90'EE,
+    DrawIndirectBuffer      = 0x8F'3F,
+    ElementArrayBuffer      = 0x88'93,
+    PixelPackBuffer         = 0x88'EB,
+    PixelUnpackBuffer       = 0x88'EC,
+    QueryBuffer             = 0x91'92,
+    ShaderStorageBuffer     = 0x90'D2,
+    TextureBuffer           = 0x8C'2A,
+    TransformFeedbackBuffer = 0x8C'8E,
+    UniformBuffer           = 0x8A'11
+};
 
-    enum class BufferBindingTarget : GLenum
-    {
-        ARRAY_BUFFER_BINDING = 0x8894, ATOMIC_COUNTER_BUFFER_BINDING = 0x92C1, COPY_READ_BUFFER_BINDING = 0x8F36,
-        COPY_WRITE_BUFFER_BINDING = 0x8F37, DRAW_INDIRECT_BUFFER_BINDING = 0x8F43,
-        DISPATCH_INDIRECT_BUFFER_BINDING = 0x90EF, ELEMENT_ARRAY_BUFFER_BINDING = 0x8895,
-        PIXEL_PACK_BUFFER_BINDING = 0x88ED, PIXEL_UNPACK_BUFFER_BINDING = 0x88EF,
-        SHADER_STORAGE_BUFFER_BINDING = 0x90D3, QUERY_BUFFER_BINDING = 0x9193, TEXTURE_BUFFER_BINDING = 0x8C2A,
-        TRANSFORM_FEEDBACK_BUFFER_BINDING = 0x8C8F, UNIFORM_BUFFER_BINDING = 0x8A28
-    };
+/**
+ * \brief BufferBindingTarget is a set of values of 'pname' parameter of [glGetIntegerv()](https://docs.gl/gl4/glGet)
+ * to get ID of current bound object to specific BufferTarget.
+ */
+enum class BufferBindingTarget : GLenum
+{
+    ArrayBufferBinding             = 0x88'94,
+    AtomicCounterBufferBinding     = 0x92'C1,
+    CopyReadBufferBinding          = 0x8F'36,
+    CopyWriteBufferBinding         = 0x8F'37,
+    DispatchIndirectBufferBinding  = 0x90'EF,
+    DrawIndirectBufferBinding      = 0x8F'43,
+    ElementArrayBufferBinding      = 0x88'95,
+    PixelPackBufferBinding         = 0x88'ED,
+    PixelUnpackBufferBinding       = 0x88'EF,
+    QueryBufferBinding             = 0x91'93,
+    ShaderStorageBufferBinding     = 0x90'D3,
+    TextureBufferBinding           = 0x8C'2A,
+    TransformFeedbackBufferBinding = 0x8C'8F,
+    UniformBufferBinding           = 0x8A'28
+};
 
-    /**
-     * \brief BufferDataUsage represents 'usage' parameter of [glBufferData()](https://docs.gl/gl4/glBufferData).
-     */
-    enum class BufferDataUsage : GLenum
-    {
-        STREAM_DRAW = 0x88E0, STREAM_READ = 0x88E1, STREAM_COPY = 0x88E2, STATIC_DRAW = 0x88E4,
-        STATIC_READ = 0x88E5, STATIC_COPY = 0x88E6, DYNAMIC_DRAW = 0x88E8, DYNAMIC_READ = 0x88E9,
-        DYNAMIC_COPY = 0x88EA
-    };
+/**
+ * \brief BufferDataUsage represents 'usage' parameter of [glBufferData()](https://docs.gl/gl4/glBufferData).
+ */
+enum class BufferDataUsage : GLenum
+{
+    DynamicCopy = 0x88'EA,
+    DynamicDraw = 0x88'E8,
+    DynamicRead = 0x88'E9,
+    StaticCopy  = 0x88'E6,
+    StaticDraw  = 0x88'E4,
+    StaticRead  = 0x88'E5,
+    StreamCopy  = 0x88'E2,
+    StreamDraw  = 0x88'E0,
+    StreamRead  = 0x88'E1
+};
 
-    /**
-     * VertexAttrType represents 'type' parameter of
-     * [glVertexAttribPointer()](https://docs.gl/gl4/glVertexAttribPointer).
-     */
-    enum class VertexAttrType : GLenum
-    {
-        BYTE = 0x1400, UNSIGNED_BYTE = 0x1401, SHORT = 0x1402, UNSIGNED_SHORT = 0x1403,
-        INT = 0x1404, UNSIGNED_INT = 0x1405, HALF_FLOAT = 0x140B, FLOAT = 0x1406,
-        DOUBLE = 0x140A, FIXED = 0x140C, INT_2_10_10_10_REV = 0x8D9F, UNSIGNED_INT_2_10_10_10_REV = 0x8368,
-        UNSIGNED_INT_10F_11F_11F_REV = 0x8C3B
-    };
-}
+/**
+ * VertexAttrType represents 'type' parameter of
+ * [glVertexAttribPointer()](https://docs.gl/gl4/glVertexAttribPointer).
+ */
+enum class VertexAttrType : GLenum
+{
+    Byte                    = 0x14'00,
+    Double                  = 0x14'0A,
+    Fixed                   = 0x14'0C,
+    Float                   = 0x14'06,
+    HalfFloat               = 0x14'0B,
+    Int                     = 0x14'04,
+    Int2101010Rev           = 0x8D'9F,
+    Short                   = 0x14'02,
+    UnsignedByte            = 0x14'01,
+    UnsignedInt             = 0x14'05,
+    UnsignedInt10f11f11fRev = 0x8C'3B,
+    UnsignedInt2101010Rev   = 0x83'68,
+    UnsignedShort           = 0x14'03
+};
+
+}  // namespace ogls::oglCore::vertex
 
 #endif
