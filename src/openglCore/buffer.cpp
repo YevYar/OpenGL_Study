@@ -105,38 +105,38 @@ BufferBindingTarget Buffer::Impl::getTargetAssociatedGetParameter(BufferTarget t
 {
     switch (target)
     {
-        case BufferTarget::ARRAY_BUFFER:
-            return BufferBindingTarget::ARRAY_BUFFER_BINDING;
-        case BufferTarget::ATOMIC_COUNTER_BUFFER:
-            return BufferBindingTarget::ATOMIC_COUNTER_BUFFER_BINDING;
-        case BufferTarget::COPY_READ_BUFFER:
-            return BufferBindingTarget::COPY_READ_BUFFER_BINDING;
-        case BufferTarget::COPY_WRITE_BUFFER:
-            return BufferBindingTarget::COPY_WRITE_BUFFER_BINDING;
-        case BufferTarget::DISPATCH_INDIRECT_BUFFER:
-            return BufferBindingTarget::DISPATCH_INDIRECT_BUFFER_BINDING;
-        case BufferTarget::DRAW_INDIRECT_BUFFER:
-            return BufferBindingTarget::DRAW_INDIRECT_BUFFER_BINDING;
-        case BufferTarget::ELEMENT_ARRAY_BUFFER:
-            return BufferBindingTarget::ELEMENT_ARRAY_BUFFER_BINDING;
-        case BufferTarget::PIXEL_PACK_BUFFER:
-            return BufferBindingTarget::PIXEL_PACK_BUFFER_BINDING;
-        case BufferTarget::PIXEL_UNPACK_BUFFER:
-            return BufferBindingTarget::PIXEL_UNPACK_BUFFER_BINDING;
-        case BufferTarget::QUERY_BUFFER:
-            return BufferBindingTarget::QUERY_BUFFER_BINDING;
-        case BufferTarget::SHADER_STORAGE_BUFFER:
-            return BufferBindingTarget::SHADER_STORAGE_BUFFER_BINDING;
-        case BufferTarget::TEXTURE_BUFFER:
-            return BufferBindingTarget::TEXTURE_BUFFER_BINDING;
-        case BufferTarget::TRANSFORM_FEEDBACK_BUFFER:
-            return BufferBindingTarget::TRANSFORM_FEEDBACK_BUFFER_BINDING;
-        case BufferTarget::UNIFORM_BUFFER:
-            return BufferBindingTarget::UNIFORM_BUFFER_BINDING;
+        case BufferTarget::ArrayBuffer:
+            return BufferBindingTarget::ArrayBufferBinding;
+        case BufferTarget::AtomicCounterBuffer:
+            return BufferBindingTarget::AtomicCounterBufferBinding;
+        case BufferTarget::CopyReadBuffer:
+            return BufferBindingTarget::CopyReadBufferBinding;
+        case BufferTarget::CopyWriteBuffer:
+            return BufferBindingTarget::CopyWriteBufferBinding;
+        case BufferTarget::DispatchIndirectBuffer:
+            return BufferBindingTarget::DispatchIndirectBufferBinding;
+        case BufferTarget::DrawIndirectBuffer:
+            return BufferBindingTarget::DrawIndirectBufferBinding;
+        case BufferTarget::ElementArrayBuffer:
+            return BufferBindingTarget::ElementArrayBufferBinding;
+        case BufferTarget::PixelPackBuffer:
+            return BufferBindingTarget::PixelPackBufferBinding;
+        case BufferTarget::PixelUnpackBuffer:
+            return BufferBindingTarget::PixelUnpackBufferBinding;
+        case BufferTarget::QueryBuffer:
+            return BufferBindingTarget::QueryBufferBinding;
+        case BufferTarget::ShaderStorageBuffer:
+            return BufferBindingTarget::ShaderStorageBufferBinding;
+        case BufferTarget::TextureBuffer:
+            return BufferBindingTarget::TextureBufferBinding;
+        case BufferTarget::TransformFeedbackBuffer:
+            return BufferBindingTarget::TransformFeedbackBufferBinding;
+        case BufferTarget::UniformBuffer:
+            return BufferBindingTarget::UniformBufferBinding;
         default:
         {
             OGLS_ASSERT(false);
-            return BufferBindingTarget::ARRAY_BUFFER_BINDING;
+            return BufferBindingTarget::ArrayBufferBinding;
         }
     }
 }

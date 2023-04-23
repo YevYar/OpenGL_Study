@@ -20,12 +20,12 @@ namespace ogls::oglCore::shader
  */
 enum class ShaderType : GLenum
 {
-    COMPUTE_SHADER         = 0x91'B9,
-    VERTEX_SHADER          = 0x8B'31,
-    TESS_CONTROL_SHADER    = 0x8E'88,
-    TESS_EVALUATION_SHADER = 0x8E'87,
-    GEOMETRY_SHADER        = 0x8D'D9,
-    FRAGMENT_SHADER        = 0x8B'30
+    ComputeShader        = 0x91'B9,
+    FragmentShader       = 0x8B'30,
+    GeometryShader       = 0x8D'D9,
+    TessControlShader    = 0x8E'88,
+    TessEvaluationShader = 0x8E'87,
+    VertexShader         = 0x8B'31
 };
 
 /**
@@ -96,7 +96,7 @@ class ShaderProgram
          *
          * \param vertexShader   - an object of Shader class with the type ShaderType::VERTEX_SHADER.
          * \param fragmentShader - an object of Shader class with the type ShaderType::FRAGMENT_SHADER.
-         * \throw exceptions::GLRecAcquisitionException().
+         * \throw ogls::exceptions::GLRecAcquisitionException().
          */
         ShaderProgram(const Shader& vertexShader, const Shader& fragmentShader);
         OGLS_NOT_COPYABLE_MOVABLE(ShaderProgram)
@@ -117,7 +117,7 @@ class ShaderProgram
          * \param Count - the integer value in the range [1, 4].
          * \param name  - a name of uniform variable, which is used in OpenGL shader program.
          * \return created BaseUniform object or throws an exception if nothing is found.
-         * \throw exceptions::GLRecAcquisitionException().
+         * \throw ogls::exceptions::GLRecAcquisitionException().
          */
         template<typename Type, unsigned int Count>
         BaseUniform& findUniform(std::string name);
@@ -154,8 +154,8 @@ class ShaderProgram
  * \throw std::runtime_error,
  * exceptions, which can be thrown by constructors of Shader and ShaderProgram classes.
  */
-std::unique_ptr<shader::ShaderProgram> makeShaderProgram(const std::string& pathToVertexShader,
-                                                         const std::string& pathToFragmentShader);
+std::unique_ptr<ShaderProgram> makeShaderProgram(const std::string& pathToVertexShader,
+                                                 const std::string& pathToFragmentShader);
 
 }  // namespace ogls::oglCore::shader
 

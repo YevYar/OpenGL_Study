@@ -5,9 +5,6 @@
 
 namespace ogls::oglCore::shader
 {
-/**
- * \brief BaseImpl is a base class with implementation details of BaseUniform.
- */
 struct BaseUniform::BaseImpl
 {
     public:
@@ -47,12 +44,6 @@ struct BaseUniform::BaseImpl
 
 };  // struct BaseUniform::BaseImpl
 
-/**
- * \brief Impl contains implementation details of Uniform.
- *
- * \param Type  - one of the list: GLfloat, GLdouble, GLint, GLuint.
- * \param Count - the integer value in the range [1, 4].
- */
 template<typename Type, unsigned int Count>
 struct Uniform<Type, Count>::Impl : public BaseUniform::BaseImpl
 {

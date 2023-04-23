@@ -17,7 +17,7 @@ struct Shader::Impl
          * \brief Id of referenced OpenGL shader object.
          */
         GLuint           rendererId = {0};
-        const ShaderType type       = ShaderType::VERTEX_SHADER;
+        const ShaderType type       = ShaderType::VertexShader;
 
 };  // struct Shader::Impl
 

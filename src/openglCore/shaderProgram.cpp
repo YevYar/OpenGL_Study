@@ -2,7 +2,6 @@
 #include "shaderProgramImpl.h"
 
 #include <format>
-#include <iostream>
 #include <vector>
 
 #include "exceptions.h"
@@ -64,8 +63,8 @@ std::unique_ptr<ShaderProgram> makeShaderProgram(const std::string& pathToVertex
         throw std::runtime_error{"Vertex or fragment shader source is empty."};
     }
 
-    const auto vShader = Shader{ShaderType::VERTEX_SHADER, vShaderSource},
-               fShader = Shader{ShaderType::FRAGMENT_SHADER, fShaderSource};
+    const auto vShader = Shader{ShaderType::VertexShader, vShaderSource},
+               fShader = Shader{ShaderType::FragmentShader, fShaderSource};
 
     return std::make_unique<ShaderProgram>(vShader, fShader);
 }
@@ -86,12 +85,12 @@ Shader::Impl::Impl(ShaderType t, const std::string& shaderSource) : type{t}
     OGLS_GLCall(glShaderSource(rendererId, 1, &c_shaderSource, nullptr));
     OGLS_GLCall(glCompileShader(rendererId));
 
-    auto compileResult = int{0};
+    auto compileResult = GLint{0};
     OGLS_GLCall(glGetShaderiv(rendererId, GL_COMPILE_STATUS, &compileResult));
 
     if (compileResult == GL_FALSE)
     {
-        auto logLength = int{0};
+        auto logLength = GLint{0};
         OGLS_GLCall(glGetShaderiv(rendererId, GL_INFO_LOG_LENGTH, &logLength));
         auto errorLog = std::vector<GLchar>(logLength);
         OGLS_GLCall(glGetShaderInfoLog(rendererId, logLength, &logLength, &errorLog[0]));
@@ -121,14 +120,14 @@ ShaderProgram::Impl::Impl(const Shader& vertexShader, const Shader& fragmentShad
     OGLS_GLCall(glLinkProgram(rendererId));
     OGLS_GLCall(glValidateProgram(rendererId));
 
-    auto validationResult = int{0};
+    auto validationResult = GLint{0};
     OGLS_GLCall(glGetProgramiv(rendererId, GL_VALIDATE_STATUS, &validationResult));
-    auto linkingResult = int{0};
+    auto linkingResult = GLint{0};
     OGLS_GLCall(glGetProgramiv(rendererId, GL_LINK_STATUS, &linkingResult));
 
     if (linkingResult == GL_FALSE || validationResult == GL_FALSE)
     {
-        auto errorLength = int{0};
+        auto errorLength = GLint{0};
         OGLS_GLCall(glGetProgramiv(rendererId, GL_INFO_LOG_LENGTH, &errorLength));
         auto errorLog = std::vector<GLchar>(errorLength);
         OGLS_GLCall(glGetProgramInfoLog(rendererId, errorLength, &errorLength, &errorLog[0]));
@@ -171,19 +170,20 @@ namespace
     {
         switch (type)
         {
-            case ShaderType::VERTEX_SHADER:
+            case ShaderType::VertexShader:
                 return "VERTEX";
-            case ShaderType::FRAGMENT_SHADER:
+            case ShaderType::FragmentShader:
                 return "FRAGMENT";
-            case ShaderType::GEOMETRY_SHADER:
+            case ShaderType::GeometryShader:
                 return "GEOMETRY";
             default:
             {
                 OGLS_ASSERT(false);
-                return "VERTEX";
+                return "UNSUPPORTED";
             }
         };
     }
+
 }  // namespace
 
 #define INSTANTIATE_FIND_UNIFORM(Type)                                      \
