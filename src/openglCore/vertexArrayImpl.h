@@ -1,37 +1,38 @@
-#ifndef VERTEX_ARRAY_IMPL_H
-#define VERTEX_ARRAY_IMPL_H
+#ifndef OGLS_OGLCORE_VERTEX_VERTEX_ARRAY_IMPL_H
+#define OGLS_OGLCORE_VERTEX_VERTEX_ARRAY_IMPL_H
 
 #include "vertexArray.h"
 
-namespace openglCore::vertex
+#include "helpers/macros.h"
+
+namespace ogls::oglCore::vertex
 {
-	struct VertexArray::Impl
-	{
-		public:
-			Impl();
+struct VertexArray::Impl
+{
+    public:
+        static void bindSpecificVao(GLuint vaoId) noexcept;
 
-			NOT_COPYABLE_MOVABLE(Impl)
-		
-			/**
-			 * \brief Deletes vertex array object in OpenGL state machine.
-			 *
-			 * Wraps [glDeleteVertexArrays()](https://docs.gl/gl4/glDeleteVertexArrays).
-			 */
-			~Impl();
+        Impl();
+        OGLS_NOT_COPYABLE_MOVABLE(Impl)
+        /**
+         * \brief Deletes vertex array object in OpenGL state machine.
+         *
+         * Wraps [glDeleteVertexArrays()](https://docs.gl/gl4/glDeleteVertexArrays).
+         */
+        ~Impl();
 
-			static void bindSpecificVao(GLuint vaoId) noexcept;
+        void deleteVertexArray();
+        void genVertexArray();
 
-			void genVertexArray();
-			void deleteVertexArray();
+    public:
+        /**
+         * \brief Id of referenced OpenGL vertex array object.
+         */
+        GLuint                               rendererId = {0};
+        std::vector<std::shared_ptr<Buffer>> buffers;
 
-		public:
-			/**
-			 * \brief Id of referenced OpenGL vertex array object.
-			 */
-			GLuint m_rendererId = 0;
-			std::vector<std::shared_ptr<Buffer>> m_buffers;
+};  // struct VertexArray::Impl
 
-	};
-}
+}  // namespace ogls::oglCore::vertex
 
 #endif
