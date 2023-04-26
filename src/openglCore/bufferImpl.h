@@ -2,6 +2,7 @@
 #define OGLS_OGLCORE_VERTEX_BUFFER_IMPL_H
 
 #include "buffer.h"
+
 #include "openglHelpersImpl.h"
 
 namespace ogls::oglCore::vertex

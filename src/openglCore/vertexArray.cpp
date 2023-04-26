@@ -106,9 +106,11 @@ void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
                                                            toUType(attr.type), attr.byteOffset));
                     break;
                 default:
+                {
                     OGLS_ASSERT(false);
                     OGLS_GLCall(glVertexArrayAttribFormat(m_impl->rendererId, attr.index, attr.count,
                                                           toUType(attr.type), attr.normalized, attr.byteOffset));
+                }
             }
         }
     }
@@ -138,7 +140,7 @@ const std::vector<std::shared_ptr<Buffer>>& VertexArray::getBuffers() const noex
 
 VertexArray* VertexArray::clone() const
 {
-    return new VertexArray(*this);
+    return new VertexArray{*this};
 }
 
 //------ IMPLEMENTATION

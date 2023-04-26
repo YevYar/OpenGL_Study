@@ -1,260 +1,392 @@
-#ifndef TEXTURE_TYPES_H
-#define TEXTURE_TYPES_H
+#ifndef OGLS_OGLCORE_TEXTURE_TEXTURE_TYPES_H
+#define OGLS_OGLCORE_TEXTURE_TEXTURE_TYPES_H
 
 #include <glad/glad.h>
 
 #include "helpers/macros.h"
 
-namespace openglCore::texture
+namespace ogls::oglCore::texture
 {
-    /**
-     * \brief TexturePixelFormat is a format of the texture, which represents 'format' parameter of such functions as
-     * [glTexImage1D()](https://docs.gl/gl4/glTexImage1D), [glTexImage2D()](https://docs.gl/gl4/glTexImage2D),
-     * [glTexImage3D()](https://docs.gl/gl4/glTexImage3D) etc.
-     *
-     * The 'format' describes the format of pixel data in client memory.
-     * See this [explanation](https://stackoverflow.com/questions/34497195/difference-between-format-and-internalformat).
-     */
-    enum class TexturePixelFormat : GLenum
-    {
-        RED = 0x1903, RG = 0x8227, RGB = 0x1907, BGR = 0x80E0, RGBA = 0x1908, BGRA = 0x80E1, RED_INTEGER = 0x8D94,
-        RG_INTEGER = 0x8228, RGB_INTEGER = 0x8D98, BGR_INTEGER = 0x8D9A, RGBA_INTEGER = 0x8D99, BGRA_INTEGER = 0x8D9B,
-        STENCIL_INDEX = 0x1901, DEPTH_COMPONENT = 0x1902, DEPTH_STENCIL = 0x84F9
-    };
+/**
+ * \brief TexImage1DTarget is a type of the texture, which represents 'target' parameter of
+ * [glTexImage1D()](https://docs.gl/gl4/glTexImage1D).
+ */
+enum class TexImage1DTarget : GLenum
+{
+    ProxyTexture1d = 0x80'63,
+    Texture1d      = 0x0D'E0
+};
 
-    /**
-     * \brief TextureInternalFormat is a format of the texture, which represents 'internalFormat' parameter
-     * of such functions as [glTexImage1D()](https://docs.gl/gl4/glTexImage1D),
-     * [glTexImage2D()](https://docs.gl/gl4/glTexImage2D), [glTexImage3D()](https://docs.gl/gl4/glTexImage3D) etc.
-     *
-     * The 'internalFormat' describes how the texture shall be stored in the GPU.
-     * See this [explanation](https://stackoverflow.com/questions/34497195/difference-between-format-and-internalformat).
-     */
-    enum class TextureInternalFormat : GLint
-    {
-        DEPTH_COMPONENT = 0x1902, DEPTH_STENCIL = 0x84F9, RED = 0x1903, RG = 0x8227, RGB = 0x1907, RGBA = 0x1908,
-        R8 = 0x8229, R8_SNORM = 0x8F94, R16 = 0x822A, R16_SNORM = 0x8F98, RG8 = 0x822B, RG8_SNORM = 0x8F95,
-        RG16 = 0x822C, RG16_SNORM = 0x8F99, R3_G3_B2 = 0x2A10, RGB4 = 0x804F, RGB5 = 0x8050, RGB8 = 0x8051,
-        RGB8_SNORM = 0x8F96, RGB10 = 0x8052, RGB12 = 0x8053, RGB16_SNORM = 0x8F9A, RGBA2 = 0x8055, RGBA4 = 0x8056,
-        RGB5_A1 = 0x8057, RGBA8 = 0x8058, RGBA8_SNORM = 0x8F97, RGB10_A2 = 0x8059, RGB10_A2UI = 0x906F,
-        RGBA12 = 0x805A, RGBA16 = 0x805B, SRGB8 = 0x8C41, SRGB8_ALPHA8 = 0x8C43, R16F = 0x822D, RG16F = 0x822F,
-        RGB16F = 0x881B, RGBA16F = 0x881A, R32F = 0x822E, RG32F = 0x8230, RGB32F = 0x8815, RGBA32F = 0x8814,
-        R11F_G11F_B10F = 0x8C3A, RGB9_E5 = 0x8C3D, R8I = 0x8231, R8UI = 0x8232, R16I = 0x8233, R16UI = 0x8234,
-        R32I = 0x8235, R32UI = 0x8236, RG8I = 0x8237, RG8UI = 0x8238, RG16I = 0x8239, RG16UI = 0x823A,
-        RG32I = 0x823B, RG32UI = 0x823C, RGB8I = 0x8D8F, RGB8UI = 0x8D7D, RGB16I = 0x8D89, RGB16UI = 0x8D77,
-        RGB32I = 0x8D83, RGB32UI = 0x8D71, RGBA8I = 0x8D8E, RGBA8UI = 0x8D7C, RGBA16I = 0x8D88, RGBA16UI = 0x8D76,
-        RGBA32I = 0x8D82, RGBA32UI = 0x8D70, COMPRESSED_RED = 0x8225, COMPRESSED_RG = 0x8226, COMPRESSED_RGB = 0x84ED,
-        COMPRESSED_RGBA = 0x84EE, COMPRESSED_SRGB = 0x8C48, COMPRESSED_SRGB_ALPHA = 0x8C49,
-        COMPRESSED_RED_RGTC1 = 0x8DBB, COMPRESSED_SIGNED_RED_RGTC1 = 0x8DBC, COMPRESSED_RG_RGTC2 = 0x8DBD,
-        COMPRESSED_SIGNED_RG_RGTC2 = 0x8DBE, COMPRESSED_RGBA_BPTC_UNORM = 0x8E8C,
-        COMPRESSED_SRGB_ALPHA_BPTC_UNORM = 0x8E8D, COMPRESSED_RGB_BPTC_SIGNED_FLOAT = 0x8E8E,
-        COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT = 0x8E8F
-    };
+/**
+ * \brief TexImage2DTarget is a type of the texture, which represents 'target' parameter of
+ * [glTexImage2D()](https://docs.gl/gl4/glTexImage2D).
+ */
+enum class TexImage2DTarget : GLenum
+{
+    ProxyTexture1dArray     = 0x8C'19,
+    ProxyTexture2d          = 0x80'64,
+    ProxyTextureCubeMap     = 0x85'1B,
+    ProxyTextureRectangle   = 0x84'F7,
+    Texture1dArray          = 0x8C'18,
+    Texture2d               = 0x0D'E1,
+    TextureCubeMapNegativeX = 0x85'16,
+    TextureCubeMapNegativeY = 0x85'18,
+    TextureCubeMapNegativeZ = 0x85'1A,
+    TextureCubeMapPositiveX = 0x85'15,
+    TextureCubeMapPositiveY = 0x85'17,
+    TextureCubeMapPositiveZ = 0x85'19,
+    TextureRectangle        = 0x84'F5
+};
 
-    /**
-     * \brief TexturePixelType is a type of the pixel data, which represents 'type' parameter of such functions as
-     * [glTexImage1D()](https://docs.gl/gl4/glTexImage1D), [glTexImage2D()](https://docs.gl/gl4/glTexImage2D),
-     * [glTexImage3D()](https://docs.gl/gl4/glTexImage3D) etc.
-     */
-    enum class TexturePixelType : GLenum
-    {
-        UNSIGNED_BYTE = 0x1401, BYTE = 0x1400, UNSIGNED_SHORT = 0x1403, SHORT = 0x1402,
-        UNSIGNED_INT = 0x1405, INT = 0x1404, FLOAT = 0x1406, UNSIGNED_BYTE_3_3_2 = 0x8032,
-        UNSIGNED_BYTE_2_3_3_REV = 0x8362, UNSIGNED_SHORT_5_6_5 = 0x8363, UNSIGNED_SHORT_5_6_5_REV = 0x8364,
-        UNSIGNED_SHORT_4_4_4_4 = 0x8033, UNSIGNED_SHORT_4_4_4_4_REV = 0x8365, UNSIGNED_SHORT_5_5_5_1 = 0x8034,
-        UNSIGNED_SHORT_1_5_5_5_REV = 0x8366, UNSIGNED_INT_8_8_8_8 = 0x8035, UNSIGNED_INT_8_8_8_8_REV = 0x8367,
-        UNSIGNED_INT_10_10_10_2 = 0x8036, UNSIGNED_INT_2_10_10_10_REV = 0x8368
-    };
+/**
+ * \brief TexImage3DTarget is a type of the texture, which represents 'target' parameter of
+ * [glTexImage3D()](https://docs.gl/gl4/glTexImage3D).
+ */
+enum class TexImage3DTarget : GLenum
+{
+    ProxyTexture2dArray = 0x8C'1B,
+    ProxyTexture3d      = 0x80'70,
+    Texture2dArray      = 0x8C'1A,
+    Texture3d           = 0x80'6F
+};
 
-    /**
-     * \brief TextureData contains a pointer to the data of the texture, information about the loaded image 
-     * and about some of the texture parameters.
-     */
-    class TextureData
-    {
-        public:
-            TextureData() = delete;
+/**
+ * \brief TexParameterName represents 'pname' parameter of [glTexParameter()](https://docs.gl/gl4/glTexParameter).
+ */
+enum class TexParameterName : GLenum
+{
+    DepthStencilTextureMode = 0x90'EA,
+    TextureBaseLevel        = 0x81'3C,
+    TextureCompareFunc      = 0x88'4D,
+    TextureCompareMode      = 0x88'4C,
+    TextureLodBias          = 0x85'01,
+    TextureMagFilter        = 0x28'00,
+    TextureMaxLevel         = 0x81'3D,
+    TextureMaxLod           = 0x81'3B,
+    TextureMinFilter        = 0x28'01,
+    TextureMinLod           = 0x81'3A,
+    TextureSwizzleA         = 0x8E'45,
+    TextureSwizzleB         = 0x8E'44,
+    TextureSwizzleG         = 0x8E'43,
+    TextureSwizzleR         = 0x8E'42,
+    TextureWrapR            = 0x80'72,
+    TextureWrapS            = 0x28'02,
+    TextureWrapT            = 0x28'03
+};
 
-            /**
-             * \brief Constructs new object.
-             *
-             * TextureData takes an ownership of the data.
-             * 
-             * \param textureData - pointer to the data.
-             * \param width - width of the texture in pixels.
-             * \param height - height of the texture in pixels.
-             * \param nChannels - a number of color channels of the image.
-             * \param format - the format of image data.
-             */
-            TextureData(unsigned char* textureData, GLsizei width, GLsizei height, unsigned int nChannels,
-                TexturePixelFormat format);
+/**
+ * \brief TexParameterVectorName represents 'pname' parameter of
+ * [glTexParameter*v()](https://docs.gl/gl4/glTexParameter).
+ */
+enum class TexParameterVectorName : GLenum
+{
+    TextureBorderColor = 0x10'04,
+    TextureSwizzleRgba = 0x8E'46
+};
 
-            /**
-             * \brief Constructs new object.
-             *
-             * TextureData takes an ownership of the data.
-             *
-             * \param textureData - pointer to the data.
-             * \param width - width of the texture in pixels.
-             * \param height - height of the 2D or 3D texture in pixels. For 1D texture is not used.
-             * \param depth - depth of the 3D texture in pixels. For 1D and 2D texture is not used.
-             * \param nChannels - a number of color channels of the image.
-             * \param level - the level-of-detail number.
-             * \param format - the format of pixel data.
-             * \param internalFormat - specify how the texture shall be stored in the GPU.
-             * \param pixelType - the type of the pixel data.
-             */
-            TextureData(unsigned char* textureData, GLsizei width, GLsizei height, GLsizei depth,
-                unsigned int nChannels, GLint level, TexturePixelFormat format, TextureInternalFormat internalFormat,
-                TexturePixelType pixelType);
+/**
+ * \brief TextureBindingTarget is a parameter by which the current bound texture to specific texture target
+ * can be got. See 'Associated Gets' section of [glBindTexture()](https://docs.gl/gl4/glBindTexture).
+ */
+enum class TextureBindingTarget : GLenum
+{
+    TextureBinding1d                 = 0x80'68,
+    TextureBinding1dArray            = 0x8C'1C,
+    TextureBinding2d                 = 0x80'69,
+    TextureBinding2dArray            = 0x8C'1D,
+    TextureBinding2dMultisample      = 0x91'04,
+    TextureBinding2dMultisampleArray = 0x91'05,
+    TextureBinding3d                 = 0x80'6A,
+    TextureBindingBuffer             = 0x8C'2C,
+    TextureBindingCubeMap            = 0x85'14,
+    TextureBindingCubeMapArray       = 0x90'0A,
+    TextureBindingRectangle          = 0x84'F6
+};
 
-            NOT_COPYABLE_MOVABLE(TextureData)
+/**
+ * \brief TextureInternalFormat is a format of the texture, which represents 'internalFormat' parameter
+ * of such functions as [glTexImage1D()](https://docs.gl/gl4/glTexImage1D),
+ * [glTexImage2D()](https://docs.gl/gl4/glTexImage2D), [glTexImage3D()](https://docs.gl/gl4/glTexImage3D) etc.
+ *
+ * The 'internalFormat' describes how the texture shall be stored in the GPU.
+ * See this [explanation](https://stackoverflow.com/questions/34497195/difference-between-format-and-internalformat).
+ */
+enum class TextureInternalFormat : GLint
+{
+    CompressedRed                  = 0x82'25,
+    CompressedRedRgtc1             = 0x8D'BB,
+    CompressedRg                   = 0x82'26,
+    CompressedRgRgtc2              = 0x8D'BD,
+    CompressedRgb                  = 0x84'ED,
+    CompressedRgbBptcSignedFloat   = 0x8E'8E,
+    CompressedRgbBptcUnsignedFloat = 0x8E'8F,
+    CompressedRgba                 = 0x84'EE,
+    CompressedRgbaBptcUnorm        = 0x8E'8C,
+    CompressedSignedRedRgtc1       = 0x8D'BC,
+    CompressedSignedRgRgtc2        = 0x8D'BE,
+    CompressedSrgb                 = 0x8C'48,
+    CompressedSrgbAlpha            = 0x8C'49,
+    CompressedSrgbAlphaBptcUnorm   = 0x8E'8D,
+    DepthComponent                 = 0x19'02,
+    DepthStencil                   = 0x84'F9,
+    R11fG11fB10f                   = 0x8C'3A,
+    R16                            = 0x82'2A,
+    R16Snorm                       = 0x8F'98,
+    R16f                           = 0x82'2D,
+    R16i                           = 0x82'33,
+    R16ui                          = 0x82'34,
+    R32f                           = 0x82'2E,
+    R32i                           = 0x82'35,
+    R32ui                          = 0x82'36,
+    R3G3B2                         = 0x2A'10,
+    R8                             = 0x82'29,
+    R8Snorm                        = 0x8F'94,
+    R8i                            = 0x82'31,
+    R8ui                           = 0x82'32,
+    Red                            = 0x19'03,
+    Rg                             = 0x82'27,
+    Rg16                           = 0x82'2C,
+    Rg16Snorm                      = 0x8F'99,
+    Rg16f                          = 0x82'2F,
+    Rg16i                          = 0x82'39,
+    Rg16ui                         = 0x82'3A,
+    Rg32f                          = 0x82'30,
+    Rg32i                          = 0x82'3B,
+    Rg32ui                         = 0x82'3C,
+    Rg8                            = 0x82'2B,
+    Rg8Snorm                       = 0x8F'95,
+    Rg8i                           = 0x82'37,
+    Rg8ui                          = 0x82'38,
+    Rgb                            = 0x19'07,
+    Rgb10                          = 0x80'52,
+    Rgb10A2                        = 0x80'59,
+    Rgb10A2ui                      = 0x90'6F,
+    Rgb12                          = 0x80'53,
+    Rgb16Snorm                     = 0x8F'9A,
+    Rgb16f                         = 0x88'1B,
+    Rgb16i                         = 0x8D'89,
+    Rgb16ui                        = 0x8D'77,
+    Rgb32f                         = 0x88'15,
+    Rgb32i                         = 0x8D'83,
+    Rgb32ui                        = 0x8D'71,
+    Rgb4                           = 0x80'4F,
+    Rgb5                           = 0x80'50,
+    Rgb5A1                         = 0x80'57,
+    Rgb8                           = 0x80'51,
+    Rgb8Snorm                      = 0x8F'96,
+    Rgb8i                          = 0x8D'8F,
+    Rgb8ui                         = 0x8D'7D,
+    Rgb9E5                         = 0x8C'3D,
+    Rgba                           = 0x19'08,
+    Rgba12                         = 0x80'5A,
+    Rgba16                         = 0x80'5B,
+    Rgba16f                        = 0x88'1A,
+    Rgba16i                        = 0x8D'88,
+    Rgba16ui                       = 0x8D'76,
+    Rgba2                          = 0x80'55,
+    Rgba32f                        = 0x88'14,
+    Rgba32i                        = 0x8D'82,
+    Rgba32ui                       = 0x8D'70,
+    Rgba4                          = 0x80'56,
+    Rgba8                          = 0x80'58,
+    Rgba8Snorm                     = 0x8F'97,
+    Rgba8i                         = 0x8D'8E,
+    Rgba8ui                        = 0x8D'7C,
+    Srgb8                          = 0x8C'41,
+    Srgb8Alpha8                    = 0x8C'43
+};
 
-            /**
-             * \brief Deletes the object and cleans the data by calling helpers::freeTextureData().
-             */
-            ~TextureData();
+/**
+ * \brief TexturePixelFormat is a format of the texture, which represents 'format' parameter of such functions as
+ * [glTexImage1D()](https://docs.gl/gl4/glTexImage1D), [glTexImage2D()](https://docs.gl/gl4/glTexImage2D),
+ * [glTexImage3D()](https://docs.gl/gl4/glTexImage3D) etc.
+ *
+ * The 'format' describes the format of pixel data in client memory.
+ * See this [explanation](https://stackoverflow.com/questions/34497195/difference-between-format-and-internalformat).
+ */
+enum class TexturePixelFormat : GLenum
+{
+    Bgr            = 0x80'E0,
+    BgrInteger     = 0x8D'9A,
+    Bgra           = 0x80'E1,
+    BgraInteger    = 0x8D'9B,
+    DepthComponent = 0x19'02,
+    DepthStencil   = 0x84'F9,
+    Red            = 0x19'03,
+    RedInteger     = 0x8D'94,
+    Rg             = 0x82'27,
+    RgInteger      = 0x82'28,
+    Rgb            = 0x19'07,
+    RgbInteger     = 0x8D'98,
+    Rgba           = 0x19'08,
+    RgbaInteger    = 0x8D'99,
+    StencilIndex   = 0x19'01
+};
 
-        public:
-            /**
-             * \brief The data of the texture.
-             * 
-             * DON'T delete, TextureData takes an ownership of the data.
-             */
-            unsigned char* m_data = nullptr;
-            /**
-             * \brief The depth in pixels of the 3D texture.
-             */
-            GLsizei m_depth = 0;
-            /**
-             * \brief The height in pixels of the 2D or 3D texture.
-             */
-            GLsizei m_height = 0;
-            /**
-             * \brief The width in pixels of the texture.
-             */
-            GLsizei m_width = 0;
-            /**
-             * \brief The level-of-detail number.
-             */
-            GLint m_level = 1;
-            /**
-             * \brief A number of color channels of the image.
-             */
-            unsigned int m_nChannels = 0;
-            /**
-             * \brief The format of pixel data.
-             */
-            TexturePixelFormat m_format = TexturePixelFormat::RGB;
-            /**
-             * \brief The internal format, in which the texture shall be stored in the GPU.
-             */
-            TextureInternalFormat m_internalFormat = TextureInternalFormat::RGB8;
-            /**
-             * \brief The type of the pixel data.
-             */
-            TexturePixelType m_type = TexturePixelType::UNSIGNED_BYTE;
+/**
+ * \brief TexturePixelType is a type of the pixel data, which represents 'type' parameter of such functions as
+ * [glTexImage1D()](https://docs.gl/gl4/glTexImage1D), [glTexImage2D()](https://docs.gl/gl4/glTexImage2D),
+ * [glTexImage3D()](https://docs.gl/gl4/glTexImage3D) etc.
+ */
+enum class TexturePixelType : GLenum
+{
+    Byte                  = 0x14'00,
+    Float                 = 0x14'06,
+    Int                   = 0x14'04,
+    Short                 = 0x14'02,
+    UnsignedByte          = 0x14'01,
+    UnsignedByte233Rev    = 0x83'62,
+    UnsignedByte332       = 0x80'32,
+    UnsignedInt           = 0x14'05,
+    UnsignedInt1010102    = 0x80'36,
+    UnsignedInt2101010Rev = 0x83'68,
+    UnsignedInt8888       = 0x80'35,
+    UnsignedInt8888Rev    = 0x83'67,
+    UnsignedShort         = 0x14'03,
+    UnsignedShort1555Rev  = 0x83'66,
+    UnsignedShort4444     = 0x80'33,
+    UnsignedShort4444Rev  = 0x83'65,
+    UnsignedShort5551     = 0x80'34,
+    UnsignedShort565      = 0x83'63,
+    UnsignedShort565Rev   = 0x83'64
+};
 
-    };
+/**
+ * \brief TextureTarget is a type of the texture, which represents 'target' parameter of
+ * [glBindTexture()](https://docs.gl/gl4/glBindTexture).
+ */
+enum class TextureTarget : GLenum
+{
+    Texture1d                 = 0x0D'E0,
+    Texture1dArray            = 0x8C'18,
+    Texture2d                 = 0x0D'E1,
+    Texture2dArray            = 0x8C'1A,
+    Texture2dMultisample      = 0x91'00,
+    Texture2dMultisampleArray = 0x91'02,
+    Texture3d                 = 0x80'6F,
+    TextureBuffer             = 0x8C'2A,
+    TextureCubeMap            = 0x85'13,
+    TextureCubeMapArray       = 0x90'09,
+    TextureRectangle          = 0x84'F5
+};
 
-    /**
-     * \brief TextureTarget is a type of the texture, which represents 'target' parameter of
-     * [glBindTexture()](https://docs.gl/gl4/glBindTexture).
-     */
-    enum class TextureTarget : GLenum
-    {
-        TEXTURE_1D = 0x0DE0, TEXTURE_2D = 0x0DE1, TEXTURE_3D = 0x806F, TEXTURE_1D_ARRAY = 0x8C18,
-        TEXTURE_2D_ARRAY = 0x8C1A, TEXTURE_RECTANGLE = 0x84F5, TEXTURE_CUBE_MAP = 0x8513,
-        TEXTURE_CUBE_MAP_ARRAY = 0x9009, TEXTURE_BUFFER = 0x8C2A, TEXTURE_2D_MULTISAMPLE = 0x9100,
-        TEXTURE_2D_MULTISAMPLE_ARRAY = 0x9102
-    };
+/*
+ * \brief TexDimensionSpecificTypes declares some types, which are used for the same purpose,
+ * but by different texture types depending on their dimension (1D, 2D, 3D).
+ */
+template<unsigned int DimensionsNumber>
+struct TexDimensionSpecificTypes
+{
+};
 
-    /**
-     * \brief TextureBindingTarget is a parameter by which the current bound texture to specific texture target
-     * can be got. See 'Associated Gets' section of [glBindTexture()](https://docs.gl/gl4/glBindTexture).
-     */
-    enum class TextureBindingTarget : GLenum
-    {
-        TEXTURE_BINDING_1D = 0x8068, TEXTURE_BINDING_2D = 0x8069, TEXTURE_BINDING_3D = 0x806A,
-        TEXTURE_BINDING_1D_ARRAY = 0x8C1C, TEXTURE_BINDING_2D_ARRAY = 0x8C1D, TEXTURE_BINDING_RECTANGLE = 0x84F6,
-        TEXTURE_BINDING_BUFFER = 0x8C2C, TEXTURE_BINDING_CUBE_MAP = 0x8514, TEXTURE_BINDING_CUBE_MAP_ARRAY = 0x900A,
-        TEXTURE_BINDING_2D_MULTISAMPLE = 0x9104, TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY = 0x9105
-    };
-
-    /**
-     * \brief TexImage1DTarget is a type of the texture, which represents 'target' parameter of
-     * [glTexImage1D()](https://docs.gl/gl4/glTexImage1D).
-     */
-    enum class TexImage1DTarget : GLenum
-    {
-        TEXTURE_1D = 0x0DE0, PROXY_TEXTURE_1D = 0x8063
-    };
-
-    /**
-     * \brief TexImage2DTarget is a type of the texture, which represents 'target' parameter of
-     * [glTexImage2D()](https://docs.gl/gl4/glTexImage2D).
-     */
-    enum class TexImage2DTarget : GLenum
-    {
-        TEXTURE_2D = 0x0DE1, PROXY_TEXTURE_2D = 0x8064, TEXTURE_1D_ARRAY = 0x8C18, PROXY_TEXTURE_1D_ARRAY = 0x8C19,
-        TEXTURE_RECTANGLE = 0x84F5, PROXY_TEXTURE_RECTANGLE = 0x84F7, TEXTURE_CUBE_MAP_POSITIVE_X = 0x8515,
-        TEXTURE_CUBE_MAP_NEGATIVE_X = 0x8516, TEXTURE_CUBE_MAP_POSITIVE_Y = 0x8517,
-        TEXTURE_CUBE_MAP_NEGATIVE_Y = 0x8518, TEXTURE_CUBE_MAP_POSITIVE_Z = 0x8519,
-        TEXTURE_CUBE_MAP_NEGATIVE_Z = 0x851A, PROXY_TEXTURE_CUBE_MAP = 0x851B
-    };
-
-    /**
-     * \brief TexImage3DTarget is a type of the texture, which represents 'target' parameter of
-     * [glTexImage3D()](https://docs.gl/gl4/glTexImage3D).
-     */
-    enum class TexImage3DTarget : GLenum
-    {
-        TEXTURE_3D = 0x806F, PROXY_TEXTURE_3D = 0x8070, TEXTURE_2D_ARRAY = 0x8C1A, PROXY_TEXTURE_2D_ARRAY = 0x8C1B
-    };
-
-    template<unsigned int DimensionsNumber>
-    struct TexDimensionSpecificTypes
-    {
-    };
-
-    template<>
-    struct TexDimensionSpecificTypes<1>
-    {
+template<>
+struct TexDimensionSpecificTypes<1>
+{
         using TexImageTarget = TexImage1DTarget;
-    };
 
-    template<>
-    struct TexDimensionSpecificTypes<2>
-    {
+};  // struct TexDimensionSpecificTypes<1>
+
+template<>
+struct TexDimensionSpecificTypes<2>
+{
         using TexImageTarget = TexImage2DTarget;
-    };
 
-    template<>
-    struct TexDimensionSpecificTypes<3>
-    {
+};  // struct TexDimensionSpecificTypes<2>
+
+template<>
+struct TexDimensionSpecificTypes<3>
+{
         using TexImageTarget = TexImage3DTarget;
-    };
 
-    /**
-     * \brief TexParameterName represents 'pname' parameter of [glTexParameter()](https://docs.gl/gl4/glTexParameter).
-     */
-    enum class TexParameterName : GLenum
-    {
-        DEPTH_STENCIL_TEXTURE_MODE = 0x90EA, TEXTURE_BASE_LEVEL = 0x813C, TEXTURE_COMPARE_FUNC = 0x884D,
-        TEXTURE_COMPARE_MODE = 0x884C, TEXTURE_LOD_BIAS = 0x8501, TEXTURE_MIN_FILTER = 0x2801,
-        TEXTURE_MAG_FILTER = 0x2800, TEXTURE_MIN_LOD = 0x813A, TEXTURE_MAX_LOD = 0x813B, TEXTURE_MAX_LEVEL = 0x813D, 
-        TEXTURE_SWIZZLE_R = 0x8E42, TEXTURE_SWIZZLE_G = 0x8E43, TEXTURE_SWIZZLE_B = 0x8E44, TEXTURE_SWIZZLE_A = 0x8E45,
-        TEXTURE_WRAP_S = 0x2802, TEXTURE_WRAP_T = 0x2803, TEXTURE_WRAP_R = 0x8072
-    };
+};  // struct TexDimensionSpecificTypes<3>
 
-    /**
-     * \brief TexParameterVectorName represents 'pname' parameter of 
-     * [glTexParameter*v()](https://docs.gl/gl4/glTexParameter).
-     */
-    enum class TexParameterVectorName : GLenum
-    {
-        TEXTURE_BORDER_COLOR = 0x1004, TEXTURE_SWIZZLE_RGBA = 0x8E46
-    };
-}
+/**
+ * \brief TextureData contains a pointer to the data of the texture, information about the loaded image
+ * and about some of the texture parameters.
+ */
+class TextureData
+{
+    public:
+        /**
+         * \brief Constructs new object.
+         *
+         * TextureData takes an ownership of the data.
+         *
+         * \param textureData - pointer to the data.
+         * \param width       - width of the texture in pixels.
+         * \param height      - height of the texture in pixels.
+         * \param nChannels   - a number of color channels of the image.
+         * \param format      - the format of image data.
+         */
+        TextureData(unsigned char* textureData, GLsizei width, GLsizei height, unsigned int nChannels,
+                    TexturePixelFormat format);
+        /**
+         * \brief Constructs new object.
+         *
+         * TextureData takes an ownership of the data.
+         *
+         * \param textureData    - pointer to the data.
+         * \param width          - width of the texture in pixels.
+         * \param height         - height of the 2D or 3D texture in pixels. For 1D texture is not used.
+         * \param depth          - depth of the 3D texture in pixels. For 1D and 2D texture is not used.
+         * \param nChannels      - a number of color channels of the image.
+         * \param level          - the level-of-detail number.
+         * \param format         - the format of pixel data.
+         * \param internalFormat - specify how the texture shall be stored in the GPU.
+         * \param pixelType      - the type of the pixel data.
+         */
+        TextureData(unsigned char* textureData, GLsizei width, GLsizei height, GLsizei depth, unsigned int nChannels,
+                    GLint level, TexturePixelFormat format, TextureInternalFormat internalFormat,
+                    TexturePixelType pixelType);
+        TextureData() = delete;
+        OGLS_NOT_COPYABLE_MOVABLE(TextureData)
+        /**
+         * \brief Deletes the object and cleans the data by calling helpers::freeTextureData().
+         */
+        ~TextureData();
+
+    public:
+        /**
+         * \brief The data of the texture.
+         *
+         * DON'T delete, TextureData takes an ownership of the data.
+         */
+        unsigned char*        data           = nullptr;
+        /**
+         * \brief The depth in pixels of the 3D texture.
+         */
+        GLsizei               depth          = {0};
+        /**
+         * \brief The format of pixel data.
+         */
+        TexturePixelFormat    format         = TexturePixelFormat::Rgb;
+        /**
+         * \brief The height in pixels of the 2D or 3D texture.
+         */
+        GLsizei               height         = {0};
+        /**
+         * \brief The internal format, in which the texture shall be stored in the GPU.
+         */
+        TextureInternalFormat internalFormat = TextureInternalFormat::Rgb8;
+        /**
+         * \brief The level-of-detail number.
+         */
+        GLint                 level          = {1};
+        /**
+         * \brief A number of color channels of the image.
+         */
+        unsigned int          nChannels      = {0};
+        /**
+         * \brief The type of the pixel data.
+         */
+        TexturePixelType      type           = TexturePixelType::UnsignedByte;
+        /**
+         * \brief The width in pixels of the texture.
+         */
+        GLsizei               width          = {0};
+
+};  // class TextureData
+
+}  // namespace ogsl::oglCore::texture
 
 #endif

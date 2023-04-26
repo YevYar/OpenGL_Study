@@ -49,6 +49,7 @@ namespace openglCore::texture::TextureUnitsManager
 			{
                 using namespace openglCore;
 
+
 				const auto maxTUnitIndex = getOpenglLimit(LimitName::MAX_COMBINED_TEXTURE_IMAGE_UNITS);
 				const auto errorMessage = std::format("Texture unit index must be less than {}.", maxTUnitIndex);
 				throw std::out_of_range(errorMessage);
@@ -158,6 +159,7 @@ const std::map<TextureTarget, std::shared_ptr<BaseTexture>>& TextureUnit::getAll
 bool openglCore::texture::checkIsValidTextureUnitIndex(GLuint textureUnitIndex) noexcept
 {
     using namespace openglCore;
+
 
 	return textureUnitIndex <= getOpenglLimit(LimitName::MAX_COMBINED_TEXTURE_IMAGE_UNITS) - 1;
 }
