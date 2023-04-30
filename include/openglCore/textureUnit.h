@@ -1,57 +1,68 @@
-#ifndef TEXTURE_UNIT_H
-#define TEXTURE_UNIT_H
+#ifndef OGLS_OGLCORE_TEXTURE_TEXTURE_UNIT_H
+#define OGLS_OGLCORE_TEXTURE_TEXTURE_UNIT_H
 
-#include <glad/glad.h>
 #include <map>
 #include <memory>
 #include <vector>
 
+#include <glad/glad.h>
+
 #include "helpers/macros.h"
+#include "texture.h"
 
-namespace openglCore::texture
+namespace ogls::oglCore::texture
 {
-    class BaseTexture;
-    class TextureUnit;
-    enum class TextureTarget : GLenum;
+using TexturesConfiguration = std::map<GLuint, std::vector<std::shared_ptr<BaseTexture>>>;
 
-    using TexturesConfiguration = std::map<GLuint, std::vector<std::shared_ptr<BaseTexture>>>;
+enum class TextureTarget : GLenum;
+class TextureUnit;
 
-    namespace TextureUnitsManager
-    {
-        std::shared_ptr<TextureUnit> get(GLuint index);
-        void activateTextureUnit(GLuint index);
-        void activateTextureUnit(const std::shared_ptr<TextureUnit>& textureUnit);
-        std::shared_ptr<TextureUnit> getActiveTextureUnit();
-    };
+namespace TextureUnitsManager
+{
+    void                         activateTextureUnit(GLuint index);
+    void                         activateTextureUnit(const std::shared_ptr<TextureUnit>& textureUnit);
+    std::shared_ptr<TextureUnit> get(GLuint index);
+    std::shared_ptr<TextureUnit> getActiveTextureUnit();
 
-    class TextureUnit
-    {
-        public:
-            TextureUnit() = delete;
-            NOT_COPYABLE_MOVABLE(TextureUnit)
-            ~TextureUnit();
+};  // namespace TextureUnitsManager
 
-            void setTexture(const std::shared_ptr<BaseTexture>& texture);
-            void setTextures(const std::vector<std::shared_ptr<BaseTexture>>& textures);
-            GLuint getIndex() const noexcept;
-            std::shared_ptr<BaseTexture> getTexture(TextureTarget textureTarget) const noexcept;
-            const std::map<TextureTarget, std::shared_ptr<BaseTexture>>& getAllTextures() const noexcept;
+class TextureUnit
+{
+    private:
+        /**
+         * \brief Impl contains private data and methods of TextureUnit.
+         */
+        struct Impl;
 
-        private:
-            explicit TextureUnit(GLuint index);
+    public:
+        TextureUnit() = delete;
+        OGLS_NOT_COPYABLE_MOVABLE(TextureUnit)
+        ~TextureUnit();
 
-        private:
-            struct Impl;
-            std::unique_ptr<Impl> m_impl;
+        const std::map<TextureTarget, std::shared_ptr<BaseTexture>>& getAllTextures() const noexcept;
+        GLuint                                                       getIndex() const noexcept;
+        std::shared_ptr<BaseTexture> getTexture(TextureTarget textureTarget) const noexcept;
+        void                         setTexture(const std::shared_ptr<BaseTexture>& texture);
+        void                         setTextures(const std::vector<std::shared_ptr<BaseTexture>>& textures);
 
-        friend std::shared_ptr<TextureUnit> TextureUnitsManager::get(GLuint);
+    private:
+        explicit TextureUnit(GLuint index);
+
+    private:
+        /**
+         * \brief Pointer to implementation.
+         */
+        std::unique_ptr<Impl> m_impl;
+
+
         friend void TextureUnitsManager::activateTextureUnit(const std::shared_ptr<TextureUnit>&);
+        friend std::shared_ptr<TextureUnit> TextureUnitsManager::get(GLuint);
 
-    };
+};  // class TextureUnit
 
-    bool checkIsValidTextureUnitIndex(GLuint textureUnitIndex) noexcept;
-    void applyTexturesConfiguration(const TexturesConfiguration& texturesConfiguration);
+void applyTexturesConfiguration(const TexturesConfiguration& texturesConfiguration);
+bool checkIsValidTextureUnitIndex(GLuint textureUnitIndex) noexcept;
 
-}
+}  // namespace ogls::oglCore::texture
 
 #endif

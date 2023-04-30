@@ -9,117 +9,132 @@
 #include "texture.h"
 #include "textureImpl.h"
 
-using namespace openglCore::texture;
-
+namespace ogls::oglCore::texture
+{
 namespace
 {
-	GLuint getActiveTextureUnitIndex()
-	{
-		return helpers::getOpenGLIntegerValue(GL_ACTIVE_TEXTURE) - GL_TEXTURE0;
-	}
+    void   activateTextureUnitWithoutCheck(GLuint index);
+    GLuint getActiveTextureUnitIndex();
 
-	void activateTextureUnitWithoutCheck(GLuint index)
-	{
-		GLCall(glActiveTexture(GL_TEXTURE0 + index));
-	}
-}
+}  // namespace
 
 struct TextureUnit::Impl
 {
-	public:
-		explicit Impl(GLuint index) : m_index{ index }
-		{
-		}
+    public:
+        explicit Impl(GLuint i) : index{i}
+        {
+        }
 
-	public:
-		const GLuint m_index = 0;
-		std::map<TextureTarget, std::shared_ptr<BaseTexture>> m_unitTextures;
+    public:
+        const GLuint                                          index = {0};
+        std::map<TextureTarget, std::shared_ptr<BaseTexture>> unitTextures;
 
-};
+};  // struct TextureUnit::Impl
 
-namespace openglCore::texture::TextureUnitsManager
+namespace TextureUnitsManager
 {
-	namespace
-	{
-		std::map<GLuint, std::shared_ptr<TextureUnit>> s_textureUnits;
-
-		void checkTextureUnitIndexAndThrowIfNot(GLuint textureUnitIndex)
-		{
-			if (!checkIsValidTextureUnitIndex(textureUnitIndex))
-			{
-                using namespace openglCore;
+    namespace
+    {
+        void checkTextureUnitIndexAndThrowIfNot(GLuint textureUnitIndex);
 
 
-				const auto maxTUnitIndex = getOpenglLimit(LimitName::MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-				const auto errorMessage = std::format("Texture unit index must be less than {}.", maxTUnitIndex);
-				throw std::out_of_range(errorMessage);
-			}
-		}		
-	}
-	
-	std::shared_ptr<TextureUnit> get(GLuint index)
-	{
-		checkTextureUnitIndexAndThrowIfNot(index);
+        std::map<GLuint, std::shared_ptr<TextureUnit>> textureUnits;
 
-		if (s_textureUnits.contains(index))
-		{
-			return s_textureUnits.at(index);
-		}
+    }  // namespace
 
-		auto tUnit = std::shared_ptr<TextureUnit>(new TextureUnit(index));
-		s_textureUnits.insert({ index, tUnit });
-		return tUnit;
-	}
+    void activateTextureUnit(GLuint index)
+    {
+        checkTextureUnitIndexAndThrowIfNot(index);
 
-	void TextureUnitsManager::activateTextureUnit(GLuint index)
-	{
-		checkTextureUnitIndexAndThrowIfNot(index);
+        if (index == getActiveTextureUnitIndex())
+        {
+            return;
+        }
 
-		if (index == getActiveTextureUnitIndex())
-		{
-			return;
-		}
+        activateTextureUnitWithoutCheck(index);
+    }
 
-		activateTextureUnitWithoutCheck(index);
-	}
+    void activateTextureUnit(const std::shared_ptr<TextureUnit>& textureUnit)
+    {
+        if (textureUnit->m_impl->index == getActiveTextureUnitIndex())
+        {
+            return;
+        }
 
-	void TextureUnitsManager::activateTextureUnit(const std::shared_ptr<TextureUnit>& textureUnit)
-	{
-		if (textureUnit->m_impl->m_index == getActiveTextureUnitIndex())
-		{
-			return;
-		}
+        activateTextureUnitWithoutCheck(textureUnit->m_impl->index);
+    }
 
-		activateTextureUnitWithoutCheck(textureUnit->m_impl->m_index);
-	}
+    std::shared_ptr<TextureUnit> get(GLuint index)
+    {
+        checkTextureUnitIndexAndThrowIfNot(index);
 
-	std::shared_ptr<TextureUnit> TextureUnitsManager::getActiveTextureUnit()
-	{
-		const auto activeTextureUnitIndex = getActiveTextureUnitIndex();
-		return get(activeTextureUnitIndex);
-	}
-}
+        if (textureUnits.contains(index))
+        {
+            return textureUnits.at(index);
+        }
 
-TextureUnit::TextureUnit(GLuint index) : m_impl{ std::make_unique<Impl>(index) }
+        auto tUnit = std::shared_ptr<TextureUnit>{new TextureUnit{index}};
+        textureUnits.insert({index, tUnit});
+        return tUnit;
+    }
+
+    std::shared_ptr<TextureUnit> getActiveTextureUnit()
+    {
+        const auto activeTextureUnitIndex = getActiveTextureUnitIndex();
+        return get(activeTextureUnitIndex);
+    }
+
+    namespace
+    {
+        void checkTextureUnitIndexAndThrowIfNot(GLuint textureUnitIndex)
+        {
+            if (!checkIsValidTextureUnitIndex(textureUnitIndex))
+            {
+                const auto maxTUnitIndex = getOpenglLimit(LimitName::MaxCombinedTextureImageUnits);
+                const auto errorMessage  = std::format("Texture unit index must be less than {}.", maxTUnitIndex);
+                throw std::out_of_range{errorMessage};
+            }
+        }
+
+    }  // namespace
+
+}  // namespace TextureUnitsManager
+
+TextureUnit::TextureUnit(GLuint index) : m_impl{std::make_unique<Impl>(index)}
 {
 }
 
 TextureUnit::~TextureUnit() = default;
 
+const std::map<TextureTarget, std::shared_ptr<BaseTexture>>& TextureUnit::getAllTextures() const noexcept
+{
+    return m_impl->unitTextures;
+}
+
+GLuint TextureUnit::getIndex() const noexcept
+{
+    return m_impl->index;
+}
+
+std::shared_ptr<BaseTexture> TextureUnit::getTexture(TextureTarget textureTarget) const noexcept
+{
+    return m_impl->unitTextures.contains(textureTarget) ? m_impl->unitTextures.at(textureTarget) : nullptr;
+}
+
 void TextureUnit::setTexture(const std::shared_ptr<BaseTexture>& texture)
 {
-    if (m_impl->m_unitTextures.contains(texture->m_impl->m_target) &&
-        m_impl->m_unitTextures.at(texture->m_impl->m_target) == texture)
+    if (m_impl->unitTextures.contains(texture->m_impl->target)
+        && m_impl->unitTextures.at(texture->m_impl->target) == texture)
     {
         return;
     }
 
-	const auto activeTextureUnitIndex = getActiveTextureUnitIndex();
+    const auto activeTextureUnitIndex = getActiveTextureUnitIndex();
 
-	GLCall(glBindTextureUnit(m_impl->m_index, texture->m_impl->m_rendererId));
-    m_impl->m_unitTextures.insert_or_assign(texture->m_impl->m_target, texture);
+    OGLS_GLCall(glBindTextureUnit(m_impl->index, texture->m_impl->rendererId));
+    m_impl->unitTextures.insert_or_assign(texture->m_impl->target, texture);
 
-	activateTextureUnitWithoutCheck(activeTextureUnitIndex);
+    activateTextureUnitWithoutCheck(activeTextureUnitIndex);
 }
 
 void TextureUnit::setTextures(const std::vector<std::shared_ptr<BaseTexture>>& textures)
@@ -128,46 +143,44 @@ void TextureUnit::setTextures(const std::vector<std::shared_ptr<BaseTexture>>& t
 
     for (const auto& texture : textures)
     {
-        if (m_impl->m_unitTextures.contains(texture->m_impl->m_target) &&
-            m_impl->m_unitTextures.at(texture->m_impl->m_target) == texture)
+        if (m_impl->unitTextures.contains(texture->m_impl->target)
+            && m_impl->unitTextures.at(texture->m_impl->target) == texture)
         {
             continue;
         }
 
-        GLCall(glBindTextureUnit(m_impl->m_index, texture->m_impl->m_rendererId));
-        m_impl->m_unitTextures.insert_or_assign(texture->m_impl->m_target, texture);
-    }    
+        OGLS_GLCall(glBindTextureUnit(m_impl->index, texture->m_impl->rendererId));
+        m_impl->unitTextures.insert_or_assign(texture->m_impl->target, texture);
+    }
 
     activateTextureUnitWithoutCheck(activeTextureUnitIndex);
 }
 
-GLuint TextureUnit::getIndex() const noexcept
-{
-	return m_impl->m_index;
-}
-
-std::shared_ptr<BaseTexture> TextureUnit::getTexture(TextureTarget textureTarget) const noexcept
-{
-	return m_impl->m_unitTextures.contains(textureTarget) ? m_impl->m_unitTextures.at(textureTarget) : nullptr;
-}
-
-const std::map<TextureTarget, std::shared_ptr<BaseTexture>>& TextureUnit::getAllTextures() const noexcept
-{
-	return m_impl->m_unitTextures;
-}
-
-bool openglCore::texture::checkIsValidTextureUnitIndex(GLuint textureUnitIndex) noexcept
-{
-    using namespace openglCore;
-
-
-	return textureUnitIndex <= getOpenglLimit(LimitName::MAX_COMBINED_TEXTURE_IMAGE_UNITS) - 1;
-}
-
-void openglCore::texture::applyTexturesConfiguration(const TexturesConfiguration& texturesConfiguration)
+void applyTexturesConfiguration(const TexturesConfiguration& texturesConfiguration)
 {
     for (const auto& tUnit : texturesConfiguration)
     {
-        openglCore::texture::TextureUnitsManager::get(tUnit.first)->setTextures(tUnit.second);
+        TextureUnitsManager::get(tUnit.first)->setTextures(tUnit.second);
     }
 }
+
+bool checkIsValidTextureUnitIndex(GLuint textureUnitIndex) noexcept
+{
+    return textureUnitIndex <= getOpenglLimit(LimitName::MaxCombinedTextureImageUnits) - 1;
+}
+
+namespace
+{
+    void activateTextureUnitWithoutCheck(GLuint index)
+    {
+        OGLS_GLCall(glActiveTexture(GL_TEXTURE0 + index));
+    }
+
+    GLuint getActiveTextureUnitIndex()
+    {
+        return helpers::getOpenGLIntegerValue(GL_ACTIVE_TEXTURE) - GL_TEXTURE0;
+    }
+
+}  // namespace
+
+}  // namespace ogls::oglCore::texture
