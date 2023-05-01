@@ -6,7 +6,6 @@
 #include "helpers/debugHelpers.h"
 #include "helpers/helpers.h"
 #include "openglLimits.h"
-#include "texture.h"
 #include "textureImpl.h"
 
 namespace ogls::oglCore::texture

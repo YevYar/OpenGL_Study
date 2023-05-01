@@ -1,6 +1,7 @@
 #include "multicoloredRectangle.h"
 
 #include <array>
+#include <cmath>
 #include <exception>
 #include <stdexcept>
 
@@ -25,16 +26,19 @@ MulticoloredRectangle::MulticoloredRectangle(std::shared_ptr<ogls::oglCore::vert
 
 void MulticoloredRectangle::setColorCoefficient(float k)
 {
-    if (k >= 0 && k <= 1.0)
+    // TODO:
+    if (k >= 0.0 && !isgreater(k, 1.0))
     {
         m_shaderProgram->use();
         m_colorCoefficient.setData(&k);
+        return;
     }
-    throw std::out_of_range{"k must be in the range [0; 1]."};
+    // throw std::out_of_range{"k must be in the range [0; 1]."};
 }
 
 void MulticoloredRectangle::render()
 {
+    using namespace ogls::helpers;
     using namespace ogls::oglCore;
 
 
@@ -45,10 +49,10 @@ void MulticoloredRectangle::render()
     if (m_counter++ == 300)
     {
         auto textureData =
-          std::shared_ptr<texture::TextureData>{helpers::readTextureFromFile("resources/textures/awesomeface.png")};
-        textureData->m_format = texture::TexturePixelFormat::RGBA;
+          std::shared_ptr<texture::TextureData>{readTextureFromFile("resources/textures/awesomeface.png")};
+        textureData->format = texture::TexturePixelFormat::Rgba;
         texture::castBaseTextureToTexture<2>(m_texturesConfiguration, 0, 0)
-          ->setData(texture::TexImage2DTarget::TEXTURE_2D, textureData);
+          ->setData(texture::TexImage2DTarget::Texture2d, textureData);
     }
 
     OGLS_GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
@@ -56,6 +60,7 @@ void MulticoloredRectangle::render()
 
 std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle()
 {
+    using namespace ogls;
     using namespace ogls::oglCore::shader;
     using namespace ogls::oglCore::texture;
     using namespace ogls::oglCore::vertex;
@@ -74,36 +79,44 @@ std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle()
     // Configure VAO, VBO and EBO only once
     static auto VAO = std::make_shared<VertexArray>();
 
-    static auto coordinateMap = VertexAttribute{0, 2, VertexAttrType::Float, false, 0};
-    static auto colorMap =
-      VertexAttribute{1, 3, VertexAttrType::Float, false, getByteSizeOfType(VertexAttrType::Float) * 2};
-    static auto texCoords =
-      VertexAttribute{2, 2, VertexAttrType::Float, false, getByteSizeOfType(VertexAttrType::Float) * 5};
+    static auto coordinateMap =
+      VertexAttribute{.byteOffset{0}, .count{2}, .index{0}, .normalized{false}, .type{VertexAttrType::Float}};
+    static auto colorMap  = VertexAttribute{.byteOffset{getByteSizeOfType(VertexAttrType::Float) * 2},
+                                            .count{3},
+                                            .index{1},
+                                            .normalized{false},
+                                            .type{VertexAttrType::Float}};
+    static auto texCoords = VertexAttribute{.byteOffset{getByteSizeOfType(VertexAttrType::Float) * 5},
+                                            .count{2},
+                                            .index{2},
+                                            .normalized{false},
+                                            .type{VertexAttrType::Float}};
 
     static auto layout = VertexBufferLayout{};
     layout.addVertexAttribute(coordinateMap);
     layout.addVertexAttribute(colorMap);
     layout.addVertexAttribute(texCoords);
 
-    static auto data = ArrayData{reinterpret_cast<const void*>(points), sizeof(points)};
+    static auto data = ArrayData{reinterpret_cast<const void*>(points.data()), sizeof(points)};
     static auto VBO  = std::make_shared<Buffer>(BufferTarget::ArrayBuffer, data, BufferDataUsage::StaticDraw, layout);
 
     VAO->addBuffer(VBO);
 
-    static auto EBO = std::make_shared<Buffer>(BufferTarget::ElementArrayBuffer,
-                                               ArrayData{reinterpret_cast<const void*>(indices), sizeof(indices)},
-                                               BufferDataUsage::StaticDraw);
+    static auto EBO =
+      std::make_shared<Buffer>(BufferTarget::ElementArrayBuffer,
+                               ArrayData{reinterpret_cast<const void*>(indices.data()), sizeof(indices)},
+                               BufferDataUsage::StaticDraw);
     VAO->addBuffer(EBO);
 
     // Create shader program only once
-    static auto shaderProgram =
-      makeShaderProgram("resources/shaders/vs/vertexShader.vert", "resources/shaders/fs/fragmentShader.frag");
+    static auto shaderProgram = std::shared_ptr<ShaderProgram>{
+      makeShaderProgram("resources/shaders/vs/vertexShader.vert", "resources/shaders/fs/fragmentShader.frag")};
 
     // Load textures only once
     static auto textureData =
       std::shared_ptr<TextureData>{helpers::readTextureFromFile("resources/textures/wooden_container.jpg")};
     static auto texture2D =
-      std::make_shared<Texture<2>>(TextureTarget::TEXTURE_2D, TexImage2DTarget::TEXTURE_2D, textureData);
+      std::make_shared<Texture<2>>(TextureTarget::Texture2d, TexImage2DTarget::Texture2d, textureData);
     static TexturesConfiguration texturesConfig{
       {0, std::vector<std::shared_ptr<BaseTexture>>{texture2D}}
     };

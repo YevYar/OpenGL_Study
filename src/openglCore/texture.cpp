@@ -250,7 +250,7 @@ template<unsigned int DimensionsNumber>
 Texture<DimensionsNumber>::Impl::Impl(const Impl& obj) : BaseImpl{obj}
 {
     lastTexImageTarget = obj.lastTexImageTarget;
-    setData(m_lastTexImageTarget, obj.m_data);
+    setData(lastTexImageTarget, obj.data);
 }
 
 template<unsigned int DimensionsNumber>

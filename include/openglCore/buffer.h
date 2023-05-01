@@ -5,12 +5,13 @@
 #include <optional>
 
 #include "generalTypes.h"
-#include "vertexArray.h"
 #include "vertexBufferLayout.h"
 #include "vertexTypes.h"
 
 namespace ogls::oglCore::vertex
 {
+class VertexArray;
+
 /**
  * \brief Buffer is a wrapper over OpenGL buffer object.
  */

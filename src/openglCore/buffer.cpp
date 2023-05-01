@@ -56,7 +56,7 @@ void Buffer::setData(ArrayData data)
 {
     if (!m_impl->checkAndGenerateNewStorage(data))
     {
-        OGLS_GLCall(glNamedBufferSubData(m_impl->rendererId, 0, GLsizeiptr{m_impl->data.size}, m_impl->data.pointer));
+        OGLS_GLCall(glNamedBufferSubData(m_impl->rendererId, 0, m_impl->data.size, m_impl->data.pointer));
         m_impl->data = std::move(data);
     }
 }
@@ -150,7 +150,7 @@ bool Buffer::Impl::checkAndGenerateNewStorage(const ArrayData& d) noexcept
 {
     if (d.size != data.size)
     {
-        OGLS_GLCall(glNamedBufferData(rendererId, GLsizeiptr{d.size}, d.pointer, helpers::toUType(usage)));
+        OGLS_GLCall(glNamedBufferData(rendererId, d.size, d.pointer, helpers::toUType(usage)));
         data = d;
         return true;
     }

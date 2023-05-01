@@ -46,7 +46,7 @@ void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
 
     if (layout == std::nullopt)
     {
-        auto boundVao = GLuint{helpers::getOpenGLIntegerValue(GL_VERTEX_ARRAY_BINDING)};
+        auto boundVao = helpers::getOpenGLIntegerValue(GL_VERTEX_ARRAY_BINDING);
         if (boundVao == m_impl->rendererId)
         {
             buffer->bind();

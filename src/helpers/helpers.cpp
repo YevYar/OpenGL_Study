@@ -13,7 +13,7 @@ namespace ogls::helpers
 {
 void freeTextureData(ogls::oglCore::texture::TextureData& textureData)
 {
-    stbi_image_free(textureData.m_data);
+    stbi_image_free(textureData.data);
 }
 
 std::string readStringFromFile(const std::string& pathToFile)
@@ -68,7 +68,7 @@ std::unique_ptr<ogls::oglCore::texture::TextureData> readTextureFromFile(const s
     }
     // TODO: image format auto detection
     return std::make_unique<oglCore::texture::TextureData>(data, width, height, nChannels,
-                                                           oglCore::texture::TexturePixelFormat::RGB);
+                                                           oglCore::texture::TexturePixelFormat::Rgb);
 }
 
 }  // namespace ogls::helpers

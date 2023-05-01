@@ -14,7 +14,6 @@ namespace ogls::oglCore::texture
 {
 using TexturesConfiguration = std::map<GLuint, std::vector<std::shared_ptr<BaseTexture>>>;
 
-enum class TextureTarget : GLenum;
 class TextureUnit;
 
 namespace TextureUnitsManager
@@ -61,6 +60,27 @@ class TextureUnit
 };  // class TextureUnit
 
 void applyTexturesConfiguration(const TexturesConfiguration& texturesConfiguration);
+
+template<unsigned int DimensionsNumber>
+auto castBaseTextureToTexture(GLuint textureUnitIndex, TextureTarget textureTarget)
+{
+    const auto tUnit = TextureUnitsManager::get(textureUnitIndex);
+    return std::dynamic_pointer_cast<Texture<DimensionsNumber>>(tUnit->getTexture(textureTarget));
+}
+
+template<unsigned int DimensionsNumber>
+auto castBaseTextureToTexture(const std::shared_ptr<TextureUnit>& textureUnit, TextureTarget textureTarget)
+{
+    return std::dynamic_pointer_cast<Texture<DimensionsNumber>>(textureUnit->getTexture(textureTarget));
+}
+
+template<unsigned int DimensionsNumber>
+auto castBaseTextureToTexture(const TexturesConfiguration& texturesConfig, GLuint textureUnitIndex,
+                              unsigned int textureIndex)
+{
+    return std::dynamic_pointer_cast<Texture<DimensionsNumber>>(texturesConfig.at(textureUnitIndex).at(textureIndex));
+}
+
 bool checkIsValidTextureUnitIndex(GLuint textureUnitIndex) noexcept;
 
 }  // namespace ogls::oglCore::texture

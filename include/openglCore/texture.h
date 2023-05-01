@@ -5,7 +5,6 @@
 
 #include "generalTypes.h"
 #include "textureTypes.h"
-#include "textureUnit.h"
 
 /**
  * \namespace texture
@@ -108,26 +107,6 @@ template<unsigned int DimensionsNumber>
 auto castBaseTextureToTexture(std::shared_ptr<BaseTexture> baseTexture)
 {
     return std::dynamic_pointer_cast<Texture<DimensionsNumber>>(baseTexture);
-}
-
-template<unsigned int DimensionsNumber>
-auto castBaseTextureToTexture(GLuint textureUnitIndex, TextureTarget textureTarget)
-{
-    const auto tUnit = TextureUnitsManager::get(textureUnitIndex);
-    return std::dynamic_pointer_cast<Texture<DimensionsNumber>>(tUnit->getTexture(textureTarget));
-}
-
-template<unsigned int DimensionsNumber>
-auto castBaseTextureToTexture(const std::shared_ptr<TextureUnit>& textureUnit, TextureTarget textureTarget)
-{
-    return std::dynamic_pointer_cast<Texture<DimensionsNumber>>(textureUnit->getTexture(textureTarget));
-}
-
-template<unsigned int DimensionsNumber>
-auto castBaseTextureToTexture(const TexturesConfiguration& texturesConfig, GLuint textureUnitIndex,
-                              unsigned int textureIndex)
-{
-    return std::dynamic_pointer_cast<Texture<DimensionsNumber>>(texturesConfig.at(textureUnitIndex).at(textureIndex));
 }
 
 }  // namespace ogls::oglCore::texture
