@@ -1,6 +1,5 @@
 #include "window.h"
 
-#include <iostream>
 #include <stdexcept>
 
 // clang-format off
@@ -25,7 +24,7 @@ namespace
 struct Window::Impl
 {
     public:
-        Impl(int width, int height, const std::string& title)
+        Impl(int width, int height, std::string_view title)
         {
             if (width <= 0 || height <= 0)
             {
@@ -41,7 +40,7 @@ struct Window::Impl
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-            auto tempWindow = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+            auto tempWindow = glfwCreateWindow(width, height, title.data(), nullptr, nullptr);
             if (!tempWindow)
             {
                 cleanAndThrowOnInitException("Failed to create GLFW window.");
@@ -60,7 +59,7 @@ struct Window::Impl
 
         Impl() = delete;
 
-        void cleanAndThrowOnInitException(const std::string& errorMessage)
+        void cleanAndThrowOnInitException(std::string_view errorMessage)
         {
             glfwTerminate();
             isTerminated = true;
@@ -75,13 +74,20 @@ struct Window::Impl
 
 };  // struct Window::Impl
 
-Window::Window(int width, int height, const std::string& title) : m_impl{std::make_unique<Impl>(width, height, title)}
+Window::Window(int width, int height, std::string_view title) : m_impl{std::make_unique<Impl>(width, height, std::move(title))}
 {
 }
 
-Window::~Window()
+Window::~Window() noexcept
 {
-    glfwTerminate();
+    try
+    {
+        glfwTerminate();
+    }
+    catch (...)
+    {
+    }
+    
     isTerminated = true;
 }
 
@@ -95,7 +101,7 @@ bool Window::shouldClose() const
     return glfwWindowShouldClose(m_impl->window);
 }
 
-void Window::swapBuffers() const
+void Window::swapBuffers()
 {
     glfwSwapBuffers(m_impl->window);
 }

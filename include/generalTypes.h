@@ -23,7 +23,7 @@ struct ArrayData
          * \param pointer - pointer to the data.
          * \param size    - size in bytes of the data.
          */
-        ArrayData(const void* pointer, size_t size);
+        ArrayData(const void* pointer, size_t size) noexcept;
         /**
          * \brief Constructs new ArrayData as move-copy of other ArrayData.
          *
@@ -56,7 +56,7 @@ struct ArrayData
 class ICloneable
 {
     public:
-        virtual ~ICloneable() = 0;
+        virtual ~ICloneable() noexcept = 0;
 
         /**
          * \brief Creates a deep copy of yourself.

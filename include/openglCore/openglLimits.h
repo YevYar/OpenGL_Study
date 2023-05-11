@@ -10,7 +10,7 @@ namespace ogls::oglCore
 /**
  * \brief LimitName specifies some necessary limit parameters, which are used in the program.
  *
- * See [glGet()](https://docs.gl/gl4/glGet).
+ * \see [glGet()](https://docs.gl/gl4/glGet).
  */
 enum class LimitName : GLenum
 {
@@ -24,6 +24,7 @@ enum class LimitName : GLenum
  * If initOpenglLimits() hasn't been called before, it throws std::logic_error.
  *
  * \param limitName - a limit parameter, the value of which is needed.
+ * \see initOpenglLimits().
  * \return the value of the limit.
  * \throw std::logic_error.
  */
@@ -34,12 +35,13 @@ GLint getOpenglLimit(LimitName limitName);
  *
  * If initOpenglLimits() hasn't been called before, the map is empty.
  *
+ * \see initOpenglLimits().
  * \return the map with values of all limits.
  */
 const std::map<LimitName, GLint>& getOpenglLimits() noexcept;
 
 /**
- * \brief Retrieves values of all limits from LimitName from OpenGL state machine.
+ * \brief Retrieves values of all limits from ogls::oglCore::LimitName from OpenGL state machine.
  *
  * This function must be called to allow correct usage of getOpenglLimit(), getOpenglLimits() etc.
  */

@@ -5,6 +5,9 @@
 
 namespace ogls::oglCore::vertex
 {
+/**
+ * \brief Impl contains private data and methods of VertexBufferLayout.
+ */
 struct VertexBufferLayout::Impl
 {
     public:

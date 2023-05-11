@@ -2,7 +2,7 @@
 
 namespace ogls
 {
-ArrayData::ArrayData(const void* p, size_t s) : pointer{p}, size{s}
+ArrayData::ArrayData(const void* p, size_t s) noexcept : pointer{p}, size{s}
 {
 }
 

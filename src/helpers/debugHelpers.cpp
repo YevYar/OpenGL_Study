@@ -5,7 +5,7 @@
 
 namespace ogls::helpers
 {
-bool checkAndLogGLErrors(const char* file, const char* function, int line)
+bool checkAndLogGLErrors(std::string_view file, std::string_view function, int line)
 {
     if (Window::isGLFWTerminated())
     {
@@ -25,7 +25,7 @@ bool checkAndLogGLErrors(const char* file, const char* function, int line)
     return isErrorRaised;
 }
 
-void clearGlError()
+void clearGlError() noexcept
 {
     if (Window::isGLFWTerminated())
     {

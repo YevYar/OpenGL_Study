@@ -3,17 +3,23 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 
 #include "textureTypes.h"
 
 /**
- * \namespace helpers
+ * \namespace ogls::helpers
  * \brief helpers namespace contains some helper types and functions.
  */
 namespace ogls::helpers
 {
 /**
  * \brief Properly frees memory, in which the texture was written.
+ * 
+ * If textureData.[data](\ref ogls::oglCore::texture::TextureData::data) points to a memory, which was acquired not by readTextureFromFile(),
+ * program behavior is undefined.
+ * 
+ * \param textureData - texture data object to be cleaned.
  */
 void freeTextureData(ogls::oglCore::texture::TextureData& textureData);
 
@@ -24,16 +30,16 @@ void freeTextureData(ogls::oglCore::texture::TextureData& textureData);
  * \return the srd::string with content of the file.
  * \throw ogls::exceptions::FileOpeningException(), ogls::exceptions::FileReadingException().
  */
-std::string readStringFromFile(const std::string& pathToFile);
+std::string readTextFromFile(std::string_view pathToFile);
 
 /**
  * \brief Opens the file and reads the content as texture image.
  *
- * \param pathToFile - a path to file to be read.
+ * \param pathToFile - a path to file to be read. Must be null-terminated C-style string.
  * \return bytes of the image and accompanying information about the image.
  * \throw ogls::exceptions::FileOpeningException(), ogls::exceptions::FileReadingException().
  */
-std::unique_ptr<ogls::oglCore::texture::TextureData> readTextureFromFile(const std::string& pathToFile);
+std::unique_ptr<ogls::oglCore::texture::TextureData> readTextureFromFile(std::string_view pathToFile);
 
 /**
  * \brief Casts an object to a type of elements of its enum type.

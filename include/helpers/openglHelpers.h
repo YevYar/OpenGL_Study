@@ -8,9 +8,9 @@ namespace ogls::helpers
 /**
  * \brief Gets the integer value of the specified parameter from the OpenGL state machine.
  *
- * The list of available parameters see in description of
- * [glGet()](https://registry.khronos.org/OpenGL-Refpages/gl4/html/glGet.xhtml).
+ * The list of available parameters see in description of [glGet()](https://docs.gl/gl4/glGet).
  *
+ * \param parameterName - the parameter to get value of.
  * \return the integer value of the specified parameter.
  */
 GLint getOpenGLIntegerValue(GLenum parameterName);

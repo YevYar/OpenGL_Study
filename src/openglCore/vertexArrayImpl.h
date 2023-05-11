@@ -7,28 +7,53 @@
 
 namespace ogls::oglCore::vertex
 {
+/**
+ * \brief Impl contains private data and methods of VertexArray.
+ */
 struct VertexArray::Impl
 {
     public:
-        static void bindSpecificVao(GLuint vaoId) noexcept;
+        /**
+         * \brief Wraps [glBindVertexArray()](https://docs.gl/gl4/glBindVertexArray).
+         * 
+         * \param vaoId - rendererId.
+         * \see VertexArray::Impl::rendererId.
+         */
+        static void bindSpecificVao(GLuint vaoId);
 
+        /**
+         * \see genVertexArray().
+         */
         Impl();
         OGLS_NOT_COPYABLE_MOVABLE(Impl)
+        /**
+         * \see deleteVertexArray().
+         */
+        ~Impl() noexcept;
+
         /**
          * \brief Deletes vertex array object in OpenGL state machine.
          *
          * Wraps [glDeleteVertexArrays()](https://docs.gl/gl4/glDeleteVertexArrays).
          */
-        ~Impl();
-
         void deleteVertexArray();
+        /**
+         * \brief Generates new 1 vertex array object in OpenGL state machine.
+         *
+         * Wraps [glCreateVertexArrays()](https://docs.gl/gl4/glCreateVertexArrays).
+         * 
+         * \throw ogls::exceptions::GLRecAcquisitionException().
+         */
         void genVertexArray();
 
     public:
         /**
-         * \brief Id of referenced OpenGL vertex array object.
+         * \brief ID of referenced OpenGL vertex array object.
          */
         GLuint                               rendererId = {0};
+        /**
+         * \brief Added to vertex array object buffers.
+         */
         std::vector<std::shared_ptr<Buffer>> buffers;
 
 };  // struct VertexArray::Impl

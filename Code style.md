@@ -212,7 +212,7 @@ struct BaseUniform::BaseImpl
 
     public:
         /**
-         * \brief Location (id) of the referenced OpenGL uniform variable in a shader program.
+         * \brief Location (ID) of the referenced OpenGL uniform variable in a shader program.
          */
         const GLint m_location = {-1};
 
@@ -313,6 +313,10 @@ avoid possible misunderstanding between `auto lst = {1}; // lst is an initialize
 - Before closing `}` of namespace.
 - Before `#endif`.
 - Between functions (except methods in type declaration) and between function and type declaration.
+
+## Noexcept
+- Destructors must be declared as `noexcept`. If destructor calls potentially-throwing function, `try-catch` block must wrap this call.
+- Functions, which use macros `OGLS_CALL()`, cannot be declared as `noexcept`, because `OGLS_CALL()` can be changed to become potentially-throwing.
 
 ## Some rules from [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
 - Try to avoid forward declarations of entities defined in another project ([see Forward Declarations](https://google.github.io/styleguide/cppguide.html#Forward_Declarations)).

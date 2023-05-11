@@ -28,7 +28,7 @@ VertexArray::VertexArray(VertexArray&& obj) noexcept : m_impl{std::move(obj.m_im
 
 VertexArray::~VertexArray() = default;
 
-void VertexArray::unbind() noexcept
+void VertexArray::unbind()
 {
     Impl::bindSpecificVao(0);
 }
@@ -36,11 +36,10 @@ void VertexArray::unbind() noexcept
 VertexArray& VertexArray::operator=(VertexArray&& obj) noexcept
 {
     m_impl = std::move(obj.m_impl);
-
     return *this;
 }
 
-void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
+void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer)
 {
     const auto layout = buffer->getLayout();
 
@@ -118,19 +117,25 @@ void VertexArray::addBuffer(std::shared_ptr<Buffer> buffer) noexcept
     m_impl->buffers.push_back(std::move(buffer));
 }
 
-void VertexArray::bind() const noexcept
+void VertexArray::bind() const
 {
     Impl::bindSpecificVao(m_impl->rendererId);
 }
 
-void VertexArray::disableAttribute(unsigned int index) const noexcept
+void VertexArray::disableAttribute(int index)
 {
-    OGLS_GLCall(glDisableVertexArrayAttrib(m_impl->rendererId, index));
+    if (index >= 0)
+    {
+        OGLS_GLCall(glDisableVertexArrayAttrib(m_impl->rendererId, index));
+    }
 }
 
-void VertexArray::enableAttribute(unsigned int index) const noexcept
+void VertexArray::enableAttribute(int index)
 {
-    OGLS_GLCall(glEnableVertexArrayAttrib(m_impl->rendererId, index));
+    if (index >= 0)
+    {
+        OGLS_GLCall(glEnableVertexArrayAttrib(m_impl->rendererId, index));
+    }    
 }
 
 const std::vector<std::shared_ptr<Buffer>>& VertexArray::getBuffers() const noexcept
@@ -150,12 +155,18 @@ VertexArray::Impl::Impl()
     genVertexArray();
 }
 
-VertexArray::Impl::~Impl()
+VertexArray::Impl::~Impl() noexcept
 {
-    deleteVertexArray();
+    try
+    {
+        deleteVertexArray();
+    }
+    catch (...)
+    {
+    }  
 }
 
-void VertexArray::Impl::bindSpecificVao(GLuint vaoId) noexcept
+void VertexArray::Impl::bindSpecificVao(GLuint vaoId)
 {
     OGLS_GLCall(glBindVertexArray(vaoId));
 }

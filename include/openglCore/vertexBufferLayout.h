@@ -20,7 +20,7 @@ struct VertexAttribute
          * of the first generic vertex attribute in the array in the data store of the buffer currently bound
          * to the GL_ARRAY_BUFFER target.
          */
-        unsigned int   byteOffset = {0};
+        int   byteOffset = {0};
         /**
          * \brief The number of components per generic vertex attribute. Must be 1, 2, 3, 4.
          */
@@ -43,6 +43,11 @@ struct VertexAttribute
 
 /**
  * \brief VertexBufferLayout represents the format of the data, which is stored in a Buffer.
+ * 
+ * The format is (VNCVNCVNCVNC)
+ * (see [Formatting VBO Data](https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices#Formatting_VBO_Data)).
+ * 
+ * \see ogls::oglCore::vertex::VertexArray::addBuffer().
  */
 class VertexBufferLayout
 {
@@ -54,9 +59,12 @@ class VertexBufferLayout
 
     public:
         OGLS_DEFAULT_MOVABLE(VertexBufferLayout)
+        /**
+         * \brief Constructs new layout without any vertex attributes.
+         */
         VertexBufferLayout();
         VertexBufferLayout(const VertexBufferLayout& obj);
-        ~VertexBufferLayout();
+        ~VertexBufferLayout() noexcept;
 
         VertexBufferLayout& operator=(const VertexBufferLayout& obj);
 
@@ -92,7 +100,7 @@ class VertexBufferLayout
  * \param type - type to get the size of.
  * \return size in bytes of the type.
  */
-unsigned int getByteSizeOfType(VertexAttrType type) noexcept;
+int getByteSizeOfType(VertexAttrType type) noexcept;
 
 }  // namespace ogls::oglCore::vertex
 

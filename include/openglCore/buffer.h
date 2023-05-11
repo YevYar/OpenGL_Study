@@ -26,25 +26,25 @@ class Buffer : public ICloneable
     public:
         /**
          * \brief Unbinds current buffer from the target.
+         * 
+         * Wraps [glBindBuffer()](https://docs.gl/gl4/glBindBuffer).
          *
          * \param target - target buffer to be unbound from.
          */
-        static void unbindTarget(BufferTarget target) noexcept;
+        static void unbindTarget(BufferTarget target);
 
         /**
-         * \brief Constructs new Buffer object with passed arguments and
-         * generates new 1 buffer in OpenGL state machine.
-         *
-         * Buffer data specified by data parameter is not immediately loaded in generated OpenGL buffer.
-         * Data is loaded in generated OpenGL buffer in first call of method bind().
+         * \brief Constructs new Buffer object with passed arguments, generates new 1 buffer in OpenGL state machine
+         * and loads the data in referenced OpenGL buffer object.
+         * 
+         * Wraps [glCreateBuffers()](https://docs.gl/gl4/glCreateBuffers).
          *
          * \param target       - target to bind buffer to.
          * \param data         - data, which must be set in OpenGL buffer.
          * \param usage        - usage of data.
          * \param bufferLayout - VertexBufferLayout.
          * Use only for buffer, which is intended to be vertex buffer object. Otherwise must be std::nullopt.
-         *
-         * \throw exceptions::GLRecAcquisitionException().
+         * \throw ogls::exceptions::GLRecAcquisitionException().
          */
         Buffer(BufferTarget target, ArrayData data, BufferDataUsage usage,
                std::optional<VertexBufferLayout> bufferLayout = std::nullopt);
@@ -52,50 +52,47 @@ class Buffer : public ICloneable
          * \brief Constructs new Buffer as move-copy of other Buffer.
          *
          * New 1 buffer in OpenGL state machine is not generated.
-         *
-         * If data of moved Buffer was not loaded early,
-         * data is loaded in OpenGL buffer in first call of method bind().
          */
         Buffer(Buffer&& obj) noexcept;
-        ~Buffer();
+        /**
+         * \brief Deletes the buffer object in OpenGL state machine.
+         *
+         * Wraps [glDeleteBuffers()](https://docs.gl/gl4/glDeleteBuffers).
+         */
+        ~Buffer() noexcept;
 
         /**
          * \brief Move-copies the state of other Buffer.
          *
-         * Reference on pointed OpenGL buffer of assignment destination Buffer is not changed.
-         *
-         * Data is loaded in OpenGL buffer of assignment destination Buffer in first call of method bind().
+         * NOTE: Reference on pointed OpenGL buffer object of assignment destination Buffer (this object) is changed.
+         * That is why VertexArray object, to which this Buffer was added, can be affected,
+         * because OpenGL vertex array object represented by VertexArray object references on the previous ID
+         * of this Buffer object, which was replaced by ID of Buffer obj.
          */
         Buffer& operator=(Buffer&& obj) noexcept;
-        // Note that it can affect VAO to which current buffer is bound, because OpenGL buffer obj. can references on old buffer
         Buffer& operator=(const Buffer& obj) = delete;
 
         /**
          * \brief Wraps [glBindBuffer()](https://docs.gl/gl4/glBindBuffer).
-         *
-         * Also sets Buffer data in OpenGL buffer if it was not set before.
          */
-        void                              bind() const noexcept;
+        void                              bind() const;
         /**
          * \brief Returns data of the Buffer.
-         *
-         * It is not guaranteed that data of the Buffer is loaded in OpenGL buffer.
-         *
-         * Loading of data is done by:
-         * - first call of bind() after object creation or assignment,
-         * - calling of setData().
-         *
+         *          
          * \return data of the Buffer.
          */
         const ArrayData&                  getData() const noexcept;
         /**
          * \brief Returns layout of the buffer.
+         * 
+         * \return layout of the Buffer.
          */
         std::optional<VertexBufferLayout> getLayout() const noexcept;
         /**
          * \brief Sets new Buffer data and loads it in OpenGL buffer.
          *
-         * The buffer is immediately bound (see bind()) and data is loaded.
+         * Wraps [glNamedBufferData()](https://docs.gl/gl4/glBufferData)
+         * and [glNamedBufferSubData()](https://docs.gl/gl4/glBufferSubData).
          *
          * \param data - data, which must be set in OpenGL buffer.
          */
@@ -103,7 +100,7 @@ class Buffer : public ICloneable
         /**
          * \brief Calls unbindTarget() with the target of the buffer.
          */
-        void                              unbind() const noexcept;
+        void                              unbind() const;
 
         Buffer* clone() const override;
 
@@ -112,12 +109,11 @@ class Buffer : public ICloneable
          * \brief Constructs new Buffer as copy of other Buffer.
          *
          * However new 1 buffer in OpenGL state machine is generated.
-         * Deep copy of m_data is not made (see copy constructor of ArrayData).
-         *
-         * Buffer data is not immediately loaded in generated OpenGL buffer.
-         * Data is loaded in generated OpenGL buffer in first call of method bind().
-         *
-         * \throw exceptions::GLRecAcquisitionException().
+         * Deep copy of data of Buffer obj is not made (see copy constructor of ArrayData).
+         * 
+         * Wraps [glCreateBuffers()](https://docs.gl/gl4/glCreateBuffers).
+         * 
+         * \throw ogls::exceptions::GLRecAcquisitionException().
          */
         Buffer(const Buffer& obj);
 

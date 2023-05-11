@@ -37,6 +37,10 @@ void VertexBufferLayout::addVertexAttribute(const VertexAttribute& va)
     {
         throw std::out_of_range{"Count must be greater than 0 and less than 5."};
     }
+    if (va.byteOffset < 0)
+    {
+        throw std::out_of_range{"Byte offset cannot be negative."};
+    }
 
     m_impl->vertexAttributes.push_back(va);
     m_impl->stride += getByteSizeOfType(va.type) * va.count;
@@ -52,7 +56,7 @@ GLsizei VertexBufferLayout::getStride() const noexcept
     return m_impl->stride;
 }
 
-unsigned int getByteSizeOfType(VertexAttrType type) noexcept
+int getByteSizeOfType(VertexAttrType type) noexcept
 {
     switch (type)
     {

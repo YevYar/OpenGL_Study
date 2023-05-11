@@ -26,7 +26,7 @@ Buffer::Buffer(Buffer&& obj) noexcept : m_impl{std::move(obj.m_impl)}
 
 Buffer::~Buffer() = default;
 
-void Buffer::unbindTarget(BufferTarget target) noexcept
+void Buffer::unbindTarget(BufferTarget target)
 {
     OGLS_GLCall(glBindBuffer(helpers::toUType(target), 0));
 }
@@ -37,7 +37,7 @@ Buffer& Buffer::operator=(Buffer&& obj) noexcept
     return *this;
 }
 
-void Buffer::bind() const noexcept
+void Buffer::bind() const
 {
     m_impl->bind();
 }
@@ -61,7 +61,7 @@ void Buffer::setData(ArrayData data)
     }
 }
 
-void Buffer::unbind() const noexcept
+void Buffer::unbind() const
 {
     Buffer::unbindTarget(m_impl->target);
 }
@@ -91,12 +91,18 @@ Buffer::Impl::Impl(Impl&& obj) noexcept :
     obj.rendererId = {0};
 }
 
-Buffer::Impl::~Impl()
+Buffer::Impl::~Impl() noexcept
 {
-    deleteBuffer();
+    try
+    {
+        deleteBuffer();
+    }
+    catch (...)
+    {
+    }    
 }
 
-void Buffer::Impl::bindToTarget(BufferTarget target, GLuint bufferId) noexcept
+void Buffer::Impl::bindToTarget(BufferTarget target, GLuint bufferId)
 {
     OGLS_GLCall(glBindBuffer(helpers::toUType(target), bufferId));
 }
@@ -141,12 +147,12 @@ BufferBindingTarget Buffer::Impl::getTargetAssociatedGetParameter(BufferTarget t
     }
 }
 
-void Buffer::Impl::bind() const noexcept
+void Buffer::Impl::bind() const
 {
     Impl::bindToTarget(target, rendererId);
 }
 
-bool Buffer::Impl::checkAndGenerateNewStorage(const ArrayData& d) noexcept
+bool Buffer::Impl::checkAndGenerateNewStorage(const ArrayData& d)
 {
     if (d.size != data.size)
     {
@@ -157,7 +163,7 @@ bool Buffer::Impl::checkAndGenerateNewStorage(const ArrayData& d) noexcept
     return false;
 }
 
-void Buffer::Impl::deleteBuffer() noexcept
+void Buffer::Impl::deleteBuffer()
 {
     OGLS_GLCall(glDeleteBuffers(1, &rendererId));
     rendererId = {0};

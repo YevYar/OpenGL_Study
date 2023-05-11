@@ -14,9 +14,10 @@ namespace ogls::helpers
 void freeTextureData(ogls::oglCore::texture::TextureData& textureData)
 {
     stbi_image_free(textureData.data);
+    textureData.data = nullptr;
 }
 
-std::string readStringFromFile(const std::string& pathToFile)
+std::string readTextFromFile(std::string_view pathToFile)
 {
     using namespace ogls;
 
@@ -46,7 +47,7 @@ std::string readStringFromFile(const std::string& pathToFile)
     return stream.str();
 }
 
-std::unique_ptr<ogls::oglCore::texture::TextureData> readTextureFromFile(const std::string& pathToFile)
+std::unique_ptr<ogls::oglCore::texture::TextureData> readTextureFromFile(std::string_view pathToFile)
 {
     using namespace ogls;
 
@@ -59,7 +60,7 @@ std::unique_ptr<ogls::oglCore::texture::TextureData> readTextureFromFile(const s
 
     stbi_set_flip_vertically_on_load(true);
     auto width = int{0}, height = int{0}, nChannels = int{0};
-    auto data = stbi_load(pathToFile.c_str(), &width, &height, &nChannels, 0);
+    auto data = stbi_load(pathToFile.data(), &width, &height, &nChannels, 0);
 
     if (!data)
     {

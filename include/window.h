@@ -2,7 +2,7 @@
 #define OGLS_WINDOW_H
 
 #include <memory>
-#include <string>
+#include <string_view>
 
 #include "helpers/macros.h"
 
@@ -22,7 +22,7 @@ class Window
 
     public:
         /**
-         * \brief Returns bool value: true is the window was terminated, false otherwise.
+         * \brief Returns bool value: true if the window was terminated, false otherwise.
          */
         static bool isGLFWTerminated() noexcept;
 
@@ -31,17 +31,17 @@ class Window
          *
          * \param width  - width of the window in pixels.
          * \param height - height of the window in pixels.
-         * \param title  - title of the window.
+         * \param title  - title of the window. Must be null-terminated C-style string.
          * \throw std::out_of_range, ogls::exceptions::WindowInitializationException().
          */
-        Window(int width, int height, const std::string& title);
+        Window(int width, int height, std::string_view title);
         Window() = delete;
         OGLS_NOT_COPYABLE_MOVABLE(Window)
         /**
          * \brief Destructs the window and OpenGL context by calling
          * [glfwTerminate()](https://www.glfw.org/docs/3.3/group__init.html#gaaae48c0a18607ea4a4ba951d939f0901).
          */
-        ~Window();
+        ~Window() noexcept;
 
         /**
          * \brief Wraps
@@ -54,7 +54,7 @@ class Window
          * \brief Wraps
          * [glfwSwapBuffers()](https://www.glfw.org/docs/3.3/group__window.html#ga15a5a1ee5b3c2ca6b15ca209a12efd14).
          */
-        void swapBuffers() const;
+        void swapBuffers();
 
     private:
         /**

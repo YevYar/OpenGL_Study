@@ -5,7 +5,7 @@
 #include <string>
 
 /**
- * \namespace exceptions
+ * \namespace ogls::exceptions
  * \brief exceptions namespace contains all custom exception types.
  */
 namespace ogls::exceptions
@@ -24,7 +24,15 @@ class BaseException : public std::exception
          *
          * \param message - error message.
          */
-        explicit inline BaseException(const std::string& message) : std::exception{message.c_str()}
+        explicit BaseException(const std::string& message) noexcept : std::exception{message.c_str()}
+        {
+        }
+        /**
+         * \brief Constructs new std::exception and passes message to its constructor.
+         *
+         * \param message - error message. Must be null-terminated C-style string.
+         */
+        explicit BaseException(std::string_view message) noexcept : std::exception{message.data()}
         {
         }
 

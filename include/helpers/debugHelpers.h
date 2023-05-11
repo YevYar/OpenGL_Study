@@ -1,6 +1,8 @@
 #ifndef OGLS_HELPERS_DEBUG_HELPERS_H
 #define OGLS_HELPERS_DEBUG_HELPERS_H
 
+#include <string_view>
+
 #include <debugbreak.h>
 
 #include "window.h"
@@ -47,12 +49,12 @@ namespace ogls::helpers
  * \param line     - the line, from which the function is called.
  * \return false if is no error and true otherwise.
  */
-bool checkAndLogGLErrors(const char* file, const char* function, int line);
+bool checkAndLogGLErrors(std::string_view file, std::string_view function, int line);
 
 /**
  * \brief Invalidates all current OpenGL errors.
  */
-void clearGlError();
+void clearGlError() noexcept;
 
 }  // namespace ogls::helpers
 
