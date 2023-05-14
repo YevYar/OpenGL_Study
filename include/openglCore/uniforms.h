@@ -32,7 +32,7 @@ class BaseUniform
     public:
         BaseUniform() = delete;
         OGLS_NOT_COPYABLE_MOVABLE(BaseUniform)
-        virtual ~BaseUniform();
+        virtual ~BaseUniform() noexcept;
 
         /**
          * \brief Sets the data of OpenGL uniform variable.
@@ -46,12 +46,9 @@ class BaseUniform
          * \brief Constructs new BaseUniform object using pointer to BaseImpl object or to object of the class,
          * derived from BaseImpl.
          *
-         * It is also checked that the uniform is attached to a shader program.
-         *
          * \param impl - pointer to BaseImpl object or to object of the class, derived from BaseImpl.
-         * \throw ogls::exceptions::GLRecAcquisitionException().
          */
-        explicit BaseUniform(std::unique_ptr<BaseImpl> impl);
+        explicit BaseUniform(std::unique_ptr<BaseImpl> impl) noexcept;
 
     protected:
         /**
@@ -91,16 +88,14 @@ class Uniform : public BaseUniform
         /**
          * \brief Returns a Type representation of Uniform object.
          *
-         * The same as getValue().
+         * \see getValue().
          */
-        explicit operator Type() noexcept;
+        explicit operator Type() const;
 
         /**
-         * \brief Returns current value, which is stored in OpenGL uniform variable.
-         *
-         * The same as operator Type().
+         * \brief Returns current value, which is stored in OpenGL uniform variable inside OpenGL state machine.
          */
-        Type getValue();
+        Type getValue() const;
 
         void setData(const void* data) override;
 
@@ -108,10 +103,11 @@ class Uniform : public BaseUniform
         /**
          * \brief Constructs new object.
          *
+         * It is also checked that the uniform is attached to a shader program.
+         *
          * \param shaderProgram - an ID of parent shader program.
          * \param location      - a location of the uniform in a shader program.
          * \param name          - a name of the uniform variable.
-         * \see BaseUniform().
          * \throw ogls::exceptions::GLRecAcquisitionException().
          */
         Uniform(GLuint shaderProgram, GLint location, std::string name);

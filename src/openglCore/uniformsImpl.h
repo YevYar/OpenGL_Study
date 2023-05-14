@@ -5,6 +5,9 @@
 
 namespace ogls::oglCore::shader
 {
+/**
+ * \brief BaseImpl contains private data and methods of BaseUniform.
+ */
 struct BaseUniform::BaseImpl
 {
     public:
@@ -37,13 +40,16 @@ struct BaseUniform::BaseImpl
          * \brief Name of the referenced OpenGL uniform variable, which is used in a code of a shader.
          */
         const std::string name;
-        /*
+        /**
          * \brief ID of parent shader program.
          */
         const GLuint      shaderProgram = {0};
 
 };  // struct BaseUniform::BaseImpl
 
+/**
+ * \brief Impl contains private data and methods of Uniform.
+ */
 template<typename Type, unsigned int Count>
 struct Uniform<Type, Count>::Impl : public BaseUniform::BaseImpl
 {
@@ -66,16 +72,16 @@ struct Uniform<Type, Count>::Impl : public BaseUniform::BaseImpl
          * \param shaderProgram - an ID of parent shader program.
          * \param location      - a location of the uniform in a shader program.
          * \param name          - a name of the uniform variable.
-         * \see BaseImpl().
+         * \see BaseUniform::BaseImpl().
          * \throw ogls::exceptions::GLRecAcquisitionException().
          */
         Impl(GLuint shaderProgram, GLint location, std::string name);
         OGLS_NOT_COPYABLE_MOVABLE(Impl)
 
         /**
-         * \brief Returns current value, which is stored in OpenGL uniform variable.
+         * \brief Returns current value, which is stored in OpenGL uniform variable inside OpenGL state machine.
          */
-        Type getValue();
+        Type getValue() const;
 
         void setData(const void* data) override;
 

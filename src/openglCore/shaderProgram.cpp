@@ -20,14 +20,14 @@ Shader::Shader(ShaderType type, const std::string& shaderSource) : m_impl{std::m
 {
 }
 
-Shader::~Shader() = default;
+Shader::~Shader() noexcept = default;
 
 ShaderProgram::ShaderProgram(const Shader& vertexShader, const Shader& fragmentShader) :
     m_impl{std::make_unique<Impl>(vertexShader, fragmentShader)}
 {
 }
 
-ShaderProgram::~ShaderProgram() = default;
+ShaderProgram::~ShaderProgram() noexcept = default;
 
 template<typename Type, unsigned int Count>
 BaseUniform& ShaderProgram::findUniform(std::string name)
@@ -48,16 +48,16 @@ BaseUniform& ShaderProgram::getUniform(const std::string& name) const
     return *(m_impl->uniforms.at(name).get());
 }
 
-void ShaderProgram::use() const noexcept
+void ShaderProgram::use() const
 {
     OGLS_GLCall(glUseProgram(m_impl->rendererId));
 }
 
-std::unique_ptr<ShaderProgram> makeShaderProgram(const std::string& pathToVertexShader,
-                                                 const std::string& pathToFragmentShader)
+std::unique_ptr<ShaderProgram> makeShaderProgram(std::string_view pathToVertexShader,
+                                                 std::string_view pathToFragmentShader)
 {
-    const auto vShaderSource = helpers::readStringFromFile(pathToVertexShader),
-               fShaderSource = helpers::readStringFromFile(pathToFragmentShader);
+    const auto vShaderSource = helpers::readTextFromFile(pathToVertexShader),
+               fShaderSource = helpers::readTextFromFile(pathToFragmentShader);
     if (vShaderSource.empty() || fShaderSource.empty())
     {
         throw std::runtime_error{"Vertex or fragment shader source is empty."};
@@ -102,9 +102,15 @@ Shader::Impl::Impl(ShaderType t, const std::string& shaderSource) : type{t}
     }
 }
 
-Shader::Impl::~Impl()
+Shader::Impl::~Impl() noexcept
 {
-    OGLS_GLCall(glDeleteShader(rendererId));
+    try
+    {
+        OGLS_GLCall(glDeleteShader(rendererId));
+    }
+    catch (...)
+    {
+    }
 }
 
 ShaderProgram::Impl::Impl(const Shader& vertexShader, const Shader& fragmentShader)
@@ -142,9 +148,15 @@ ShaderProgram::Impl::Impl(const Shader& vertexShader, const Shader& fragmentShad
     OGLS_GLCall(glDetachShader(rendererId, fragmentShader.m_impl->rendererId));
 }
 
-ShaderProgram::Impl::~Impl()
+ShaderProgram::Impl::~Impl() noexcept
 {
-    OGLS_GLCall(glDeleteProgram(rendererId));
+    try
+    {
+        OGLS_GLCall(glDeleteProgram(rendererId));
+    }
+    catch (...)
+    {
+    }
 }
 
 GLint ShaderProgram::Impl::getUniformLocation(const std::string& uniformName) const

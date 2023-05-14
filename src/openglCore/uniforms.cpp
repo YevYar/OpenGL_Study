@@ -37,11 +37,11 @@ namespace
 
 }  // namespace
 
-BaseUniform::BaseUniform(std::unique_ptr<BaseImpl> impl) : m_impl{std::move(impl)}
+BaseUniform::BaseUniform(std::unique_ptr<BaseImpl> impl) noexcept : m_impl{std::move(impl)}
 {
 }
 
-BaseUniform::~BaseUniform() = default;
+BaseUniform::~BaseUniform() noexcept = default;
 
 template<typename Type, unsigned int Count>
 Uniform<Type, Count>::Uniform(GLuint shaderProgram, GLint location, std::string name) :
@@ -50,13 +50,13 @@ Uniform<Type, Count>::Uniform(GLuint shaderProgram, GLint location, std::string 
 }
 
 template<typename Type, unsigned int Count>
-Uniform<Type, Count>::operator Type() noexcept
+Uniform<Type, Count>::operator Type() const
 {
     return getValue();
 }
 
 template<typename Type, unsigned int Count>
-Type Uniform<Type, Count>::getValue()
+Type Uniform<Type, Count>::getValue() const
 {
     return impl()->getValue();
 }
@@ -101,7 +101,7 @@ Uniform<Type, Count>::Impl::Impl(GLuint shaderProgram, GLint location, std::stri
 }
 
 template<typename Type, unsigned int Count>
-Type Uniform<Type, Count>::Impl::getValue()
+Type Uniform<Type, Count>::Impl::getValue() const
 {
     auto value = Type{0};
     OGLS_GLCall(getter(shaderProgram, location, &value));

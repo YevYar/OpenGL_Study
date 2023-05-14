@@ -10,7 +10,7 @@
 #include "uniforms.h"
 
 /**
- * \namespace shader
+ * \namespace ogls::oglCore::shader
  * \brief shader namespace contains types, related to OpenGL shaders, shader programs, uniforms etc.
  */
 namespace ogls::oglCore::shader
@@ -59,7 +59,7 @@ class Shader
          *
          * Wraps [glDeleteShader()](https://docs.gl/gl4/glDeleteShader).
          */
-        ~Shader();
+        ~Shader() noexcept;
 
     private:
         /**
@@ -92,7 +92,8 @@ class ShaderProgram
          * [glAttachShader()](https://docs.gl/gl4/glAttachShader), [glLinkProgram()](https://docs.gl/gl4/glLinkProgram),
          * [glValidateProgram()](https://docs.gl/gl4/glValidateProgram),
          * [glGetProgramiv()](https://docs.gl/gl4/glGetProgram),
-         * [glGetProgramInfoLog()](https://docs.gl/gl4/glGetProgramInfoLog).
+         * [glGetProgramInfoLog()](https://docs.gl/gl4/glGetProgramInfoLog),
+         * [glDetachShader()](https://docs.gl/gl4/glDetachShader).
          *
          * \param vertexShader   - an object of Shader class with the type ShaderType::VERTEX_SHADER.
          * \param fragmentShader - an object of Shader class with the type ShaderType::FRAGMENT_SHADER.
@@ -105,10 +106,10 @@ class ShaderProgram
          *
          * Wraps [glDeleteProgram()](https://docs.gl/gl4/glDeleteProgram).
          */
-        ~ShaderProgram();
+        ~ShaderProgram() noexcept;
 
         /**
-         * \brief Finds uniform location and creates BaseUniform object,
+         * \brief Finds uniform location and creates Uniform<Type, Count> object,
          * which wraps the OpenGL uniform variable with specified name.
          *
          * Uses [glGetUniformLocation()](https://docs.gl/gl4/glGetUniformLocation).
@@ -116,18 +117,21 @@ class ShaderProgram
          * \param Type  - one of the list: GLfloat, GLdouble, GLint, GLuint.
          * \param Count - the integer value in the range [1, 4].
          * \param name  - a name of uniform variable, which is used in OpenGL shader program.
-         * \return created BaseUniform object or throws an exception if nothing is found.
+         * \return created Uniform<Type, Count> object via reference to base class BaseUniform
+         * or throws an exception if nothing is found.
          * \throw ogls::exceptions::GLRecAcquisitionException().
          */
         template<typename Type, unsigned int Count>
         BaseUniform& findUniform(std::string name);
         /**
-         * \brief Returns BaseUniform, which wraps the OpenGL uniform variable with specified name.
+         * \brief Returns Uniform object via reference to base class BaseUniform,
+         * which wraps the OpenGL uniform variable with specified name.
          *
-         * To get BaseUniform for specified uniform variable this uniform must be previously found and created
+         * To get Uniform for specified uniform variable this uniform must be previously found and created
          * by calling findUniform().
          *
          * \param name - a name of uniform variable, which is used in OpenGL shader program.
+         * \see findUniform().
          * \return found BaseUniform object or throws an exception if nothing is found.
          * \throw std::out_of_range.
          */
@@ -135,7 +139,7 @@ class ShaderProgram
         /**
          * \brief Wraps [glUseProgram()](https://docs.gl/gl4/glUseProgram).
          */
-        void         use() const noexcept;
+        void         use() const;
 
     private:
         /**
@@ -154,8 +158,8 @@ class ShaderProgram
  * \throw std::runtime_error,
  * exceptions, which can be thrown by constructors of Shader and ShaderProgram classes.
  */
-std::unique_ptr<ShaderProgram> makeShaderProgram(const std::string& pathToVertexShader,
-                                                 const std::string& pathToFragmentShader);
+std::unique_ptr<ShaderProgram> makeShaderProgram(std::string_view pathToVertexShader,
+                                                 std::string_view pathToFragmentShader);
 
 }  // namespace ogls::oglCore::shader
 
