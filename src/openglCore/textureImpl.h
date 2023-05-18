@@ -39,9 +39,6 @@ template<>
 struct TexDimensionSpecificFunc<1>
 {
     public:
-        using TexImageTarget = TexDimensionSpecificTypes<1>::TexImageTarget;
-
-    public:
         void setTexImageInTarget(GLuint textureId, std::shared_ptr<TextureData> textureData);
         void setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData) const noexcept;
 
@@ -50,9 +47,6 @@ struct TexDimensionSpecificFunc<1>
 template<>
 struct TexDimensionSpecificFunc<2>
 {
-    public:
-        using TexImageTarget = TexDimensionSpecificTypes<2>::TexImageTarget;
-
     public:
         void setTexImageInTarget(GLuint textureId, std::shared_ptr<TextureData> textureData);
         void setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData) const noexcept;
@@ -63,9 +57,6 @@ template<>
 struct TexDimensionSpecificFunc<3>
 {
     public:
-        using TexImageTarget = TexDimensionSpecificTypes<3>::TexImageTarget;
-
-    public:
         void setTexImageInTarget(GLuint textureId, std::shared_ptr<TextureData> textureData);
         void setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData) const noexcept;
 
@@ -75,10 +66,7 @@ template<unsigned int DimensionsNumber>
 struct Texture<DimensionsNumber>::Impl : public BaseTexture::BaseImpl
 {
     public:
-        using TexImageTarget = TexDimensionSpecificFunc<DimensionsNumber>::TexImageTarget;
-
-    public:
-        static void                 bindToTarget(TextureTarget target, GLuint textureId) noexcept;
+        static void                 bindToTarget(TextureTarget target, GLuint textureId);
         static TextureBindingTarget getTargetAssociatedGetParameter(TextureTarget target) noexcept;
 
         explicit Impl(TextureTarget target);
@@ -88,16 +76,14 @@ struct Texture<DimensionsNumber>::Impl : public BaseTexture::BaseImpl
         Impl& operator=(Impl&&) noexcept = delete;
 
         void bind() const noexcept;
-        void setData(TexImageTarget texImageTarget, std::shared_ptr<TextureData> textureData);
+        void setData(std::shared_ptr<TextureData> textureData);
         void specifyTextureStorageFormat(const std::shared_ptr<TextureData>& textureData) const noexcept;
 
     public:
         std::shared_ptr<TextureData>               data;
         const GLuint                               dimensionsNumber         = {DimensionsNumber};
         mutable bool                               isStorageFormatSpecified = false;
-        TexImageTarget                             lastTexImageTarget;
         TexDimensionSpecificFunc<DimensionsNumber> specific;
-        TexImageTarget                             texImageTarget;
 
 
         template<OpenGLBindableObject Type>

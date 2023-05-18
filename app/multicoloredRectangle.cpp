@@ -51,8 +51,7 @@ void MulticoloredRectangle::render()
         auto textureData =
           std::shared_ptr<texture::TextureData>{readTextureFromFile("resources/textures/awesomeface.png")};
         textureData->format = texture::TexturePixelFormat::Rgba;
-        texture::castBaseTextureToTexture<2>(m_texturesConfiguration, 0, 0)
-          ->setData(texture::TexImage2DTarget::Texture2d, textureData);
+        texture::castBaseTextureToTexture<2>(m_texturesConfiguration, 0, 0)->setData(textureData);
     }
 
     OGLS_GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
@@ -115,8 +114,7 @@ std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle()
     // Load textures only once
     static auto textureData =
       std::shared_ptr<TextureData>{helpers::readTextureFromFile("resources/textures/wooden_container.jpg")};
-    static auto texture2D =
-      std::make_shared<Texture<2>>(TextureTarget::Texture2d, TexImage2DTarget::Texture2d, textureData);
+    static auto texture2D = std::make_shared<Texture<2>>(TextureTarget::Texture2d, textureData);
     static TexturesConfiguration texturesConfig{
       {0, std::vector<std::shared_ptr<BaseTexture>>{texture2D}}
     };

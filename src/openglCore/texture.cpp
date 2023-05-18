@@ -46,11 +46,9 @@ Texture<DimensionsNumber>::Texture(TextureTarget target) : BaseTexture{std::make
 }
 
 template<unsigned int DimensionsNumber>
-Texture<DimensionsNumber>::Texture(TextureTarget target, TexImageTarget texImageTarget,
-                                   std::shared_ptr<TextureData> textureData) :
-    Texture{target}
+Texture<DimensionsNumber>::Texture(TextureTarget target, std::shared_ptr<TextureData> textureData) : Texture{target}
 {
-    setData(texImageTarget, std::move(textureData));
+    setData(std::move(textureData));
 }
 
 template<unsigned int DimensionsNumber>
@@ -86,9 +84,9 @@ TextureTarget Texture<DimensionsNumber>::getTarget() const noexcept
 }
 
 template<unsigned int DimensionsNumber>
-void Texture<DimensionsNumber>::setData(TexImageTarget texImageTarget, std::shared_ptr<TextureData> textureData)
+void Texture<DimensionsNumber>::setData(std::shared_ptr<TextureData> textureData)
 {
-    impl()->setData(texImageTarget, std::move(textureData));
+    impl()->setData(std::move(textureData));
 }
 
 template<unsigned int DimensionsNumber>
@@ -249,8 +247,7 @@ Texture<DimensionsNumber>::Impl::Impl(TextureTarget t) : BaseImpl{t}
 template<unsigned int DimensionsNumber>
 Texture<DimensionsNumber>::Impl::Impl(const Impl& obj) : BaseImpl{obj}
 {
-    lastTexImageTarget = obj.lastTexImageTarget;
-    setData(lastTexImageTarget, obj.data);
+    setData(obj.data);
 }
 
 template<unsigned int DimensionsNumber>
@@ -301,7 +298,7 @@ void Texture<DimensionsNumber>::Impl::bind() const noexcept
 }
 
 template<unsigned int DimensionsNumber>
-void Texture<DimensionsNumber>::Impl::setData(TexImageTarget t, std::shared_ptr<TextureData> textureData)
+void Texture<DimensionsNumber>::Impl::setData(std::shared_ptr<TextureData> textureData)
 {
     if (!isStorageFormatSpecified)
     {
@@ -311,8 +308,7 @@ void Texture<DimensionsNumber>::Impl::setData(TexImageTarget t, std::shared_ptr<
     specific.setTexImageInTarget(rendererId, textureData);
     OGLS_GLCall(glGenerateTextureMipmap(rendererId));
 
-    data               = std::move(textureData);
-    lastTexImageTarget = t;
+    data = std::move(textureData);
 }
 
 template<unsigned int DimensionsNumber>

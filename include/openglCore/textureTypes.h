@@ -8,49 +8,6 @@
 namespace ogls::oglCore::texture
 {
 /**
- * \brief TexImage1DTarget is a type of the texture, which represents 'target' parameter of
- * [glTexImage1D()](https://docs.gl/gl4/glTexImage1D).
- */
-enum class TexImage1DTarget : GLenum
-{
-    ProxyTexture1d = 0x80'63,
-    Texture1d      = 0x0D'E0
-};
-
-/**
- * \brief TexImage2DTarget is a type of the texture, which represents 'target' parameter of
- * [glTexImage2D()](https://docs.gl/gl4/glTexImage2D).
- */
-enum class TexImage2DTarget : GLenum
-{
-    ProxyTexture1dArray     = 0x8C'19,
-    ProxyTexture2d          = 0x80'64,
-    ProxyTextureCubeMap     = 0x85'1B,
-    ProxyTextureRectangle   = 0x84'F7,
-    Texture1dArray          = 0x8C'18,
-    Texture2d               = 0x0D'E1,
-    TextureCubeMapNegativeX = 0x85'16,
-    TextureCubeMapNegativeY = 0x85'18,
-    TextureCubeMapNegativeZ = 0x85'1A,
-    TextureCubeMapPositiveX = 0x85'15,
-    TextureCubeMapPositiveY = 0x85'17,
-    TextureCubeMapPositiveZ = 0x85'19,
-    TextureRectangle        = 0x84'F5
-};
-
-/**
- * \brief TexImage3DTarget is a type of the texture, which represents 'target' parameter of
- * [glTexImage3D()](https://docs.gl/gl4/glTexImage3D).
- */
-enum class TexImage3DTarget : GLenum
-{
-    ProxyTexture2dArray = 0x8C'1B,
-    ProxyTexture3d      = 0x80'70,
-    Texture2dArray      = 0x8C'1A,
-    Texture3d           = 0x80'6F
-};
-
-/**
  * \brief TexParameterName represents 'pname' parameter of [glTexParameter()](https://docs.gl/gl4/glTexParameter).
  */
 enum class TexParameterName : GLenum
@@ -270,36 +227,6 @@ enum class TextureTarget : GLenum
     TextureRectangle          = 0x84'F5
 };
 
-/*
- * \brief TexDimensionSpecificTypes declares some types, which are used for the same purpose,
- * but by different texture types depending on their dimension (1D, 2D, 3D).
- */
-template<unsigned int DimensionsNumber>
-struct TexDimensionSpecificTypes
-{
-};
-
-template<>
-struct TexDimensionSpecificTypes<1>
-{
-        using TexImageTarget = TexImage1DTarget;
-
-};  // struct TexDimensionSpecificTypes<1>
-
-template<>
-struct TexDimensionSpecificTypes<2>
-{
-        using TexImageTarget = TexImage2DTarget;
-
-};  // struct TexDimensionSpecificTypes<2>
-
-template<>
-struct TexDimensionSpecificTypes<3>
-{
-        using TexImageTarget = TexImage3DTarget;
-
-};  // struct TexDimensionSpecificTypes<3>
-
 /**
  * \brief TextureData contains a pointer to the data of the texture, information about the loaded image
  * and about some of the texture parameters.
@@ -318,8 +245,8 @@ class TextureData
          * \param nChannels   - a number of color channels of the image.
          * \param format      - the format of image data.
          */
-        TextureData(unsigned char* textureData, GLsizei width, GLsizei height, unsigned int nChannels,
-                    TexturePixelFormat format);
+        TextureData(unsigned char* textureData, GLsizei width, GLsizei height, int nChannels,
+                    TexturePixelFormat format) noexcept;
         /**
          * \brief Constructs new object.
          *
@@ -335,15 +262,15 @@ class TextureData
          * \param internalFormat - specify how the texture shall be stored in the GPU.
          * \param pixelType      - the type of the pixel data.
          */
-        TextureData(unsigned char* textureData, GLsizei width, GLsizei height, GLsizei depth, unsigned int nChannels,
+        TextureData(unsigned char* textureData, GLsizei width, GLsizei height, GLsizei depth, int nChannels,
                     GLint level, TexturePixelFormat format, TextureInternalFormat internalFormat,
-                    TexturePixelType pixelType);
+                    TexturePixelType pixelType) noexcept;
         TextureData() = delete;
         OGLS_NOT_COPYABLE_MOVABLE(TextureData)
         /**
          * \brief Deletes the object and cleans the data by calling helpers::freeTextureData().
          */
-        ~TextureData();
+        ~TextureData() noexcept;
 
     public:
         /**
@@ -375,7 +302,7 @@ class TextureData
         /**
          * \brief A number of color channels of the image.
          */
-        unsigned int          nChannels      = {0};
+        int          nChannels      = {0};
         /**
          * \brief The type of the pixel data.
          */

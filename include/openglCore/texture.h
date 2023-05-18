@@ -54,9 +54,6 @@ class Texture : public BaseTexture
                       "The number of dimensions must be in range [1, 3].");
 
 
-    public:
-        using TexImageTarget = TexDimensionSpecificTypes<DimensionsNumber>::TexImageTarget;
-
     private:
         /**
          * \brief Impl contains private data and methods of Texture.
@@ -73,7 +70,7 @@ class Texture : public BaseTexture
 
         OGLS_DEFAULT_MOVABLE(Texture)
         explicit Texture(TextureTarget target);
-        Texture(TextureTarget target, TexImageTarget texImageTarget, std::shared_ptr<TextureData> textureData);
+        Texture(TextureTarget target, std::shared_ptr<TextureData> textureData);
         ~Texture();
 
         Texture& operator=(const Texture& obj) = delete;
@@ -81,7 +78,7 @@ class Texture : public BaseTexture
         void                         bind() const noexcept;
         std::shared_ptr<TextureData> getData() const noexcept;
         TextureTarget                getTarget() const noexcept;
-        void                         setData(TexImageTarget texImageTarget, std::shared_ptr<TextureData> textureData);
+        void                         setData(std::shared_ptr<TextureData> textureData);
         template<typename Type>
         requires std::is_same_v<GLfloat, Type> || std::is_same_v<GLint, Type>
         void setParameter(TexParameterName parameter, Type value);
