@@ -9,11 +9,7 @@
 
 namespace ogls::oglCore::texture
 {
-BaseTexture::BaseTexture() : m_impl{std::make_unique<BaseImpl>()}
-{
-}
-
-BaseTexture::BaseTexture(std::unique_ptr<BaseImpl> impl) : m_impl{std::move(impl)}
+BaseTexture::BaseTexture(std::unique_ptr<BaseImpl> impl) noexcept : m_impl{std::move(impl)}
 {
 }
 
@@ -21,7 +17,7 @@ BaseTexture::BaseTexture(const BaseTexture& obj) : m_impl{std::make_unique<BaseI
 {
 }
 
-BaseTexture::~BaseTexture() = default;
+BaseTexture::~BaseTexture() noexcept = default;
 
 BaseTexture* BaseTexture::clone() const
 {
@@ -57,16 +53,16 @@ Texture<DimensionsNumber>::Texture(const Texture& obj) : BaseTexture{std::make_u
 }
 
 template<unsigned int DimensionsNumber>
-Texture<DimensionsNumber>::~Texture() = default;
+Texture<DimensionsNumber>::~Texture() noexcept = default;
 
 template<unsigned int DimensionsNumber>
-void Texture<DimensionsNumber>::unbindTarget(TextureTarget target) noexcept
+void Texture<DimensionsNumber>::unbindTarget(TextureTarget target)
 {
     OGLS_GLCall(glBindTexture(helpers::toUType(target), 0));
 }
 
 template<unsigned int DimensionsNumber>
-void Texture<DimensionsNumber>::bind() const noexcept
+void Texture<DimensionsNumber>::bind() const
 {
     impl()->bind();
 }
@@ -136,13 +132,12 @@ void Texture<DimensionsNumber>::setParameterV(TexParameterName parameter, const 
 
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::specifyTextureStorageFormat(const std::shared_ptr<TextureData>& textureData)
-  const noexcept
 {
     impl()->specifyTextureStorageFormat(textureData);
 }
 
 template<unsigned int DimensionsNumber>
-void Texture<DimensionsNumber>::unbind() const noexcept
+void Texture<DimensionsNumber>::unbind() const
 {
     Texture::unbindTarget(m_impl->target);
 }
@@ -171,12 +166,18 @@ BaseTexture::BaseImpl::BaseImpl(const BaseImpl& obj) : target{obj.target}
     genTexture();
 }
 
-BaseTexture::BaseImpl::~BaseImpl()
+BaseTexture::BaseImpl::~BaseImpl() noexcept
 {
-    deleteTexture();
+    try
+    {
+        deleteTexture();
+    }
+    catch (...)
+    {
+    }
 }
 
-void BaseTexture::BaseImpl::deleteTexture() noexcept
+void BaseTexture::BaseImpl::deleteTexture()
 {
     OGLS_GLCall(glDeleteTextures(1, &rendererId));
     rendererId = {0};
@@ -200,8 +201,7 @@ void TexDimensionSpecificFunc<1>::setTexImageInTarget(GLuint textureId, std::sha
                                     toUType(textureData->type), textureData->data));
 }
 
-void TexDimensionSpecificFunc<1>::setTexStorageFormat(GLuint                              textureId,
-                                                      const std::shared_ptr<TextureData>& textureData) const noexcept
+void TexDimensionSpecificFunc<1>::setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData)
 {
     OGLS_GLCall(glTextureStorage1D(textureId, textureData->level, helpers::toUType(textureData->internalFormat),
                                    textureData->width));
@@ -216,8 +216,7 @@ void TexDimensionSpecificFunc<2>::setTexImageInTarget(GLuint textureId, std::sha
                                     toUType(textureData->format), toUType(textureData->type), textureData->data));
 }
 
-void TexDimensionSpecificFunc<2>::setTexStorageFormat(GLuint                              textureId,
-                                                      const std::shared_ptr<TextureData>& textureData) const noexcept
+void TexDimensionSpecificFunc<2>::setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData)
 {
     OGLS_GLCall(glTextureStorage2D(textureId, textureData->level, helpers::toUType(textureData->internalFormat),
                                    textureData->width, textureData->height));
@@ -232,8 +231,7 @@ void TexDimensionSpecificFunc<3>::setTexImageInTarget(GLuint textureId, std::sha
                                     toUType(textureData->format), toUType(textureData->type), textureData->data));
 }
 
-void TexDimensionSpecificFunc<3>::setTexStorageFormat(GLuint                              textureId,
-                                                      const std::shared_ptr<TextureData>& textureData) const noexcept
+void TexDimensionSpecificFunc<3>::setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData)
 {
     OGLS_GLCall(glTextureStorage3D(textureId, textureData->level, helpers::toUType(textureData->internalFormat),
                                    textureData->width, textureData->height, textureData->depth));
@@ -251,7 +249,7 @@ Texture<DimensionsNumber>::Impl::Impl(const Impl& obj) : BaseImpl{obj}
 }
 
 template<unsigned int DimensionsNumber>
-void Texture<DimensionsNumber>::Impl::bindToTarget(TextureTarget target, GLuint textureId) noexcept
+void Texture<DimensionsNumber>::Impl::bindToTarget(TextureTarget target, GLuint textureId)
 {
     OGLS_GLCall(glBindTexture(helpers::toUType(target), textureId));
 }
@@ -292,7 +290,7 @@ TextureBindingTarget Texture<DimensionsNumber>::Impl::getTargetAssociatedGetPara
 }
 
 template<unsigned int DimensionsNumber>
-void Texture<DimensionsNumber>::Impl::bind() const noexcept
+void Texture<DimensionsNumber>::Impl::bind() const
 {
     Impl::bindToTarget(target, rendererId);
 }
@@ -313,7 +311,6 @@ void Texture<DimensionsNumber>::Impl::setData(std::shared_ptr<TextureData> textu
 
 template<unsigned int DimensionsNumber>
 void Texture<DimensionsNumber>::Impl::specifyTextureStorageFormat(const std::shared_ptr<TextureData>& textureData)
-  const noexcept
 {
     OGLS_ASSERT(!isStorageFormatSpecified);
     specific.setTexStorageFormat(rendererId, textureData);

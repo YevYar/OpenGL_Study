@@ -12,7 +12,7 @@ namespace ogls::exceptions
 {
 /**
  * \brief BaseException is a base class for exceptions which has all constructors of std::exception
- * and defines additional constructor, which get error string as std::string.
+ * and defines additional constructors to get error string as std::string or std::string_view.
  */
 class BaseException : public std::exception
 {
@@ -27,6 +27,7 @@ class BaseException : public std::exception
         explicit BaseException(const std::string& message) noexcept : std::exception{message.c_str()}
         {
         }
+
         /**
          * \brief Constructs new std::exception and passes message to its constructor.
          *

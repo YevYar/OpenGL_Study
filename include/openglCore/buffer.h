@@ -26,7 +26,7 @@ class Buffer : public ICloneable
     public:
         /**
          * \brief Unbinds current buffer from the target.
-         * 
+         *
          * Wraps [glBindBuffer()](https://docs.gl/gl4/glBindBuffer).
          *
          * \param target - target buffer to be unbound from.
@@ -36,7 +36,7 @@ class Buffer : public ICloneable
         /**
          * \brief Constructs new Buffer object with passed arguments, generates new 1 buffer in OpenGL state machine
          * and loads the data in referenced OpenGL buffer object.
-         * 
+         *
          * Wraps [glCreateBuffers()](https://docs.gl/gl4/glCreateBuffers).
          *
          * \param target       - target to bind buffer to.
@@ -44,6 +44,7 @@ class Buffer : public ICloneable
          * \param usage        - usage of data.
          * \param bufferLayout - VertexBufferLayout.
          * Use only for buffer, which is intended to be vertex buffer object. Otherwise must be std::nullopt.
+         * \see setData().
          * \throw ogls::exceptions::GLRecAcquisitionException().
          */
         Buffer(BufferTarget target, ArrayData data, BufferDataUsage usage,
@@ -78,20 +79,21 @@ class Buffer : public ICloneable
         void                              bind() const;
         /**
          * \brief Returns data of the Buffer.
-         *          
+         *
          * \return data of the Buffer.
          */
         const ArrayData&                  getData() const noexcept;
         /**
          * \brief Returns layout of the buffer.
-         * 
+         *
          * \return layout of the Buffer.
          */
         std::optional<VertexBufferLayout> getLayout() const noexcept;
         /**
          * \brief Sets new Buffer data and loads it in OpenGL buffer.
          *
-         * Wraps [glNamedBufferData()](https://docs.gl/gl4/glBufferData)
+         * Wraps [glNamedBufferData()](https://docs.gl/gl4/glBufferData) (creates new data store in OpenGL
+         * only if the data.[size](\ref ArrayData::size) is not equal to current size)
          * and [glNamedBufferSubData()](https://docs.gl/gl4/glBufferSubData).
          *
          * \param data - data, which must be set in OpenGL buffer.
@@ -110,9 +112,10 @@ class Buffer : public ICloneable
          *
          * However new 1 buffer in OpenGL state machine is generated.
          * Deep copy of data of Buffer obj is not made (see copy constructor of ArrayData).
-         * 
+         *
          * Wraps [glCreateBuffers()](https://docs.gl/gl4/glCreateBuffers).
-         * 
+         *
+         * \see setData().
          * \throw ogls::exceptions::GLRecAcquisitionException().
          */
         Buffer(const Buffer& obj);

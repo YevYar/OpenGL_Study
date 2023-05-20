@@ -20,7 +20,7 @@ namespace
 struct TextureUnit::Impl
 {
     public:
-        explicit Impl(GLuint i) : index{i}
+        explicit Impl(GLuint i) noexcept : index{i}
         {
         }
 
@@ -103,7 +103,7 @@ TextureUnit::TextureUnit(GLuint index) : m_impl{std::make_unique<Impl>(index)}
 {
 }
 
-TextureUnit::~TextureUnit() = default;
+TextureUnit::~TextureUnit() noexcept = default;
 
 const std::map<TextureTarget, std::shared_ptr<BaseTexture>>& TextureUnit::getAllTextures() const noexcept
 {
@@ -133,6 +133,7 @@ void TextureUnit::setTexture(const std::shared_ptr<BaseTexture>& texture)
     OGLS_GLCall(glBindTextureUnit(m_impl->index, texture->m_impl->rendererId));
     m_impl->unitTextures.insert_or_assign(texture->m_impl->target, texture);
 
+    // TODO: Check, if it is necessary to reactivate active texture unit after glBindTextureUnit()
     activateTextureUnitWithoutCheck(activeTextureUnitIndex);
 }
 
@@ -152,6 +153,7 @@ void TextureUnit::setTextures(const std::vector<std::shared_ptr<BaseTexture>>& t
         m_impl->unitTextures.insert_or_assign(texture->m_impl->target, texture);
     }
 
+    // TODO: Check, if it is necessary to reactivate active texture unit after glBindTextureUnit()
     activateTextureUnitWithoutCheck(activeTextureUnitIndex);
 }
 
@@ -163,7 +165,7 @@ void applyTexturesConfiguration(const TexturesConfiguration& texturesConfigurati
     }
 }
 
-bool checkIsValidTextureUnitIndex(GLuint textureUnitIndex) noexcept
+bool checkIsValidTextureUnitIndex(GLuint textureUnitIndex)
 {
     return textureUnitIndex <= getOpenglLimit(LimitName::MaxCombinedTextureImageUnits) - 1;
 }

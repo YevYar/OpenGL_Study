@@ -114,7 +114,7 @@ class Uniform : public BaseUniform
 
     private:
         /**
-         * \brief Returns a pointer to an object of implementation class, casted from BaseImpl to Impl.
+         * \brief Returns a pointer to an object of implementation class, casted from BaseUniform::BaseImpl to Impl.
          */
         Impl* impl() const noexcept;
 
