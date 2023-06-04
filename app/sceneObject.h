@@ -27,7 +27,7 @@ class SceneObject
          */
         SceneObject(std::shared_ptr<ogls::oglCore::vertex::VertexArray>   vao,
                     std::shared_ptr<ogls::oglCore::shader::ShaderProgram> shaderProgram);
-        virtual ~SceneObject() = default;
+        virtual ~SceneObject() noexcept = default;
 
         /**
          * \brief Sets a configuration of texture units, which is used for rendering of the object.

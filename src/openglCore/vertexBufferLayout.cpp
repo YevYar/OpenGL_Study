@@ -17,10 +17,15 @@ VertexBufferLayout::VertexBufferLayout(const VertexBufferLayout& obj) : m_impl{s
 {
 }
 
-VertexBufferLayout::~VertexBufferLayout() = default;
+VertexBufferLayout::~VertexBufferLayout() noexcept = default;
 
 VertexBufferLayout& VertexBufferLayout::operator=(const VertexBufferLayout& obj)
 {
+    if (this == &obj)
+    {
+        return *this;
+    }
+
     m_impl = std::make_unique<Impl>(*obj.m_impl);
     return *this;
 }

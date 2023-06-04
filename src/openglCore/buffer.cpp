@@ -24,7 +24,7 @@ Buffer::Buffer(Buffer&& obj) noexcept : m_impl{std::move(obj.m_impl)}
 {
 }
 
-Buffer::~Buffer() = default;
+Buffer::~Buffer() noexcept = default;
 
 void Buffer::unbindTarget(BufferTarget target)
 {
@@ -99,7 +99,7 @@ Buffer::Impl::~Impl() noexcept
     }
     catch (...)
     {
-    }    
+    }
 }
 
 void Buffer::Impl::bindToTarget(BufferTarget target, GLuint bufferId)

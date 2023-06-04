@@ -17,10 +17,10 @@ namespace ogls::oglCore
  */
 template<typename Type>
 concept OpenGLBindableObject = requires(Type openglObject) {
-    requires std::is_same_v<decltype(openglObject.m_rendererId), GLuint>;
-    requires std::is_same_v<std::underlying_type_t<decltype(openglObject.m_target)>, GLenum>;
-    Type::getTargetAssociatedGetParameter(decltype(openglObject.m_target){});
-    Type::bindToTarget(decltype(openglObject.m_target){}, GLuint{});
+    requires std::is_same_v<decltype(openglObject.rendererId), GLuint>;
+    requires std::is_same_v<std::underlying_type_t<decltype(openglObject.target)>, GLenum>;
+    Type::getTargetAssociatedGetParameter(decltype(openglObject.target){});
+    Type::bindToTarget(decltype(openglObject.target){}, GLuint{});
     openglObject.bind();
 };
 
@@ -37,9 +37,9 @@ void bindForAMomentAndExecute(
   const Type& openglObject, const std::function<void()>& funcToExecute = []() {})
 {
     auto boundObj = helpers::getOpenGLIntegerValue(
-      helpers::toUType(openglObject.getTargetAssociatedGetParameter(openglObject.m_target)));
+      helpers::toUType(openglObject.getTargetAssociatedGetParameter(openglObject.target)));
 
-    if (boundObj == openglObject.m_rendererId)
+    if (boundObj == openglObject.rendererId)
     {
         funcToExecute();
     }
@@ -47,7 +47,7 @@ void bindForAMomentAndExecute(
     {
         openglObject.bind();
         funcToExecute();
-        openglObject.bindToTarget(openglObject.m_target, boundObj);
+        openglObject.bindToTarget(openglObject.target, boundObj);
     }
 }
 

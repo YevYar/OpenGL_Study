@@ -65,6 +65,8 @@ std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle()
     using namespace ogls::oglCore::vertex;
 
 
+    static auto callCounter = int{0};
+
     // clang-format off
     static const auto points  = std::array<GLfloat, 28>{
 		-0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
@@ -92,20 +94,28 @@ std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle()
                                             .type{VertexAttrType::Float}};
 
     static auto layout = VertexBufferLayout{};
-    layout.addVertexAttribute(coordinateMap);
-    layout.addVertexAttribute(colorMap);
-    layout.addVertexAttribute(texCoords);
+    if (callCounter == 0)
+    {
+        layout.addVertexAttribute(coordinateMap);
+        layout.addVertexAttribute(colorMap);
+        layout.addVertexAttribute(texCoords);
+    }
 
     static auto data = ArrayData{reinterpret_cast<const void*>(points.data()), sizeof(points)};
     static auto VBO  = std::make_shared<Buffer>(BufferTarget::ArrayBuffer, data, BufferDataUsage::StaticDraw, layout);
-
-    VAO->addBuffer(VBO);
+    if (callCounter == 0)
+    {
+        VAO->addBuffer(VBO);
+    }
 
     static auto EBO =
       std::make_shared<Buffer>(BufferTarget::ElementArrayBuffer,
                                ArrayData{reinterpret_cast<const void*>(indices.data()), sizeof(indices)},
                                BufferDataUsage::StaticDraw);
-    VAO->addBuffer(EBO);
+    if (callCounter == 0)
+    {
+        VAO->addBuffer(EBO);
+    }
 
     // Create shader program only once
     static auto shaderProgram = std::shared_ptr<ShaderProgram>{
@@ -114,10 +124,12 @@ std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle()
     // Load textures only once
     static auto textureData =
       std::shared_ptr<TextureData>{helpers::readTextureFromFile("resources/textures/wooden_container.jpg")};
-    static auto texture2D = std::make_shared<Texture<2>>(TextureTarget::Texture2d, textureData);
+    static auto                  texture2D = std::make_shared<Texture<2>>(TextureTarget::Texture2d, textureData);
     static TexturesConfiguration texturesConfig{
       {0, std::vector<std::shared_ptr<BaseTexture>>{texture2D}}
     };
+
+    ++callCounter;
 
     // Create new MulticoloredRectangle
     auto rect = new MulticoloredRectangle{VAO, shaderProgram};

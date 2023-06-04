@@ -23,6 +23,7 @@ struct BaseUniform::BaseImpl
          */
         BaseImpl(GLuint shaderProgram, GLint location, std::string name);
         OGLS_NOT_COPYABLE_MOVABLE(BaseImpl)
+        virtual ~BaseImpl() noexcept = default;
 
         /**
          * \brief Sets the data of OpenGL uniform variable.

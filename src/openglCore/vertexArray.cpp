@@ -26,7 +26,7 @@ VertexArray::VertexArray(VertexArray&& obj) noexcept : m_impl{std::move(obj.m_im
 {
 }
 
-VertexArray::~VertexArray() = default;
+VertexArray::~VertexArray() noexcept = default;
 
 void VertexArray::unbind()
 {
@@ -135,7 +135,7 @@ void VertexArray::enableAttribute(int index)
     if (index >= 0)
     {
         OGLS_GLCall(glEnableVertexArrayAttrib(m_impl->rendererId, index));
-    }    
+    }
 }
 
 const std::vector<std::shared_ptr<Buffer>>& VertexArray::getBuffers() const noexcept
@@ -163,7 +163,7 @@ VertexArray::Impl::~Impl() noexcept
     }
     catch (...)
     {
-    }  
+    }
 }
 
 void VertexArray::Impl::bindSpecificVao(GLuint vaoId)

@@ -23,6 +23,6 @@ ArrayData& ArrayData::operator=(ArrayData&& obj) noexcept
     return *this;
 }
 
-ICloneable::~ICloneable() = default;
+ICloneable::~ICloneable() noexcept = default;
 
 }  // namespace ogls

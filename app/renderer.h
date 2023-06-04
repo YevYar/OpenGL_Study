@@ -10,7 +10,7 @@
  * \brief app namespace contains types and functions of demo application.
  */
 /**
- * \namespace renderer
+ * \namespace app::renderer
  * \brief renderer namespace contains types and functions to provide basic graphical objects or their managers.
  */
 namespace app::renderer
@@ -35,7 +35,7 @@ class Renderer
          */
         Renderer();
         OGLS_NOT_COPYABLE_MOVABLE(Renderer)
-        virtual ~Renderer() = default;
+        virtual ~Renderer() noexcept = default;
 
         /**
          * \brief Performs rendering.
