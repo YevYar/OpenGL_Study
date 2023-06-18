@@ -22,9 +22,9 @@ if(Doxygen_FOUND)
     set(DOXYGEN_TEMPLATE_RELATIONS YES)
     set(DOXYGEN_ENABLE_PREPROCESSING YES)
     set(DOXYGEN_MACRO_EXPANSION YES)
-
+    
     doxygen_add_docs(OpenGL_Study_docs
-        ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/app
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
         COMMENT "Generating API documentation with Doxygen")
 else()
