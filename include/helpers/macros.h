@@ -3,7 +3,7 @@
 
 /**
  * \brief Adds default copy constructor and copy assignment operator to a class.
- * 
+ *
  * \param ClassX - the name of the class.
  */
 #define OGLS_DEFAULT_COPYABLE(ClassX)           \
@@ -12,7 +12,7 @@
 
 /**
  * \brief Adds default move constructor and move assignment operator to a class.
- * 
+ *
  * \param ClassX - the name of the class.
  */
 #define OGLS_DEFAULT_MOVABLE(ClassX)       \
@@ -21,7 +21,7 @@
 
 /**
  * \brief Adds default copy and move constructors and copy and move assignment operators to a class.
- * 
+ *
  * \param ClassX - the name of the class.
  */
 #define OGLS_DEFAULT_COPYABLE_MOVABLE(ClassX)   \
@@ -32,7 +32,7 @@
 
 /**
  * \brief Deletes copy constructor and copy assignment operator from a class.
- * 
+ *
  * \param ClassX - the name of the class.
  */
 #define OGLS_NOT_COPYABLE(ClassX)              \
@@ -41,7 +41,7 @@
 
 /**
  * \brief Deletes move constructor and move assignment operator from a class.
- * 
+ *
  * \param ClassX - the name of the class.
  */
 #define OGLS_NOT_MOVABLE(ClassX)          \
@@ -50,7 +50,7 @@
 
 /**
  * \brief Deletes copy and move constructors and copy and move assignment operators from a class.
- * 
+ *
  * \param ClassX - the name of the class.
  */
 #define OGLS_NOT_COPYABLE_MOVABLE(ClassX)      \

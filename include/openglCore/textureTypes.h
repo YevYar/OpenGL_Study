@@ -302,7 +302,7 @@ class TextureData
         /**
          * \brief A number of color channels of the image.
          */
-        int          nChannels      = {0};
+        int                   nChannels      = {0};
         /**
          * \brief The type of the pixel data.
          */
@@ -314,6 +314,6 @@ class TextureData
 
 };  // class TextureData
 
-}  // namespace ogsl::oglCore::texture
+}  // namespace ogls::oglCore::texture
 
 #endif

@@ -16,7 +16,8 @@ TextureData::TextureData(unsigned char* textureData, GLsizei w, GLsizei h, int n
 
 TextureData::TextureData(unsigned char* textureData, GLsizei w, GLsizei h, GLsizei d, int nCh, GLint l,
                          TexturePixelFormat f, TextureInternalFormat iF, TexturePixelType pixelType) noexcept :
-    data{textureData}, depth{d > 0 ? d : 0}, height{h > 0 ? h : 0}, width{w > 0 ? w : 0}, nChannels{nCh > 0 ? nCh : 0},
+    data{textureData},
+    depth{d > 0 ? d : 0}, height{h > 0 ? h : 0}, width{w > 0 ? w : 0}, nChannels{nCh > 0 ? nCh : 0},
     level{l > 0 ? l : 0}, format{f}, internalFormat{iF}, type{pixelType}
 {
     OGLS_ASSERT(data);
@@ -35,7 +36,7 @@ TextureData::~TextureData() noexcept
     }
     catch (...)
     {
-    }    
+    }
 }
 
 }  // namespace ogls::oglCore::texture
