@@ -8,7 +8,7 @@ namespace ogls::oglCore::vertex
 /**
  * \brief Impl contains private data and methods of VertexBufferLayout.
  */
-struct VertexBufferLayout::Impl
+class VertexBufferLayout::Impl
 {
     public:
         Impl()                = default;
@@ -30,7 +30,7 @@ struct VertexBufferLayout::Impl
          */
         std::vector<VertexAttribute> vertexAttributes;
 
-};  // struct VertexBufferLayout::Impl
+};  // class VertexBufferLayout::Impl
 
 }  // namespace ogls::oglCore::vertex
 

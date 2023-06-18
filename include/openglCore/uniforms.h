@@ -27,7 +27,7 @@ class BaseUniform
         /**
          * \brief BaseImpl contains private data and methods of BaseUniform.
          */
-        struct BaseImpl;
+        class BaseImpl;
 
     public:
         BaseUniform() = delete;
@@ -80,7 +80,7 @@ class Uniform : public BaseUniform
         /**
          * \brief Impl contains private data and methods of Uniform.
          */
-        struct Impl;
+        class Impl;
 
     public:
         Uniform() = delete;

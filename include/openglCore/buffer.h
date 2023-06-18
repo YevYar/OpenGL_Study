@@ -21,7 +21,7 @@ class Buffer : public ICloneable
         /**
          * \brief Impl contains private data and methods of Buffer.
          */
-        struct Impl;
+        class Impl;
 
     public:
         /**

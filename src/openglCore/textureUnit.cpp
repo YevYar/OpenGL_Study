@@ -17,7 +17,7 @@ namespace
 
 }  // namespace
 
-struct TextureUnit::Impl
+class TextureUnit::Impl
 {
     public:
         explicit Impl(GLuint i) noexcept : index{i}
@@ -28,7 +28,7 @@ struct TextureUnit::Impl
         const GLuint                                          index = {0};
         std::map<TextureTarget, std::shared_ptr<BaseTexture>> unitTextures;
 
-};  // struct TextureUnit::Impl
+};  // class TextureUnit::Impl
 
 namespace TextureUnitsManager
 {

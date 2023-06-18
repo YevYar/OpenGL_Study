@@ -23,7 +23,7 @@ class BaseTexture : public ICloneable
         /**
          * \brief BaseImpl contains private data and methods of BaseTexture.
          */
-        struct BaseImpl;
+        class BaseImpl;
 
     public:
         OGLS_DEFAULT_MOVABLE(BaseTexture)
@@ -91,7 +91,7 @@ class Texture : public BaseTexture
         /**
          * \brief Impl contains private data and methods of Texture.
          */
-        struct Impl;
+        class Impl;
 
     public:
         /**

@@ -10,12 +10,12 @@ namespace ogls::oglCore::vertex
 /**
  * \brief Impl contains private data and methods of VertexArray.
  */
-struct VertexArray::Impl
+class VertexArray::Impl
 {
     public:
         /**
          * \brief Wraps [glBindVertexArray()](https://docs.gl/gl4/glBindVertexArray).
-         * 
+         *
          * \param vaoId - rendererId.
          * \see VertexArray::Impl::rendererId.
          */
@@ -41,7 +41,7 @@ struct VertexArray::Impl
          * \brief Generates new 1 vertex array object in OpenGL state machine.
          *
          * Wraps [glCreateVertexArrays()](https://docs.gl/gl4/glCreateVertexArrays).
-         * 
+         *
          * \throw ogls::exceptions::GLRecAcquisitionException().
          */
         void genVertexArray();
@@ -56,7 +56,7 @@ struct VertexArray::Impl
          */
         std::vector<std::shared_ptr<Buffer>> buffers;
 
-};  // struct VertexArray::Impl
+};  // class VertexArray::Impl
 
 }  // namespace ogls::oglCore::vertex
 

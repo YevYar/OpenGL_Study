@@ -37,7 +37,7 @@ class Shader
         /**
          * \brief Impl contains private data and methods of Shader.
          */
-        struct Impl;
+        class Impl;
 
     public:
         /**
@@ -81,7 +81,7 @@ class ShaderProgram
         /**
          * \brief Impl contains private data and methods of ShaderProgram.
          */
-        struct Impl;
+        class Impl;
 
     public:
         /**

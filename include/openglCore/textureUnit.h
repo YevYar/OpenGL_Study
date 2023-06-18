@@ -76,7 +76,7 @@ class TextureUnit
         /**
          * \brief Impl contains private data and methods of TextureUnit.
          */
-        struct Impl;
+        class Impl;
 
     public:
         TextureUnit() = delete;

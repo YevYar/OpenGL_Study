@@ -8,7 +8,7 @@ namespace ogls::oglCore::shader
 /**
  * \brief Impl contains private data and methods of Shader.
  */
-struct Shader::Impl
+class Shader::Impl
 {
     public:
         /**
@@ -42,12 +42,12 @@ struct Shader::Impl
          */
         const ShaderType type       = ShaderType::VertexShader;
 
-};  // struct Shader::Impl
+};  // class Shader::Impl
 
 /**
  * \brief Impl contains private data and methods of ShaderProgram.
  */
-struct ShaderProgram::Impl
+class ShaderProgram::Impl
 {
     public:
         /**
@@ -95,7 +95,7 @@ struct ShaderProgram::Impl
          */
         std::map<std::string, std::unique_ptr<BaseUniform>> uniforms;
 
-};  // ShaderProgram::Impl
+};  // class ShaderProgram::Impl
 
 }  // namespace ogls::oglCore::shader
 

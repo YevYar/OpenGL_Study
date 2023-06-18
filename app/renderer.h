@@ -27,7 +27,7 @@ class Renderer
         /**
          * \brief Impl contains private data and methods of Renderer.
          */
-        struct Impl;
+        class Impl;
 
     public:
         /**

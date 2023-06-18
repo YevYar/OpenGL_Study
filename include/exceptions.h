@@ -39,6 +39,8 @@ class BaseException : public std::exception
 
 };  // class BaseException
 
+//------ OPENGL EXCEPTIONS
+
 /**
  * \brief GLRecAcquisitionException is an exception to indicate error while generating some resources in OpenGL state
  * machine.
@@ -49,6 +51,8 @@ class GLRecAcquisitionException : public BaseException
         using BaseException::BaseException;
 
 };  // class GLRecAcquisitionException
+
+//------ FILE EXCEPTIONS
 
 /**
  * \brief FileException is a base exception to indicate error while working with files or directories.
@@ -79,6 +83,8 @@ class FileReadingException : public FileException
         using FileException::FileException;
 
 };  // class FileReadingException
+
+//------ WINDOW EXCEPTIONS
 
 /**
  * \brief WindowException is a base exception to indicate error from the Window.

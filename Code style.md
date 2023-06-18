@@ -183,7 +183,7 @@ class MyClass
 - Source code of the **core** is placed in **src** folder, public headers of the **core** - in **root include** folder. **app** folder contains sources and headers of the demo application.
 - Header and source files are placed in the same folder, except cases, when header file is a part of public **core** interface. In such a case header file is placed in **root include** folder and source file in **src** folder.
 - **core** base namespace is `ogls`, **app** base namespace is `app`.
-- In case of PIMPL, **struct Impl** must be declared in the file with the same name as the name of the class, which owns this Impl, suffixed by **Impl** in the name of the header file. For example if a class **MyClass** is declared in the file **myClass.h** in *include* folder, the header file with Impl must be declared in **src/.../myClassImpl.h**.
+- In case of PIMPL, **class Impl** must be declared in the file with the same name as the name of the class, which owns this Impl, suffixed by **Impl** in the name of the header file. For example if a class **MyClass** is declared in the file **myClass.h** in *include* folder, the header file with Impl must be declared in **src/.../myClassImpl.h**.
 - Every file ends with one empty line.
 
 ### Header file template
@@ -197,7 +197,7 @@ class MyClass
 namespace ogls::oglCore::shader // all declarations in header files must be in some namespace,
     // NO DECLARATIONS IN GLOBAL SCOPE
 {
-struct BaseUniform::BaseImpl
+class BaseUniform::BaseImpl
 {
     public:
         /**
@@ -216,7 +216,7 @@ struct BaseUniform::BaseImpl
          */
         const GLint m_location = {-1};
 
-};  // struct BaseUniform::BaseImpl
+};  // class BaseUniform::BaseImpl
 
 }  // namespace ogls::oglCore::shader
 
@@ -298,7 +298,7 @@ avoid possible misunderstanding between `auto lst = {1}; // lst is an initialize
 - **BUT** in type declarations type is specified before the field name: `int m_someField = {0};`.
 
 ## Patterns
-- In **core** PIMPL should be used. When PIMPL is used, the **Impl** struct should be declared in separate ***Impl.h** file in **src** folder. It is useful in cases, when class, which owns **Impl**, has friends, which must have access to internal details of the class. In such a case these friends must know declaration of **Impl** struct to use it. 
+- In **core** PIMPL should be used. When PIMPL is used, the **Impl** class should be declared in separate ***Impl.h** file in **src** folder. It is useful in cases, when class, which owns **Impl**, has friends, which must have access to internal details of the class. In such a case these friends must know declaration of **Impl** class to use it. 
 - In **app** using of PIMPL is not obligatory.
 
 ## Macros
@@ -326,3 +326,4 @@ avoid possible misunderstanding between `auto lst = {1}; // lst is an initialize
 - Do not use an unsigned type merely to assert that a variable is non-negative ([see On Unsigned Integers](https://google.github.io/styleguide/cppguide.html#Integer_Types)).
 - Switch statements should always have a default case. If the default case should never execute, treat this as an error ([see Switch Statements](https://google.github.io/styleguide/cppguide.html#Switch_Statements)).
 - Fall-through from one case label to another must be annotated using the `[[fallthrough]];` attribute ([see Switch Statements](https://google.github.io/styleguide/cppguide.html#Switch_Statements)).
+- Use a struct only for passive objects that carry data; everything else is a class ([see Structs vs. Classes](https://google.github.io/styleguide/cppguide.html#Structs_vs._Classes)). 

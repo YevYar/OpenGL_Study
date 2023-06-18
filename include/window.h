@@ -18,7 +18,7 @@ class Window
         /**
          * \brief Impl contains private data and methods of Window.
          */
-        struct Impl;
+        class Impl;
 
     public:
         /**

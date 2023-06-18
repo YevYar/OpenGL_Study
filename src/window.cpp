@@ -21,7 +21,7 @@ namespace
 
 }  // namespace
 
-struct Window::Impl
+class Window::Impl
 {
     public:
         Impl(int width, int height, std::string_view title)
@@ -72,9 +72,10 @@ struct Window::Impl
          */
         GLFWwindow* window = nullptr;
 
-};  // struct Window::Impl
+};  // class Window::Impl
 
-Window::Window(int width, int height, std::string_view title) : m_impl{std::make_unique<Impl>(width, height, std::move(title))}
+Window::Window(int width, int height, std::string_view title) :
+    m_impl{std::make_unique<Impl>(width, height, std::move(title))}
 {
 }
 
@@ -87,7 +88,7 @@ Window::~Window() noexcept
     catch (...)
     {
     }
-    
+
     isTerminated = true;
 }
 

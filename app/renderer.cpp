@@ -6,7 +6,7 @@
 
 namespace app::renderer
 {
-struct Renderer::Impl
+class Renderer::Impl
 {
     public:
         Impl()

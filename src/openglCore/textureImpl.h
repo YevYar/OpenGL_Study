@@ -10,7 +10,7 @@ namespace ogls::oglCore::texture
 /**
  * \brief BaseImpl contains private data and methods of BaseTexture.
  */
-struct BaseTexture::BaseImpl
+class BaseTexture::BaseImpl
 {
     public:
         /**
@@ -54,7 +54,7 @@ struct BaseTexture::BaseImpl
          */
         TextureTarget target     = TextureTarget::Texture2d;
 
-};  // struct BaseTexture::BaseImpl
+};  // class BaseTexture::BaseImpl
 
 /**
  * \brief TexDimensionSpecificFunc declares some functions, which are used for the same purpose,
@@ -64,12 +64,12 @@ struct BaseTexture::BaseImpl
  * texture.
  */
 template<unsigned int DimensionsNumber>
-struct TexDimensionSpecificFunc
+class TexDimensionSpecificFunc
 {
 };
 
 template<>
-struct TexDimensionSpecificFunc<1>
+class TexDimensionSpecificFunc<1>
 {
     public:
         /**
@@ -85,10 +85,10 @@ struct TexDimensionSpecificFunc<1>
          */
         void setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData);
 
-};  // struct TexDimensionSpecificFunc<1>
+};  // class TexDimensionSpecificFunc<1>
 
 template<>
-struct TexDimensionSpecificFunc<2>
+class TexDimensionSpecificFunc<2>
 {
     public:
         /**
@@ -104,10 +104,10 @@ struct TexDimensionSpecificFunc<2>
          */
         void setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData);
 
-};  // struct TexDimensionSpecificFunc<2>
+};  // class TexDimensionSpecificFunc<2>
 
 template<>
-struct TexDimensionSpecificFunc<3>
+class TexDimensionSpecificFunc<3>
 {
     public:
         /**
@@ -123,7 +123,7 @@ struct TexDimensionSpecificFunc<3>
          */
         void setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData);
 
-};  // struct TexDimensionSpecificFunc<3>
+};  // class TexDimensionSpecificFunc<3>
 
 /**
  * \brief Impl contains private data and methods of Texture.
@@ -132,7 +132,7 @@ struct TexDimensionSpecificFunc<3>
  * texture.
  */
 template<unsigned int DimensionsNumber>
-struct Texture<DimensionsNumber>::Impl : public BaseTexture::BaseImpl
+class Texture<DimensionsNumber>::Impl : public BaseTexture::BaseImpl
 {
     public:
         /**
@@ -216,7 +216,7 @@ struct Texture<DimensionsNumber>::Impl : public BaseTexture::BaseImpl
         template<OpenGLBindableObject Type>
         friend void ogls::oglCore::bindForAMomentAndExecute(const Type&, const std::function<void()>&);
 
-};  // struct Texture<DimensionsNumber>::Impl
+};  // class Texture<DimensionsNumber>::Impl
 
 }  // namespace ogls::oglCore::texture
 

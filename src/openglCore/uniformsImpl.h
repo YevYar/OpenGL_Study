@@ -8,7 +8,7 @@ namespace ogls::oglCore::shader
 /**
  * \brief BaseImpl contains private data and methods of BaseUniform.
  */
-struct BaseUniform::BaseImpl
+class BaseUniform::BaseImpl
 {
     public:
         /**
@@ -46,13 +46,13 @@ struct BaseUniform::BaseImpl
          */
         const GLuint      shaderProgram = {0};
 
-};  // struct BaseUniform::BaseImpl
+};  // class BaseUniform::BaseImpl
 
 /**
  * \brief Impl contains private data and methods of Uniform.
  */
 template<typename Type, unsigned int Count>
-struct Uniform<Type, Count>::Impl : public BaseUniform::BaseImpl
+class Uniform<Type, Count>::Impl : public BaseUniform::BaseImpl
 {
     public:
         /**
@@ -100,7 +100,7 @@ struct Uniform<Type, Count>::Impl : public BaseUniform::BaseImpl
          */
         const ConcreteUniformSetter setter = nullptr;
 
-};  // struct Uniform::Impl
+};  // class Uniform::Impl
 
 }  // namespace ogls::oglCore::shader
 

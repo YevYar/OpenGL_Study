@@ -29,12 +29,12 @@ class VertexArray : public ICloneable
         /**
          * \brief Impl contains private data and methods of VertexArray.
          */
-        struct Impl;
+        class Impl;
 
     public:
         /**
          * \brief Unbinds current vertex array object.
-         * 
+         *
          * Wraps [glBindVertexArray()](https://docs.gl/gl4/glBindVertexArray).
          */
         static void unbind();
@@ -45,7 +45,7 @@ class VertexArray : public ICloneable
          * This vertex array object is bound to become active vertex array object (see bind()).
          *
          * Wraps [glCreateVertexArrays()](https://docs.gl/gl4/glCreateVertexArrays).
-         * 
+         *
          * \see bind().
          * \throw ogls::exceptions::GLRecAcquisitionException().
          */
@@ -71,15 +71,17 @@ class VertexArray : public ICloneable
 
         /**
          * \brief Binds the buffer to OpenGL vertex array object.
-         * 
+         *
          * If buffer has no layout, this vertex array object is bound (if needed) to become active vertex array object
          * (see bind()) and buffer.[bind()](\ref Buffer::bind()) is called. After that previous bound VAO is bound back.
-         * 
-         * If buffer has layout, buffer data is loaded using [glVertexArrayVertexBuffer()](https://docs.gl/gl4/glBindVertexBuffer), 
+         *
+         * If buffer has layout, buffer data is loaded using
+         * [glVertexArrayVertexBuffer()](https://docs.gl/gl4/glBindVertexBuffer),
          * [glVertexArrayAttribBinding()](https://docs.gl/gl4/glVertexAttribBinding),
          * and [glVertexArrayAttribFormat()](https://docs.gl/gl4/glVertexAttribFormat)
          * in the format (VNCVNCVNCVNC)
-         * (see [Formatting VBO Data](https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices#Formatting_VBO_Data)).
+         * (see [Formatting VBO
+         * Data](https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices#Formatting_VBO_Data)).
          *
          * Every attribute is automatically enabled (see enableAttribute()).
          *
@@ -96,13 +98,13 @@ class VertexArray : public ICloneable
         void                                        bind() const;
         /**
          * \brief Wraps [glDisableVertexAttribArray()](https://docs.gl/gl4/glDisableVertexAttribArray).
-         * 
+         *
          * \param index - the index of the generic vertex attribute to be disabled.
          */
         void                                        disableAttribute(int index);
         /**
          * \brief Wraps [glEnableVertexAttribArray()](https://docs.gl/gl4/glEnableVertexAttribArray).
-         * 
+         *
          * \param index - the index of the generic vertex attribute to be enabled.
          */
         void                                        enableAttribute(int index);
@@ -126,7 +128,7 @@ class VertexArray : public ICloneable
          * \throw ogls::exceptions::GLRecAcquisitionException().
          */
         VertexArray(const VertexArray& obj);
-        
+
     private:
         /**
          * \brief Pointer to implementation.

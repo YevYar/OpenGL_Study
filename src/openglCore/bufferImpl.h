@@ -10,7 +10,7 @@ namespace ogls::oglCore::vertex
 /**
  * \brief Impl contains private data and methods of Buffer.
  */
-struct Buffer::Impl
+class Buffer::Impl
 {
     public:
         /**
@@ -18,16 +18,16 @@ struct Buffer::Impl
          *
          * Wraps [glBindBuffer()](https://docs.gl/gl4/glBindBuffer).
          * It is necessary for ogls::oglCore::bindForAMomentAndExecute().
-         * 
+         *
          * \param target   - the target to which the buffer object is bound.
          * \param bufferId - rendererId of the buffer, which must be bound.
          */
         static void                bindToTarget(BufferTarget target, GLuint bufferId);
         /**
          * \brief Returns the corresponding binding target for passed buffer target.
-         * 
+         *
          * It is necessary for ogls::oglCore::bindForAMomentAndExecute().
-         * 
+         *
          * \param target - the target, binding target of which is needed.
          */
         static BufferBindingTarget getTargetAssociatedGetParameter(BufferTarget target) noexcept;
@@ -52,7 +52,7 @@ struct Buffer::Impl
 
         /**
          * \brief Binds a buffer to a target.
-         * 
+         *
          * \see bindToTarget().
          */
         void bind() const;
@@ -61,7 +61,7 @@ struct Buffer::Impl
          *
          * If [size](\ref ogls::ArrayData::size) of passed data not equal to [size](\ref ogls::ArrayData::size)
          * of current data, calls [glNamedBufferData()](https://docs.gl/gl4/glBufferData) and sets Buffer::Impl::data.
-         * 
+         *
          * \return true if new storage was generated, false otherwise.
          */
         bool checkAndGenerateNewStorage(const ArrayData& data);
@@ -75,7 +75,7 @@ struct Buffer::Impl
          * \brief Generates OpenGL buffer object.
          *
          * Wraps [glCreateBuffers()](https://docs.gl/gl4/glCreateBuffers).
-         * 
+         *
          * \throw ogls::exceptions::GLRecAcquisitionException().
          */
         void genBuffer();
@@ -106,7 +106,7 @@ struct Buffer::Impl
         template<ogls::oglCore::OpenGLBindableObject Type>
         friend void ogls::oglCore::bindForAMomentAndExecute(const Type&, const std::function<void()>&);
 
-};  // struct Buffer::Impl
+};  // class Buffer::Impl
 
 }  // namespace ogls::oglCore::vertex
 
