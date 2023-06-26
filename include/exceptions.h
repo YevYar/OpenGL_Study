@@ -2,6 +2,7 @@
 #define OGLS_EXCEPTIONS_EXCEPTIONS_H
 
 #include <exception>
+#include <format>
 #include <string>
 
 /**
@@ -105,6 +106,93 @@ class WindowInitializationException : public WindowException
         using WindowException::WindowException;
 
 };  // class WindowInitializationException
+
+//------ MATH EXCEPTIONS
+
+/**
+ * \brief MathException is a base exception to indicate error while math calculations.
+ */
+class MathException : public BaseException
+{
+    public:
+        using BaseException::BaseException;
+
+};  // class MathException
+
+/**
+ * \brief DivisionByZeroException is an exception caused by division by zero while calculations.
+ */
+class DivisionByZeroException final : public MathException
+{
+    public:
+        /**
+         * \brief Constructs new std::exception and passes message to its constructor.
+         *
+         * \param mathStatement - math statement, which caused division by zero. Must be null-terminated C-style string.
+         */
+        explicit DivisionByZeroException(const char* mathStatement) :
+            MathException{std::format("Division by zero: {}.", mathStatement)}
+        {
+        }
+
+        /**
+         * \brief Constructs new std::exception and passes message to its constructor.
+         *
+         * \param mathStatement - math statement, which caused division by zero.
+         */
+        explicit DivisionByZeroException(const std::string& mathStatement) :
+            DivisionByZeroException{mathStatement.c_str()}
+        {
+        }
+
+        /**
+         * \brief Constructs new std::exception and passes message to its constructor.
+         *
+         * \param mathStatement - math statement, which caused division by zero. Must be null-terminated C-style string.
+         */
+        explicit DivisionByZeroException(std::string_view mathStatement) : DivisionByZeroException{mathStatement.data()}
+        {
+        }
+
+};  // class DivisionByZeroException
+
+/**
+ * \brief ResultIsNotNumberException is an exception, which indicates that the result of an expression is not a number.
+ */
+class ResultIsNotNumberException final : public MathException
+{
+    public:
+        /**
+         * \brief Constructs new std::exception and passes message to its constructor.
+         *
+         * \param mathStatement - math statement, which caused not numeric result. Must be null-terminated C-style string.
+         */
+        explicit ResultIsNotNumberException(const char* mathStatement) :
+            MathException{std::format("The result of expression is not a number: {}.", mathStatement)}
+        {
+        }
+
+        /**
+         * \brief Constructs new std::exception and passes message to its constructor.
+         *
+         * \param mathStatement - math statement, which caused not numeric result.
+         */
+        explicit ResultIsNotNumberException(const std::string& mathStatement) :
+            ResultIsNotNumberException{mathStatement.c_str()}
+        {
+        }
+
+        /**
+         * \brief Constructs new std::exception and passes message to its constructor.
+         *
+         * \param mathStatement - math statement, which caused not numeric result. Must be null-terminated C-style string.
+         */
+        explicit ResultIsNotNumberException(std::string_view mathStatement) :
+            ResultIsNotNumberException{mathStatement.data()}
+        {
+        }
+
+};  // class ResultIsNotNumberException
 
 }  // namespace ogls::exceptions
 
