@@ -53,7 +53,7 @@
   function 2
 
 
-  variable 1
+  variable 1  // also can be before types and functions if they use it
   variable 2
 
   /* anonymous namespace definition */ namespace

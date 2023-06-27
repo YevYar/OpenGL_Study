@@ -31,6 +31,19 @@
     ClassX& operator=(ClassX&&)      = default;
 
 /**
+ * \brief Adds default copy and move constructors and copy and move assignment operators to a class.
+ *
+ * All added methods are constexpr and noexcept.
+ *
+ * \param ClassX - the name of the class.
+ */
+#define OGLS_DEFAULT_CONSTEXPR_NOEXCEPT_COPYABLE_MOVABLE(ClassX)   \
+    constexpr ClassX(const ClassX&) noexcept            = default; \
+    constexpr ClassX(ClassX&&) noexcept                 = default; \
+    constexpr ClassX& operator=(const ClassX&) noexcept = default; \
+    constexpr ClassX& operator=(ClassX&&) noexcept      = default;
+
+/**
  * \brief Deletes copy constructor and copy assignment operator from a class.
  *
  * \param ClassX - the name of the class.
