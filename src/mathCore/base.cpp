@@ -2,7 +2,7 @@
 
 namespace ogls::mathCore
 {
-float interpolateAngle(float angle, AngleUnit unit) noexcept
+float mapAngleToCircleRange(float angle, AngleUnit unit) noexcept
 {
     angle = helpers::absolute(angle);
 
@@ -19,20 +19,20 @@ float interpolateAngle(float angle, AngleUnit unit) noexcept
 
 float cos(float angle, AngleUnit unit)
 {
-    const auto interpolatedAngle = interpolateAngle(angle, unit);
+    const auto mappedAngle = mapAngleToCircleRange(angle, unit);
 
     // cos(0) = 1.0
-    if (isAngle0(interpolatedAngle))
+    if (isAngle0(mappedAngle))
     {
         return 1.0f;
     }
     // cos(90) = cos(-90) = cos(270) = cos(-270) = 0
-    if (isAngle90(interpolatedAngle, unit) || isAngle270(interpolatedAngle, unit))
+    if (isAngle90(mappedAngle, unit) || isAngle270(mappedAngle, unit))
     {
         return 0.0f;
     }
     // cos(180) = cos(-180) = -1
-    if (isAngle180(interpolatedAngle, unit))
+    if (isAngle180(mappedAngle, unit))
     {
         return -1.0f;
     }
@@ -54,21 +54,21 @@ std::optional<float> cot(float angle, AngleUnit unit)
 
 float sin(float angle, AngleUnit unit)
 {
-    const auto sign              = float{angle >= 0.0f ? 1.0f : -1.0f};
-    const auto interpolatedAngle = interpolateAngle(angle, unit);
+    const auto sign        = float{angle >= 0.0f ? 1.0f : -1.0f};
+    const auto mappedAngle = mapAngleToCircleRange(angle, unit);
 
     // sin(0) = sin(180) = sin(-180) = 0
-    if (isAngle0(interpolatedAngle) || isAngle180(interpolatedAngle, unit))
+    if (isAngle0(mappedAngle) || isAngle180(mappedAngle, unit))
     {
         return 0.0f;
     }
     // sin(90) = 1, sin(-90) = -1
-    if (isAngle90(interpolatedAngle, unit))
+    if (isAngle90(mappedAngle, unit))
     {
         return sign * 1.0f;
     }
     // sin(270) = -1, sin(-270) = 1
-    if (isAngle270(interpolatedAngle, unit))
+    if (isAngle270(mappedAngle, unit))
     {
         return sign * (-1.0f);
     }
@@ -78,15 +78,15 @@ float sin(float angle, AngleUnit unit)
 
 std::optional<float> tan(float angle, AngleUnit unit)
 {
-    const auto interpolatedAngle = interpolateAngle(angle, unit);
+    const auto mappedAngle = mapAngleToCircleRange(angle, unit);
 
     // tan(0) = tan(180) = tan(-180) = 0.0
-    if (isAngle0(interpolatedAngle) || isAngle180(interpolatedAngle, unit))
+    if (isAngle0(mappedAngle) || isAngle180(mappedAngle, unit))
     {
         return 0.0f;
     }
     // tan(90) = tan(-90) = tan(270) = tan(-270) = NaN
-    if (isAngle90(interpolatedAngle, unit) || isAngle270(interpolatedAngle, unit))
+    if (isAngle90(mappedAngle, unit) || isAngle270(mappedAngle, unit))
     {
         return std::nullopt;
     }

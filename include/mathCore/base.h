@@ -76,6 +76,24 @@ inline bool isNormal(float num) noexcept
 }
 
 /**
+ * \brief Maps the value to the range [-1, 1].
+ *
+ * If the value is outside the range, it is mapped to -1 or 1 depending on the sign.
+ * Otherwise unchanged value is returned.
+ *
+ * \param value - a value to map.
+ * \return the value mapped to the range [-1, 1].
+ */
+constexpr float mapValueToUnitRange(float value) noexcept
+{
+    if (value >= -1.0f && value <= 1.0f)
+    {
+        return value;
+    }
+    return value > 1.0f ? 1.0f : -1.0f;
+}
+
+/**
  * \brief Calculates the square of a number.
  *
  * \param Type - a type, which supports operator*.
@@ -101,15 +119,6 @@ constexpr float degreesIntoRadians(float degrees) noexcept
     constexpr auto k = std::numbers::pi / 180.0f;
     return degrees * k;
 }
-
-/**
- * \brief Interpolates the angle in the range [0, 360] degrees.
- *
- * \param angle - a value of the angle.
- * \param unit  - measurement unit of the angle.
- * \return the interpolated angle in the range [0, 360] degrees.
- */
-float interpolateAngle(float angle, AngleUnit unit = AngleUnit::Degrees) noexcept;
 
 /**
  * \brief Checks if the angle is equal to 0 degrees.
@@ -170,6 +179,15 @@ constexpr bool isAngle270(float angle, AngleUnit unit = AngleUnit::Degrees) noex
     constexpr auto radiansFor270Deg = float{3.0f * std::numbers::pi / 2.0f};
     return helpers::isFloatsEqual(angle, unit == AngleUnit::Degrees ? 270.0f : radiansFor270Deg, FLOAT_ANGLE_EPSILON);
 }
+
+/**
+ * \brief Maps the value to the range [0, 360] degrees.
+ *
+ * \param angle - a value of the angle.
+ * \param unit  - measurement unit of the angle.
+ * \return the angle mapped to the range [0, 360] degrees.
+ */
+float mapAngleToCircleRange(float angle, AngleUnit unit = AngleUnit::Degrees) noexcept;
 
 /**
  * \brief Converts radians into degrees.
