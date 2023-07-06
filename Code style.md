@@ -170,6 +170,7 @@ class MyClass
 - As long as you can, stick to the **Rule of Zero**, but if you have to write at least one of the Big Five, default the rest.
 - Order methods of one group in alphabetical order.
 - Use alphabetical order of class fields. If necessary, group class fields and apply alphabetical order inside this groups.
+- Alphabetical order may be broken, if functions are inlined and they use other function or variable, which must be defined before the function. 
 ### Line breaks in class/struct declaration:
 - 2 empty lines after static asserts.
 - 1 empty line before access modifier.

@@ -9,7 +9,7 @@
 namespace ogls::mathCore
 {
 /**
- * \brief Vector represents a vector in 3D (2D) space.
+ * \brief Vector represents a vector in 3D (2D) orthonormal basis.
  */
 class Vector
 {
@@ -315,6 +315,68 @@ class Vector
 
 };  // class Vector
 
+//------ OPERATIONS ON VECTOR
+
+/**
+ * \brief Calculates dot product of two Vector by their coordinates.
+ *
+ * \return the dot product of two Vector.
+ */
+constexpr float dotProduct(const Vector& v1, const Vector& v2) noexcept
+{
+    return (v1.x() * v2.x()) + (v1.y() * v2.y()) + (v1.z() * v2.z());
+}
+
+/**
+ * \brief Calculates dot product of two Vector by their lengths and an angle between them.
+ *
+ * \param lengthV1 - length (magnitude) of Vector 1.
+ * \param lengthV2 - length (magnitude) of Vector 2.
+ * \param angle    - angle between two Vector.
+ * \param unit     - measurement unit of the angle.
+ * \return the dot product of two Vector.
+ */
+inline float dotProduct(float lengthV1, float lengthV2, float angle, AngleUnit unit = AngleUnit::Degrees)
+{
+    return lengthV1 * lengthV2 * mathCore::cos(angle, unit);
+}
+
+/**
+ * \brief Calculates dot product of two Vector by their lengths and an angle between them.
+ *
+ * \param v1    - Vector 1.
+ * \param v2    - Vector 2.
+ * \param angle - angle between two Vector.
+ * \param unit  - measurement unit of the angle.
+ * \return the dot product of two Vector.
+ */
+inline float dotProduct(const Vector& v1, const Vector& v2, float angle, AngleUnit unit = AngleUnit::Degrees)
+{
+    return v1.length() * v2.length() * mathCore::cos(angle, unit);
+}
+
+/**
+ * \brief Calculates the value of cosine between two Vector.
+ *
+ * \return the value of cosine between two Vector.
+ */
+constexpr float cosBetweenVectors(const Vector& v1, const Vector& v2) noexcept
+{
+    const auto l1 = v1.length(), l2 = v2.length();
+    // The angle between vector and zero-vector is 90 degrees, cos(90) = 0
+    return l1 == 0.0f || l2 == 0.0f ? 0.0f : dotProduct(v1, v2) / l1 / l2;
+}
+
+/**
+ * \brief Calculates the angle between two Vector.
+ *
+ * \return the angle in radians between two Vector.
+ */
+inline float angleBetweenVectors(const Vector& v1, const Vector& v2)
+{
+    return std::acosf(mapValueToUnitRange(cosBetweenVectors(v1, v2)));
+}
+
 /**
  * \brief Checks equality of two Vector.
  *
@@ -446,6 +508,38 @@ constexpr Vector normalize(const Vector& v) noexcept
 {
     const auto length = v.length();
     return length == 0.0f ? v : Vector{v.x() / length, v.y() / length, v.z() / length};
+}
+
+//------ CHECKERS OF VECTOR PROPERTIES
+
+/**
+ * \brief Checks if two Vector are co-directed.
+ *
+ * \return true if co-directed, false otherwise.
+ */
+inline bool isVectorsCodirected(const Vector& v1, const Vector& v2)
+{
+    return angleBetweenVectors(v1, v2) == 0.0f;
+}
+
+/**
+ * \brief Checks if two Vector are oppositely directed (the angle between Vector is 180 degrees).
+ *
+ * \return true if oppositely directed, false otherwise.
+ */
+inline bool isVectorsOppositelyDirected(const Vector& v1, const Vector& v2)
+{
+    return helpers::isFloatsEqual(angleBetweenVectors(v1, v2), std::numbers::pi);
+}
+
+/**
+ * \brief Checks if two Vector are orthogonal.
+ *
+ * \return true if orthogonal, false otherwise.
+ */
+constexpr bool isVectorsOrthogonal(const Vector& v1, const Vector& v2) noexcept
+{
+    return dotProduct(v1, v2) == 0.0f;
 }
 
 }  // namespace ogls::mathCore
