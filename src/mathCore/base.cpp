@@ -46,7 +46,7 @@ std::optional<float> cot(float angle, AngleUnit unit)
 
     if (tg)
     {
-        return helpers::isFloatsEqual(*tg, 0.0f) ? std::nullopt : std::optional(1.0f / *tg);
+        return *tg == 0.0f ? std::nullopt : std::optional(1.0f / *tg);
     }
 
     return 0.0f;

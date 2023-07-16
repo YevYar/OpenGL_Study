@@ -123,14 +123,12 @@ constexpr float degreesIntoRadians(float degrees) noexcept
 /**
  * \brief Checks if the angle is equal to 0 degrees.
  *
- * The value of the angle is compared with 0 degrees with precision FLOAT_ANGLE_EPSILON.
- *
  * \param angle - a value of the angle.
  * \return true if the angle is equal to 0 degrees, false otherwise.
  */
 constexpr bool isAngle0(float angle) noexcept
 {
-    return helpers::isFloatsEqual(angle, 0.0f, FLOAT_ANGLE_EPSILON);
+    return angle == 0.0f;
 }
 
 /**

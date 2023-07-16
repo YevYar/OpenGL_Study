@@ -160,6 +160,7 @@ class Vector
         /**
          * \brief Returns boolean representation of the Vector object.
          *
+         * \see isZeroVector().
          * \return false if the Vector is zero-vector, true otherwise.
          */
         constexpr explicit operator bool() const noexcept
@@ -175,6 +176,8 @@ class Vector
             return std::format("Vector(x={}, y={}, z={} | length={})", m_x, m_y, m_z, length());
         }
 
+        //------
+
         /**
          * \brief Checks if the Vector is normalized vector (unit vector, length is equal to 1.0).
          *
@@ -182,6 +185,7 @@ class Vector
          */
         constexpr bool isNormalized() const noexcept
         {
+            // Check approximately, because it's rare case, when actually normalized Vector has length exactly 1.0.
             return ogls::helpers::isFloatsEqual(length(), 1.0f, 1.0E-6f);
         }
 
@@ -192,10 +196,7 @@ class Vector
          */
         constexpr bool isZeroVector() const noexcept
         {
-            using ogls::helpers::isFloatsEqual;
-
-
-            return isFloatsEqual(m_x, 0.0f) && isFloatsEqual(m_y, 0.0f) && isFloatsEqual(m_z, 0.0f);
+            return m_x == 0.0f && m_y == 0.0f && m_z == 0.0f;
         }
 
         /**
@@ -203,12 +204,8 @@ class Vector
          */
         constexpr float length() const noexcept
         {
-            using ogls::helpers::isFloatsEqual;
-
-
-            return isFloatsEqual(m_x, 0.0f) && isFloatsEqual(m_y, 0.0f) && isFloatsEqual(m_z, 0.0f)
-                     ? 0.0f
-                     : std::sqrtf(square(m_x) + square(m_y) + square(m_z));
+            return m_x == 0.0f && m_y == 0.0f && m_z == 0.0f ? 0.0f
+                                                             : std::sqrtf(square(m_x) + square(m_y) + square(m_z));
         }
 
         /**

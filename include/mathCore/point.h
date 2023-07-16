@@ -72,10 +72,7 @@ struct Point
          */
         constexpr bool isOrigin() const noexcept
         {
-            using ogls::helpers::isFloatsEqual;
-
-
-            return isFloatsEqual(x, 0.0f) && isFloatsEqual(y, 0.0f) && isFloatsEqual(z, 0.0f);
+            return x == 0.0f && y == 0.0f && z == 0.0f;
         }
 
         /**
