@@ -157,6 +157,41 @@ class DivisionByZeroException final : public MathException
 };  // class DivisionByZeroException
 
 /**
+ * \brief MatrixException is an exception to indicate error while operating on Matrices.
+ */
+class MatrixException : public MathException
+{
+    public:
+        using MathException::MathException;
+
+};  // class MatrixException
+
+/**
+ * \brief MatricesDimensionalityException is an exception caused by invalid dimensionality of Matrix objects.
+ */
+class MatricesDimensionalityException final : public MatrixException
+{
+    public:
+        /**
+         * \brief Constructs new std::exception and passes message to its constructor.
+         *
+         * \param matrix1SizeStr  - result of call ogls::mathCore::Matrix::toSizeOnlyString() of Matrix 1.
+         * \param matrix2SizeStr  - result of call ogls::mathCore::Matrix::toSizeOnlyString() of Matrix 2.
+         * \param matrixOperation - string representation of the operation, for which dimensionality of matrices
+         * is important. Must be null-terminated C-style string.
+         * \param hint            - provides a hint to fix the problem. Must start with uppercase letter, end with '.'
+         * and be null-terminated C-style string.
+         */
+        MatricesDimensionalityException(const std::string& matrix1SizeStr, const std::string& matrix2SizeStr,
+                                        const char* matrixOperation, const char* hint = "") :
+            MatrixException{std::format("Matrices {} and {} have invalid dimensionality for operation {}. {}",
+                                        matrix1SizeStr, matrix2SizeStr, matrixOperation, hint)}
+        {
+        }
+
+};  // class MatricesDimensionalityException
+
+/**
  * \brief ResultIsNotNumberException is an exception, which indicates that the result of an expression is not a number.
  */
 class ResultIsNotNumberException final : public MathException

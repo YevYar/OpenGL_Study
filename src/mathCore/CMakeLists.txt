@@ -1,12 +1,14 @@
 add_library(OpenGL_Study_Math_Core)
 
 set(PUBLIC_HEADERS ${PATH_TO_PUBLIC_INCLUDE}/mathCore/base.h
+    ${PATH_TO_PUBLIC_INCLUDE}/mathCore/matrix.h
     ${PATH_TO_PUBLIC_INCLUDE}/mathCore/point.h
 	${PATH_TO_PUBLIC_INCLUDE}/mathCore/vector.h)
 	
 set(PRIVATE_HEADERS "")
 	
-set(SOURCES base.cpp)
+set(SOURCES base.cpp
+    matrix.cpp)
 
 
 target_sources(OpenGL_Study_Math_Core PRIVATE ${SOURCES} ${PUBLIC_HEADERS} ${PRIVATE_HEADERS})
