@@ -25,7 +25,7 @@ Matrix::Matrix(size_t rowsNumber, size_t columnsNumber, float defaultValue) :
         throw ogls::exceptions::MatrixException{formatZeroDimensionErrorMessage(m_rowsNumber, m_columnsNumber)};
     }
 
-    m_data = std::vector{m_rowsNumber, std::vector(m_columnsNumber, defaultValue)};
+    m_data = std::vector(m_rowsNumber * m_columnsNumber, defaultValue);
 }
 
 Matrix::Matrix(const Size& size, float defaultValue) : Matrix(size.rows, size.columns, defaultValue)
@@ -58,7 +58,14 @@ Matrix::Matrix(const std::vector<std::vector<float>>& values)
 
     m_rowsNumber    = rowsNumber;
     m_columnsNumber = columnsNumber;
-    m_data          = values;
+    m_data          = std::vector(m_rowsNumber * m_columnsNumber, 0.0f);
+
+    auto insertPos = m_data.begin();
+    for (const auto& column : values)
+    {
+        std::copy(column.cbegin(), column.cend(), insertPos);
+        insertPos += m_columnsNumber;
+    }
 }
 
 Matrix::Matrix(size_t rowsNumber, size_t columnsNumber, const std::vector<float>& values) :
@@ -75,13 +82,7 @@ Matrix::Matrix(size_t rowsNumber, size_t columnsNumber, const std::vector<float>
                       m_rowsNumber * m_columnsNumber)};
     }
 
-    m_data     = std::vector{m_rowsNumber, std::vector(m_columnsNumber, 0.0f)};
-    auto index = size_t{0};
-    for (auto i = size_t{0}; i < m_rowsNumber; ++i)
-    {
-        const auto startPos = values.cbegin() + i * m_columnsNumber;
-        std::copy(startPos, startPos + m_columnsNumber, m_data[i].begin());
-    }
+    m_data = std::vector<float>{values.cbegin(), values.cbegin() + m_rowsNumber * m_columnsNumber};
 }
 
 Matrix Matrix::operator-() const
@@ -163,7 +164,7 @@ float Matrix::getValue(size_t row, size_t column) const
         throw std::out_of_range{formatInvalidElementPositionErrorMessage(m_rowsNumber, m_columnsNumber,
                                                                          Size{.rows = row, .columns = column})};
     }
-    return m_data[row][column];
+    return m_data[row * m_columnsNumber + column];
 }
 
 float Matrix::getValue(const Size& elementPosition) const
@@ -178,16 +179,17 @@ bool Matrix::isIdentityMatrix() const noexcept
         return false;  // Identity matrices must be square
     }
 
-    const auto size = m_data.size();
+    const auto size = m_rowsNumber;
     for (auto i = size_t{0}; i < size; ++i)
     {
+        if (m_data[i * size + i] != 1.0f)
+        {
+            return false;  // Diagonal elements must be 1
+        }
+
         for (auto j = size_t{0}; j < size; ++j)
         {
-            if (i == j && m_data[i][j] != 1.0f)
-            {
-                return false;  // Diagonal elements must be 1
-            }
-            else if (i != j && m_data[i][j] != 0.0f)
+            if (i != j && m_data[i * size + j] != 0.0f)
             {
                 return false;  // Non-diagonal elements must be 0
             }
@@ -204,15 +206,11 @@ bool Matrix::isMatrixOfOnes() const noexcept
         return false;
     }
 
-    const auto columnSize = m_data[0].size();
-    for (auto i = size_t{0}; i < m_data.size(); ++i)
+    for (const auto element : m_data)
     {
-        for (auto j = size_t{0}; j < columnSize; ++j)
+        if (element != 1.0f)
         {
-            if (m_data[i][j] != 1.0f)
-            {
-                return false;
-            }
+            return false;
         }
     }
 
@@ -226,15 +224,11 @@ bool Matrix::isZeroMatrix() const noexcept
         return false;
     }
 
-    const auto columnSize = m_data[0].size();
-    for (auto i = size_t{0}; i < m_data.size(); ++i)
+    for (const auto element : m_data)
     {
-        for (auto j = size_t{0}; j < columnSize; ++j)
+        if (element != 0.0f)
         {
-            if (m_data[i][j] != 0.0f)
-            {
-                return false;
-            }
+            return false;
         }
     }
 
@@ -248,12 +242,12 @@ void Matrix::performOnEvery(std::function<float(Size, float)> functor)
         return;
     }
 
-    const auto columnSize = m_data[0].size();
-    for (auto i = size_t{0}; i < m_data.size(); ++i)
+    for (auto i = size_t{0}; i < m_rowsNumber; ++i)
     {
-        for (auto j = size_t{0}; j < columnSize; ++j)
+        for (auto j = size_t{0}; j < m_columnsNumber; ++j)
         {
-            m_data[i][j] = functor(Size{.rows = i, .columns = j}, m_data[i][j]);
+            const auto index = i * m_columnsNumber + j;
+            m_data[index]    = functor(Size{.rows = i, .columns = j}, m_data[index]);
         }
     }
 }
@@ -265,12 +259,11 @@ void Matrix::performOnEvery(std::function<void(Size, float)> functor) const
         return;
     }
 
-    const auto columnSize = m_data[0].size();
-    for (auto i = size_t{0}; i < m_data.size(); ++i)
+    for (auto i = size_t{0}; i < m_rowsNumber; ++i)
     {
-        for (auto j = size_t{0}; j < columnSize; ++j)
+        for (auto j = size_t{0}; j < m_columnsNumber; ++j)
         {
-            functor(Size{.rows = i, .columns = j}, m_data[i][j]);
+            functor(Size{.rows = i, .columns = j}, m_data[i * m_columnsNumber + j]);
         }
     }
 }
@@ -282,7 +275,7 @@ void Matrix::setValue(size_t row, size_t column, float value)
         throw std::out_of_range{formatInvalidElementPositionErrorMessage(m_rowsNumber, m_columnsNumber,
                                                                          Size{.rows = row, .columns = column})};
     }
-    m_data[row][column] = value;
+    m_data[row * m_columnsNumber + column] = value;
 }
 
 void Matrix::setValue(const Size& elementPosition, float value)
@@ -294,10 +287,7 @@ std::string Matrix::toFullString(int columnWidth) const
 {
     auto ss = std::stringstream{};
 
-    const auto numRows = m_rowsNumber;
-    const auto numCols = m_columnsNumber;
-
-    ss << "Matrix " << numRows << "x" << numCols;
+    ss << "Matrix " << m_rowsNumber << "x" << m_columnsNumber;
 
     if (isNullMatrix())
     {
@@ -308,22 +298,22 @@ std::string Matrix::toFullString(int columnWidth) const
         ss << ":\n";
     }
 
-    for (auto i = size_t{0}; i < numRows; ++i)
+    for (auto i = size_t{0}; i < m_rowsNumber; ++i)
     {
         ss << "  | ";
 
-        for (auto j = size_t{0}; j < numCols; ++j)
+        for (auto j = size_t{0}; j < m_columnsNumber; ++j)
         {
-            ss << std::left << std::setw(columnWidth) << m_data[i][j];
+            ss << std::left << std::setw(columnWidth) << m_data[i * m_columnsNumber + j];
 
-            if (j != numCols - 1)
+            if (j != m_columnsNumber - 1)
             {
                 ss << ", ";
             }
         }
 
         ss << " |";
-        if (i != numRows - 1)
+        if (i != m_rowsNumber - 1)
         {
             ss << "\n";
         }

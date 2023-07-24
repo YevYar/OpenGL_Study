@@ -352,15 +352,15 @@ class Matrix
         /**
          * \brief The number of columns.
          */
-        size_t                          m_columnsNumber = {0};
+        size_t             m_columnsNumber = {0};
         /**
          * \brief The elements of Matrix.
          */
-        std::vector<std::vector<float>> m_data;
+        std::vector<float> m_data;
         /**
          * \brief The number of rows.
          */
-        size_t                          m_rowsNumber = {0};
+        size_t             m_rowsNumber = {0};
 
 };  // class Matrix
 
