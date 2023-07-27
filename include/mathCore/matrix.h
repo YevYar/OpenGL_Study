@@ -41,6 +41,11 @@ class Matrix
 
         };  // struct Size
 
+        /**
+         * \brief Matrix::Index represents an index (position) of the element in the Matrix.
+         */
+        using Index = Size;
+
     public:
         /**
          * \brief Constructs a null Matrix.
@@ -277,7 +282,7 @@ class Matrix
          * \return the value at the specified position.
          * \throw std::out_of_range.
          */
-        float getValue(const Size& elementPosition) const;
+        float getValue(const Index& elementPosition) const;
 
         /**
          * \brief Checks if the Matrix is an identity matrix (square matrix with ones on the main diagonal
@@ -315,10 +320,10 @@ class Matrix
          * \brief Executes the provided functor on every element of the Matrix.
          *
          * \param functor - a function to execute on every element of the Matrix. Such functor receives the position
-         * of the current element via first argument as object of Matrix::Size structure and the value of the current
+         * of the current element via first argument as object of Matrix::Index structure and the value of the current
          * element via second argument. Functor must return new value of the passed element.
          */
-        void performOnEvery(std::function<float(Size, float)> functor);
+        void performOnEvery(std::function<float(Index, float)> functor);
 
         /**
          * \brief Executes the provided functor on every element of the Matrix without changing the element of Matrix.
@@ -327,10 +332,10 @@ class Matrix
          * which doesn't change the elements of the Matrix.
          *
          * \param functor - a function to execute on every element of the Matrix. Such functor receives the position
-         * of the current element via first argument as object of Matrix::Size structure and the value of the current
+         * of the current element via first argument as object of Matrix::Index structure and the value of the current
          * element via second argument.
          */
-        void performOnEvery(std::function<void(Size, float)> functor) const;
+        void performOnEvery(std::function<void(Index, float)> functor) const;
 
         /**
          * \brief Sets the value at the specified row and column in the Matrix.
@@ -353,7 +358,7 @@ class Matrix
          * \param value           - the value to set.
          * \throw std::out_of_range.
          */
-        void setValue(const Size& elementPosition, float value);
+        void setValue(const Index& elementPosition, float value);
 
         /**
          * \brief Returns the dimensionality of the Matrix.

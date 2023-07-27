@@ -18,7 +18,7 @@ namespace
     void initMatrixFromContainerOfContainers(size_t rowsNumber, size_t columnsNumber, std::vector<float>& matrixData,
                                              Type& container);
     std::string formatInvalidElementPositionErrorMessage(size_t rowsNumber, size_t columnsNumber,
-                                                         const Matrix::Size& position);
+                                                         const Matrix::Index& position);
     std::string formatZeroDimensionErrorMessage(size_t rowsNumber, size_t columnsNumber);
 
 }  // namespace
@@ -89,7 +89,7 @@ Matrix Matrix::operator-() const
 
     auto result = Matrix{*this};
     // clang-format off
-    result.performOnEvery([](Size, float element) { return -element; });  // clang-format on
+    result.performOnEvery([](Index, float element) { return -element; });  // clang-format on
     return result;
 }
 
@@ -102,14 +102,14 @@ Matrix& Matrix::operator+=(const Matrix& m)
     }
 
     // clang-format off
-    this->performOnEvery([&](Size pos, float element) { return element + m.getValue(pos); });  // clang-format on
+    this->performOnEvery([&](Index pos, float element) { return element + m.getValue(pos); });  // clang-format on
     return *this;
 }
 
 Matrix& Matrix::operator+=(float num) noexcept
 {
     // clang-format off
-    this->performOnEvery([=](Size, float element) { return element + num; });  // clang-format on
+    this->performOnEvery([=](Index, float element) { return element + num; });  // clang-format on
     return *this;
 }
 
@@ -122,21 +122,21 @@ Matrix& Matrix::operator-=(const Matrix& m)
     }
 
     // clang-format off
-    this->performOnEvery([&](Size pos, float element) { return element - m.getValue(pos); });  // clang-format on
+    this->performOnEvery([&](Index pos, float element) { return element - m.getValue(pos); });  // clang-format on
     return *this;
 }
 
 Matrix& Matrix::operator-=(float num) noexcept
 {
     // clang-format off
-    this->performOnEvery([=](Size, float element) { return element - num; });  // clang-format on
+    this->performOnEvery([=](Index, float element) { return element - num; });  // clang-format on
     return *this;
 }
 
 Matrix& Matrix::operator*=(float num) noexcept
 {
     // clang-format off
-    this->performOnEvery([=](Size, float element) { return element * num; });  // clang-format on
+    this->performOnEvery([=](Index, float element) { return element * num; });  // clang-format on
     return *this;
 }
 
@@ -148,7 +148,7 @@ Matrix& Matrix::operator/=(float num)
     }
 
     // clang-format off
-    this->performOnEvery([=](Size, float element) { return element / num; });  // clang-format on
+    this->performOnEvery([=](Index, float element) { return element / num; });  // clang-format on
     return *this;
 }
 
@@ -157,12 +157,12 @@ float Matrix::getValue(size_t row, size_t column) const
     if (row >= m_rowsNumber || column >= m_columnsNumber)
     {
         throw std::out_of_range{formatInvalidElementPositionErrorMessage(m_rowsNumber, m_columnsNumber,
-                                                                         Size{.rows = row, .columns = column})};
+                                                                         Index{.rows = row, .columns = column})};
     }
     return m_data[row * m_columnsNumber + column];
 }
 
-float Matrix::getValue(const Size& elementPosition) const
+float Matrix::getValue(const Index& elementPosition) const
 {
     return getValue(elementPosition.rows, elementPosition.columns);
 }
@@ -230,7 +230,7 @@ bool Matrix::isZeroMatrix() const noexcept
     return true;
 }
 
-void Matrix::performOnEvery(std::function<float(Size, float)> functor)
+void Matrix::performOnEvery(std::function<float(Index, float)> functor)
 {
     if (isNullMatrix())
     {
@@ -242,12 +242,12 @@ void Matrix::performOnEvery(std::function<float(Size, float)> functor)
         for (auto j = size_t{0}; j < m_columnsNumber; ++j)
         {
             const auto index = i * m_columnsNumber + j;
-            m_data[index]    = functor(Size{.rows = i, .columns = j}, m_data[index]);
+            m_data[index]    = functor(Index{.rows = i, .columns = j}, m_data[index]);
         }
     }
 }
 
-void Matrix::performOnEvery(std::function<void(Size, float)> functor) const
+void Matrix::performOnEvery(std::function<void(Index, float)> functor) const
 {
     if (isNullMatrix())
     {
@@ -258,7 +258,7 @@ void Matrix::performOnEvery(std::function<void(Size, float)> functor) const
     {
         for (auto j = size_t{0}; j < m_columnsNumber; ++j)
         {
-            functor(Size{.rows = i, .columns = j}, m_data[i * m_columnsNumber + j]);
+            functor(Index{.rows = i, .columns = j}, m_data[i * m_columnsNumber + j]);
         }
     }
 }
@@ -268,12 +268,12 @@ void Matrix::setValue(size_t row, size_t column, float value)
     if (row >= m_rowsNumber || column >= m_columnsNumber)
     {
         throw std::out_of_range{formatInvalidElementPositionErrorMessage(m_rowsNumber, m_columnsNumber,
-                                                                         Size{.rows = row, .columns = column})};
+                                                                         Index{.rows = row, .columns = column})};
     }
     m_data[row * m_columnsNumber + column] = value;
 }
 
-void Matrix::setValue(const Size& elementPosition, float value)
+void Matrix::setValue(const Index& elementPosition, float value)
 {
     setValue(elementPosition.rows, elementPosition.columns, value);
 }
@@ -335,7 +335,7 @@ bool operator==(const Matrix& m1, const Matrix& m2) noexcept
 
     auto result = true;
     m1.performOnEvery(
-      [&](Matrix::Size pos, float element)
+      [&](Matrix::Index pos, float element)
       {
           if (helpers::isFloatsNotEqual(element, m2.getValue(pos)))
           {
@@ -360,7 +360,7 @@ Matrix operator+(const Matrix& m1, const Matrix& m2)
 
     auto result = Matrix{m1};
     // clang-format off
-    result.performOnEvery([&](Matrix::Size pos, float element) { return element + m2.getValue(pos); });  // clang-format on
+    result.performOnEvery([&](Matrix::Index pos, float element) { return element + m2.getValue(pos); });  // clang-format on
     return result;
 }
 
@@ -390,7 +390,7 @@ Matrix operator-(const Matrix& m1, const Matrix& m2)
 
     auto result = Matrix{m1};
     // clang-format off
-    result.performOnEvery([&](Matrix::Size pos, float element) { return element - m2.getValue(pos); });  // clang-format on
+    result.performOnEvery([&](Matrix::Index pos, float element) { return element - m2.getValue(pos); });  // clang-format on
     return result;
 }
 
@@ -518,7 +518,7 @@ namespace
     }
 
     std::string formatInvalidElementPositionErrorMessage(size_t rowsNumber, size_t columnsNumber,
-                                                         const Matrix::Size& position)
+                                                         const Matrix::Index& position)
     {
         return std::format("Matrix size is {}x{}, but passed element position is [{}][{}]", rowsNumber, columnsNumber,
                            position.rows, position.columns);
