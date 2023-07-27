@@ -76,6 +76,33 @@ class Matrix
         /**
          * \brief Constructs a Matrix with the specified elements.
          *
+         * Both dimensions must be more then 0 and all columns must have the same size,
+         * otherwise the exception is thrown.
+         *
+         * \param values - the elements of the Matrix.
+         * \throw ogls::exceptions::MatrixException().
+         */
+        explicit Matrix(std::initializer_list<std::initializer_list<float>> values);
+
+        /**
+         * \brief Constructs a Matrix with the specified elements.
+         *
+         * It is assumed that the values are provided in row-major order. If the input list has more elements then
+         * the rowsNumber * columnsNumber, the values out of this range are ignored.
+         *
+         * The exception is thrown if one of dimensions is 0 or if the size of the input list is less then
+         * the expected size based on the provided dimensions.
+         *
+         * \param rowsNumber    - a number of rows in the Matrix.
+         * \param columnsNumber - a number of columns in the Matrix.
+         * \param values        - the elements of the Matrix.
+         * \throw ogls::exceptions::MatrixException().
+         */
+        Matrix(size_t rowsNumber, size_t columnsNumber, std::initializer_list<float> values);
+
+        /**
+         * \brief Constructs a Matrix with the specified elements.
+         *
          * Both dimensions must be more then 0 and all column-vectors must have the same size,
          * otherwise the exception is thrown.
          *

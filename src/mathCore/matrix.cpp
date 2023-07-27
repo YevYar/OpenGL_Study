@@ -11,6 +11,12 @@ namespace ogls::mathCore
 {
 namespace
 {
+    template<typename Type>
+    void initMatrixFromContainer(size_t rowsNumber, size_t columnsNumber, std::vector<float>& matrixData,
+                                 Type& container);
+    template<typename Type>
+    void initMatrixFromContainerOfContainers(size_t rowsNumber, size_t columnsNumber, std::vector<float>& matrixData,
+                                             Type& container);
     std::string formatInvalidElementPositionErrorMessage(size_t rowsNumber, size_t columnsNumber,
                                                          const Matrix::Size& position);
     std::string formatZeroDimensionErrorMessage(size_t rowsNumber, size_t columnsNumber);
@@ -32,57 +38,46 @@ Matrix::Matrix(const Size& size, float defaultValue) : Matrix(size.rows, size.co
 {
 }
 
-Matrix::Matrix(const std::vector<std::vector<float>>& values)
+Matrix::Matrix(std::initializer_list<std::initializer_list<float>> values)
 {
-    const auto rowsNumber = values.size();
-    if (rowsNumber == 0)
+    m_rowsNumber = values.size();
+    if (m_rowsNumber == 0)
     {
         throw ogls::exceptions::MatrixException{formatZeroDimensionErrorMessage(0, 0)};
     }
 
-    const auto columnsNumber = values.at(0).size();
-
     for (const auto& column : values)
     {
-        if (column.size() != columnsNumber)
-        {
-            throw ogls::exceptions::MatrixException{"All column-vectors must have the same size."};
-        }
-    }
-    // It's ensured that the size of all columns is equal and, if it's zero, it seems to be real intention to create
-    // Matrix with zero-sized columns, what is illegal.
-    if (columnsNumber == 0)
-    {
-        throw ogls::exceptions::MatrixException{formatZeroDimensionErrorMessage(rowsNumber, 0)};
+        m_columnsNumber = column.size();
+        break;
     }
 
-    m_rowsNumber    = rowsNumber;
-    m_columnsNumber = columnsNumber;
-    m_data          = std::vector(m_rowsNumber * m_columnsNumber, 0.0f);
+    initMatrixFromContainerOfContainers(m_rowsNumber, m_columnsNumber, m_data, values);
+}
 
-    auto insertPos = m_data.begin();
-    for (const auto& column : values)
+Matrix::Matrix(size_t rowsNumber, size_t columnsNumber, std::initializer_list<float> values) :
+    m_columnsNumber{columnsNumber}, m_rowsNumber{rowsNumber}
+{
+    initMatrixFromContainer(m_rowsNumber, m_columnsNumber, m_data, values);
+}
+
+Matrix::Matrix(const std::vector<std::vector<float>>& values)
+{
+    m_rowsNumber = values.size();
+    if (m_rowsNumber == 0)
     {
-        std::copy(column.cbegin(), column.cend(), insertPos);
-        insertPos += m_columnsNumber;
+        throw ogls::exceptions::MatrixException{formatZeroDimensionErrorMessage(0, 0)};
     }
+
+    m_columnsNumber = values.at(0).size();
+
+    initMatrixFromContainerOfContainers(m_rowsNumber, m_columnsNumber, m_data, values);
 }
 
 Matrix::Matrix(size_t rowsNumber, size_t columnsNumber, const std::vector<float>& values) :
     m_columnsNumber{columnsNumber}, m_rowsNumber{rowsNumber}
 {
-    if (m_rowsNumber == 0 || m_columnsNumber == 0)
-    {
-        throw ogls::exceptions::MatrixException{formatZeroDimensionErrorMessage(m_rowsNumber, m_columnsNumber)};
-    }
-    if (values.size() < m_rowsNumber * m_columnsNumber)
-    {
-        throw ogls::exceptions::MatrixException{
-          std::format("Invalid input vector size. Input vector must contain at least {} elements.",
-                      m_rowsNumber * m_columnsNumber)};
-    }
-
-    m_data = std::vector<float>{values.cbegin(), values.cbegin() + m_rowsNumber * m_columnsNumber};
+    initMatrixFromContainer(m_rowsNumber, m_columnsNumber, m_data, values);
 }
 
 Matrix Matrix::operator-() const
@@ -476,6 +471,52 @@ Matrix operator/(const Matrix& m, float num)
 
 namespace
 {
+    template<typename Type>
+    void initMatrixFromContainer(size_t rowsNumber, size_t columnsNumber, std::vector<float>& matrixData,
+                                 Type& container)
+    {
+        if (rowsNumber == 0 || columnsNumber == 0)
+        {
+            throw ogls::exceptions::MatrixException{formatZeroDimensionErrorMessage(rowsNumber, columnsNumber)};
+        }
+        if (container.size() < rowsNumber * columnsNumber)
+        {
+            throw ogls::exceptions::MatrixException{
+              std::format("Invalid input container size. Input container must contain at least {} elements.",
+                          rowsNumber * columnsNumber)};
+        }
+
+        matrixData = std::vector<float>{container.begin(), container.begin() + rowsNumber * columnsNumber};
+    }
+
+    template<typename Type>
+    void initMatrixFromContainerOfContainers(size_t rowsNumber, size_t columnsNumber, std::vector<float>& matrixData,
+                                             Type& container)
+    {
+        for (const auto& column : container)
+        {
+            if (column.size() != columnsNumber)
+            {
+                throw ogls::exceptions::MatrixException{"All columns must have the same size."};
+            }
+        }
+        // It's ensured that the size of all columns is equal and, if it's zero, it seems to be real intention to create
+        // Matrix with zero-sized columns, what is illegal.
+        if (columnsNumber == 0)
+        {
+            throw ogls::exceptions::MatrixException{formatZeroDimensionErrorMessage(rowsNumber, 0)};
+        }
+
+        matrixData = std::vector(rowsNumber * columnsNumber, 0.0f);
+
+        auto insertPos = matrixData.begin();
+        for (const auto& column : container)
+        {
+            std::copy(column.begin(), column.end(), insertPos);
+            insertPos += columnsNumber;
+        }
+    }
+
     std::string formatInvalidElementPositionErrorMessage(size_t rowsNumber, size_t columnsNumber,
                                                          const Matrix::Size& position)
     {
