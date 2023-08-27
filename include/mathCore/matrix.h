@@ -66,7 +66,6 @@ class Matrix
          * \throw ogls::exceptions::MatrixException().
          */
         Matrix(size_t rowsNumber, size_t columnsNumber, float defaultValue = {0.0f});
-
         /**
          * \brief Constructs a Matrix with the specified number of rows and columns.
          *
@@ -77,7 +76,6 @@ class Matrix
          * \throw ogls::exceptions::MatrixException().
          */
         explicit Matrix(const Size& size, float defaultValue = {0.0f});
-
         /**
          * \brief Constructs a Matrix with the specified elements.
          *
@@ -88,7 +86,6 @@ class Matrix
          * \throw ogls::exceptions::MatrixException().
          */
         explicit Matrix(std::initializer_list<std::initializer_list<float>> values);
-
         /**
          * \brief Constructs a Matrix with the specified elements.
          *
@@ -104,7 +101,6 @@ class Matrix
          * \throw ogls::exceptions::MatrixException().
          */
         Matrix(size_t rowsNumber, size_t columnsNumber, std::initializer_list<float> values);
-
         /**
          * \brief Constructs a Matrix with the specified elements.
          *
@@ -115,7 +111,6 @@ class Matrix
          * \throw ogls::exceptions::MatrixException().
          */
         explicit Matrix(const std::vector<std::vector<float>>& values);
-
         /**
          * \brief Constructs a Matrix with the specified elements.
          *
@@ -162,7 +157,6 @@ class Matrix
          * \throw ogls::exceptions::MatricesDimensionalityException().
          */
         Matrix& operator+=(const Matrix& m);
-
         /**
          * \brief Adds number to all elements of this Matrix.
          *
@@ -172,7 +166,6 @@ class Matrix
          * \return this Matrix with changed elements.
          */
         Matrix& operator+=(float num) noexcept;
-
         /**
          * \brief Subtracts another Matrix from this Matrix.
          *
@@ -184,7 +177,6 @@ class Matrix
          * \throw ogls::exceptions::MatricesDimensionalityException().
          */
         Matrix& operator-=(const Matrix& m);
-
         /**
          * \brief Subtracts number from all elements of this Matrix.
          *
@@ -194,7 +186,6 @@ class Matrix
          * \return this Matrix with changed elements.
          */
         Matrix& operator-=(float num) noexcept;
-
         /**
          * \brief Multiplies all elements of this Matrix by number.
          *
@@ -204,7 +195,6 @@ class Matrix
          * \return this Matrix with changed elements.
          */
         Matrix& operator*=(float num) noexcept;
-
         /**
          * \brief Divides all elements of this Matrix by number.
          *
@@ -272,7 +262,6 @@ class Matrix
          * \throw std::out_of_range.
          */
         float getValue(size_t row, size_t column) const;
-
         /**
          * \brief Retrieves the value at the specified position in the Matrix.
          *
@@ -283,21 +272,19 @@ class Matrix
          * \throw std::out_of_range.
          */
         float getValue(const Index& elementPosition) const;
-
         /**
          * \brief Checks if the Matrix is an identity matrix (square matrix with ones on the main diagonal
          * and zeros elsewhere).
          *
          * \return true if the Matrix is an identity matrix, false otherwise.
          */
-        bool isIdentityMatrix() const noexcept;
-
+        bool  isIdentityMatrix() const noexcept;
         /**
          * \brief Checks if the Matrix is a matrix of ones (matrix where every entry is equal to one).
          *
          * \return true if the Matrix is a matrix of ones, false otherwise.
          */
-        bool isMatrixOfOnes() const noexcept;
+        bool  isMatrixOfOnes() const noexcept;
 
         /**
          * \brief Checks if the Matrix is a null Matrix (dimensions are 0).
@@ -314,8 +301,7 @@ class Matrix
          *
          * \return true if the Matrix is a zero-matrix, false otherwise.
          */
-        bool isZeroMatrix() const noexcept;
-
+        bool        isZeroMatrix() const noexcept;
         /**
          * \brief Executes the provided functor on every element of the Matrix.
          *
@@ -323,8 +309,7 @@ class Matrix
          * of the current element via first argument as object of Matrix::Index structure and the value of the current
          * element via second argument. Functor must return new value of the passed element.
          */
-        void performOnEvery(std::function<float(Index, float)> functor);
-
+        void        performOnEvery(std::function<float(Index, float)> functor);
         /**
          * \brief Executes the provided functor on every element of the Matrix without changing the element of Matrix.
          *
@@ -335,8 +320,7 @@ class Matrix
          * of the current element via first argument as object of Matrix::Index structure and the value of the current
          * element via second argument.
          */
-        void performOnEvery(std::function<void(Index, float)> functor) const;
-
+        void        performOnEvery(std::function<void(Index, float)> functor) const;
         /**
          * \brief Sets the value at the specified row and column in the Matrix.
          *
@@ -347,8 +331,7 @@ class Matrix
          * \param value  - the value to set.
          * \throw std::out_of_range.
          */
-        void setValue(size_t row, size_t column, float value);
-
+        void        setValue(size_t row, size_t column, float value);
         /**
          * \brief Sets the value at the specified position in the Matrix.
          *
@@ -358,7 +341,7 @@ class Matrix
          * \param value           - the value to set.
          * \throw std::out_of_range.
          */
-        void setValue(const Index& elementPosition, float value);
+        void        setValue(const Index& elementPosition, float value);
 
         /**
          * \brief Returns the dimensionality of the Matrix.
@@ -374,7 +357,6 @@ class Matrix
          * \param columnWidth - is a minimum number of characters (digits + dot) of Matrix element to be displayed.
          */
         std::string toFullString(int columnWidth = 6) const;
-
         /**
          * \brief Returns a std::string representation of the Vector object only with size of the Matrix.
          */

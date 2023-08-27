@@ -15,20 +15,18 @@
  *
  * \param ClassX - the name of the class.
  */
-#define OGLS_DEFAULT_MOVABLE(ClassX)       \
-    ClassX(ClassX&&)            = default; \
-    ClassX& operator=(ClassX&&) = default;
+#define OGLS_DEFAULT_MOVABLE(ClassX)                \
+    ClassX(ClassX&&) noexcept            = default; \
+    ClassX& operator=(ClassX&&) noexcept = default;
 
 /**
  * \brief Adds default copy and move constructors and copy and move assignment operators to a class.
  *
  * \param ClassX - the name of the class.
  */
-#define OGLS_DEFAULT_COPYABLE_MOVABLE(ClassX)   \
-    ClassX(const ClassX&)            = default; \
-    ClassX(ClassX&&)                 = default; \
-    ClassX& operator=(const ClassX&) = default; \
-    ClassX& operator=(ClassX&&)      = default;
+#define OGLS_DEFAULT_COPYABLE_MOVABLE(ClassX) \
+    OGLS_DEFAULT_COPYABLE(ClassX)             \
+    OGLS_DEFAULT_MOVABLE(ClassX)
 
 /**
  * \brief Adds default copy and move constructors and copy and move assignment operators to a class.
@@ -66,10 +64,8 @@
  *
  * \param ClassX - the name of the class.
  */
-#define OGLS_NOT_COPYABLE_MOVABLE(ClassX)      \
-    ClassX(const ClassX&)            = delete; \
-    ClassX(ClassX&&)                 = delete; \
-    ClassX& operator=(const ClassX&) = delete; \
-    ClassX& operator=(ClassX&&)      = delete;
+#define OGLS_NOT_COPYABLE_MOVABLE(ClassX) \
+    OGLS_NOT_COPYABLE(ClassX)             \
+    OGLS_NOT_MOVABLE(ClassX)
 
 #endif
