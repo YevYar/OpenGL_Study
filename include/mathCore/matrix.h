@@ -5,6 +5,7 @@
 #include <functional>
 #include <string>
 
+#include "helpers/debugHelpers.h"
 #include "helpers/macros.h"
 
 namespace ogls::mathCore
@@ -17,18 +18,329 @@ namespace ogls::mathCore
  * All other constructors require not zero values of dimensions.
  *
  * Indexes are counted starting from 0.
+ *
+ * Matrix provides class users with iterators, which can be used with STL algorithms, which don't change
+ * the number of elements in provided data container (see Matrix::Iterator).
+ *
+ * \code{.cpp}
+ * // Usage of range for-loop
+ * for (const auto& el : someMatrix)
+ * {
+ *     std::cout << "element (" << el.i << ", " << el.j << ") = " << el.getValue() << "\n";
+ *     el.getValue() = el.getValue() + el.i + el.j;
+ * }
+ * \endcode
+ * \code{.cpp}
+ * // Usage of STL algorithms
+ * std::fill(someMatrix.begin(), someMatrix.end(), 5);
+ * std::cout << "Sum of elements: " << std::accumulate(someMatrix.begin(), someMatrix.end(), 0) << std::endl;
+ * std::cout << "Number of elements == 5: "
+ *                << std::count_if(someMatrix.begin(), someMatrix.end(),
+ *                               [](Matrix::iterator::Element el)
+ *                               {
+ *                                   return el.getValue() == 5;
+ *                               })
+ *                << std::endl;
+ * \endcode
  */
 class Matrix
 {
     public:
         /**
+         * \brief Matrix::Iterator provides an access to Matrix elements in row-major order from element (0, 0) to
+         * element (N-1, M-1).
+         *
+         * Iterator implements std::random_access_iterator interface. Dereference operator of the Iterator returns
+         * an Element object, which provides an access to the pointed element of the Matrix and information about the
+         * index of this element.
+         *
+         * Iterator follows the convention of the STL iterators to not throw an exception, when its user tries to
+         * dereference invalid Iterator (see isValid()). However move operations as well as copy assignment
+         * throw an exception to prevent changing the number of elements of Matrix data container outside the logic
+         * of Matrix class. Such algorithms as std::remove() cannot be used with Iterator.
+         *
+         * \see isValid().
+         */
+        template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+        class Iterator
+        {
+            public:
+                /**
+                 * \brief Element keeps the data of the Matrix element, on which the Iterator points.
+                 *
+                 * Element provides necessary data about the Matrix element -
+                 * its row and column indexes as well as the element data.
+                 */
+                struct Element
+                {
+                    public:
+                        /**
+                         * \brief Allows copy assignment of the float value.
+                         *
+                         * Changes the referenced Matrix element. Makes it possible to use algorithms like std::fill().
+                         */
+                        template<typename = std::enable_if_t<!std::is_const_v<ElementType>>>
+                        constexpr Element& operator=(ElementType newValue) noexcept
+                        {
+                            getValue() = newValue;
+                            return *this;
+                        }
+
+                        /**
+                         * \brief Returns an ElementType representation of the Element object.
+                         *
+                         * Makes it possible to use algorithms like std::accumulate().
+                         *
+                         * \see getValue().
+                         */
+                        constexpr operator ElementType() const noexcept
+                        {
+                            return getValue();
+                        }
+
+                        /**
+                         * \brief Returns the reference on the referenced Matrix element.
+                         *
+                         * Use it to change the referenced Matrix element: getValue() = newValue;
+                         */
+                        constexpr ElementType& getValue() const noexcept
+                        {
+                            OGLS_ASSERT(value != nullptr);
+                            return *value;
+                        }
+
+                    public:
+                        /**
+                         * \brief The index of the Matrix row of this Element (counts from 0).
+                         *
+                         * Changing this field has no effect on Iterator state.
+                         */
+                        size_t       i     = {0};
+                        /**
+                         * \brief The index of the Matrix column of this Element (counts from 0).
+                         *
+                         * Changing this field has no effect on Iterator state.
+                         */
+                        size_t       j     = {0};
+                        /**
+                         * \brief The pointer to the value of the Element.
+                         */
+                        ElementType* value = nullptr;
+
+                };  // struct Element
+
+                // The following type aliases are STL conventions
+                using difference_type   = std::ptrdiff_t;
+                using iterator_category = std::random_access_iterator_tag;
+                using iterator_concept  = std::random_access_iterator_tag;
+                using value_type        = Element;
+                using reference         = value_type;
+
+            public:
+                /**
+                 * \brief Constructs the default Iterator.
+                 *
+                 * The created instance has an null-initialized state, which is the kind of invalid state (see
+                 * isValid()). Don't dereference it!
+                 *
+                 * \see isValid().
+                 */
+                constexpr Iterator() noexcept                = default;  // it's required by iterator concept
+                /**
+                 * \brief Constructs new Iterator as copy of the other Iterator.
+                 *
+                 * The copy constructor doesn't throw an exception,
+                 * because the state of the source Iterator isn't affected by copy operation.
+                 */
+                constexpr Iterator(const Iterator&) noexcept = default;  // it's required by iterator concept
+                /**
+                 * \brief Constructs new Iterator as move-copy of the other Iterator.
+                 *
+                 * The move-copy constructor throws an exception,
+                 * because the state of the source Iterator is affected by move operation.
+                 *
+                 * \throw std::domain_error.
+                 */
+                constexpr Iterator(Iterator&&);  // it's required by iterator concept
+
+                /**
+                 * \brief Copies the state of the other Iterator.
+                 *
+                 * The operation throws an exception,
+                 * because the state of this Iterator is erased and replaced by the state of other Iterator.
+                 *
+                 * \throw std::domain_error.
+                 */
+                constexpr Iterator& operator=(const Iterator&);  // it's required by iterator concept
+                /**
+                 * \brief Move-copies the state of the other Iterator.
+                 *
+                 * The operation throws an exception,
+                 * because the state of this Iterator is erased and replaced by the state of other Iterator.
+                 *
+                 * \throw std::domain_error.
+                 */
+                constexpr Iterator& operator=(Iterator&&);  // it's required by iterator concept
+
+                // concept forward_iterator
+                constexpr reference operator*() const noexcept;
+                constexpr Iterator& operator++() noexcept;  // prefix ++
+                constexpr Iterator  operator++(int) noexcept;  // postfix ++
+
+                friend constexpr bool operator==(const Iterator& i, const Iterator& j) noexcept
+                {
+                    return i.m_dataIterator == j.m_dataIterator;
+                }
+
+                friend constexpr bool operator!=(const Iterator& i, const Iterator& j) noexcept
+                {
+                    return !(i == j);
+                }
+
+                // concept bidirectional_iterator
+                constexpr Iterator& operator--() noexcept;  // prefix --
+                constexpr Iterator  operator--(int) noexcept;  // postfix --
+
+                // concept random_access_iterator
+                constexpr Iterator& operator+=(difference_type n) noexcept;
+                constexpr Iterator& operator-=(difference_type n) noexcept;
+                /**
+                 * \brief Provides access to element at a certain index relative to the current iterator position.
+                 *
+                 * It's used to mimic the behavior of array subscripting for your iterator type.
+                 *
+                 * \param index - an offset from the current Iterator position to another element.
+                 */
+                constexpr reference operator[](difference_type index) const noexcept;
+
+                friend constexpr Iterator operator+(const Iterator& i, difference_type n) noexcept
+                {
+                    auto temp  = Iterator<ElementType, UnderlyingIteratorType>{i};
+                    temp      += n;
+                    return temp;
+                }
+
+                friend constexpr Iterator operator+(difference_type n, const Iterator& i) noexcept
+                {
+                    return i + n;
+                }
+
+                friend constexpr Iterator operator-(const Iterator& i, difference_type n) noexcept
+                {
+                    auto temp  = Iterator<ElementType, UnderlyingIteratorType>{i};
+                    temp      -= n;
+                    return temp;
+                }
+
+                friend constexpr difference_type operator-(const Iterator& i, const Iterator& j) noexcept
+                {
+                    return i.distanceTo(j);
+                }
+
+                friend constexpr auto operator<=>(const Iterator& i, const Iterator& j) noexcept
+                {
+                    return i.m_dataIterator <=> j.m_dataIterator;
+                }
+
+                /**
+                 * \brief Checks if Iterator is in valid state.
+                 *
+                 * An invalid state of the Iterator means that the Iterator point on the next element after
+                 * the end of the data container of the parent Matrix (element with I (element row index) = N
+                 * (a number of rows in the Matrix) and J (element column index) = 0).
+                 *
+                 * \return true if Iterator is in valid state, false otherwise.
+                 */
+                constexpr bool isValid() const noexcept;
+
+            protected:
+                /**
+                 * \brief Constructs the Iterator over provided data iterator.
+                 *
+                 * \param rowsNumber    - a number of rows in the parent Matrix.
+                 * \param columnsNumber - a number of columns in the parent Matrix.
+                 * \param dataIterator  - an iterator for the data container of the parent Matrix.
+                 * \param isEndIterator - indicator, which is necessary for correct initialisation of the Iterator.
+                 * If true the Iterator is initialised to point on the next element after the end of the data container
+                 * of the parent Matrix (element with I (element row index) = N (a number of rows in the Matrix) and
+                 * J (element column index) = 0). If false the Iterator points on the element (0, 0).
+                 * \see isValid().
+                 */
+                constexpr Iterator(size_t rowsNumber, size_t columnsNumber, UnderlyingIteratorType dataIterator,
+                                   bool isEndIterator = false) noexcept;
+
+                /**
+                 * \brief Sets the invalid state of the Iterator.
+                 *
+                 * \see isValid().
+                 */
+                constexpr void setInvalidState() noexcept;
+                /**
+                 * \brief Updates the position (row and column indexes) on which Iterator points.
+                 *
+                 * \param i - the index of the Matrix row of the current Element.
+                 * \param j - the index of the Matrix column of the current Element.
+                 */
+                constexpr void updateCurrentPosition(size_t i, size_t j) noexcept;
+
+                /**
+                 * \brief Calculates the signed number of elements between this Iterator and Iterator j.
+                 *
+                 * As a rule of thumb, it must return the signed number of calls of decrement/increment operator
+                 * to move this Iterator to the position of the Iterator j. Return value is positive if the
+                 * decrement operator must be applied to move to the position of Iterator j, otherwise it is negative.
+                 *
+                 * \param j - the Iterator to calculate the distance to it.
+                 * \return the signed number of elements between this Iterator and Iterator j.
+                 */
+                constexpr virtual difference_type distanceTo(const Iterator& j) const noexcept;
+                /**
+                 * \brief Moves Iterator on n positions.
+                 *
+                 * It must be equal to n calls of increment operator if n is positive and
+                 * to n calls of decrement operator if n is negative.
+                 *
+                 * \param n - an offset from the current Iterator position to another element.
+                 */
+                constexpr virtual void            moveIterator(difference_type n) noexcept;
+
+            protected:
+                /**
+                 * \brief The number of columns in represented Matrix.
+                 */
+                const size_t           m_columnsNumber = {0};
+                /**
+                 * \brief The row index of the current element.
+                 */
+                size_t                 m_currentI      = {0};
+                /**
+                 * \brief The column index of the current element.
+                 */
+                size_t                 m_currentJ      = {0};
+                /**
+                 * \brief The underlying iterator on the Matrix data.
+                 */
+                UnderlyingIteratorType m_dataIterator;
+                /**
+                 * \brief The maximum element index in the underlying Matrix data container.
+                 */
+                const size_t           m_maxIndex   = {0};
+                /**
+                 * \brief The number of rows in represented Matrix.
+                 */
+                const size_t           m_rowsNumber = {0};
+
+
+                friend class Matrix;
+
+        };  // class Iterator
+
+        /**
          * \brief Matrix::Size represents a dimension of the Matrix or specific index in the Matrix.
          */
         struct Size
         {
-                size_t rows    = {0};
-                size_t columns = {0};
-
+            public:
                 /**
                  * \brief Returns a std::string representation of the Size object.
                  */
@@ -37,6 +349,11 @@ class Matrix
                     return std::format("Matrix::Size(rows={}, columns={})", rows, columns);
                 }
 
+            public:
+                size_t rows    = {0};
+                size_t columns = {0};
+
+
                 friend bool operator==(const Size&, const Size&) = default;
 
         };  // struct Size
@@ -44,7 +361,10 @@ class Matrix
         /**
          * \brief Matrix::Index represents an index (position) of the element in the Matrix.
          */
-        using Index = Size;
+        using Index          = Size;
+        // The following type aliases are the conventions of STL
+        using const_iterator = Iterator<const float, std::vector<float>::const_iterator>;
+        using iterator       = Iterator<float, std::vector<float>::iterator>;
 
     public:
         /**
@@ -229,7 +549,50 @@ class Matrix
             return toFullString();
         }
 
+        //------ RANGE STUFF
+
+        /**
+         * \brief Returns an Iterator to the beginning.
+         */
+        iterator       begin() noexcept;
+        /**
+         * \brief Returns const Iterator to the beginning.
+         */
+        const_iterator begin() const noexcept;
+        /**
+         * \brief Returns const Iterator to the beginning.
+         */
+        const_iterator cbegin() const noexcept;
+        /**
+         * \brief Returns an Iterator to the end.
+         */
+        iterator       end() noexcept;
+        /**
+         * \brief Returns const Iterator to the end.
+         */
+        const_iterator end() const noexcept;
+        /**
+         * \brief Returns const Iterator to the end.
+         */
+        const_iterator cend() const noexcept;
+
+        /**
+         * \brief Returns the number of elements in the Matrix.
+         */
+        size_t size() const noexcept
+        {
+            return m_rowsNumber * m_columnsNumber;
+        }
+
         //------
+
+        /**
+         * \brief Returns the dimensionality of the Matrix.
+         */
+        Size dimensionality() const noexcept
+        {
+            return Size{.rows = m_rowsNumber, .columns = m_columnsNumber};
+        }
 
         /**
          * \brief Retrieves the number of columns in the Matrix.
@@ -342,15 +705,6 @@ class Matrix
          * \throw std::out_of_range.
          */
         void        setValue(const Index& elementPosition, float value);
-
-        /**
-         * \brief Returns the dimensionality of the Matrix.
-         */
-        Size size() const noexcept
-        {
-            return Size{.rows = m_rowsNumber, .columns = m_columnsNumber};
-        }
-
         /**
          * \brief Returns a std::string representation of the Vector object with all elements and size.
          *

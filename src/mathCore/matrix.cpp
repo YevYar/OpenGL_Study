@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iomanip>
+#include <ranges>
 #include <sstream>
 
 #include "exceptions.h"
@@ -20,8 +21,164 @@ namespace
     std::string formatInvalidElementPositionErrorMessage(size_t rowsNumber, size_t columnsNumber,
                                                          const Matrix::Index& position);
     std::string formatZeroDimensionErrorMessage(size_t rowsNumber, size_t columnsNumber);
+    void        throwUnexpectedUsageExceptionWithHint(const char* operatorName);
 
 }  // namespace
+
+//------ MATRIX::ITERATOR
+
+static_assert(std::random_access_iterator<Matrix::iterator>);
+static_assert(std::ranges::random_access_range<Matrix>);
+static_assert(std::ranges::sized_range<Matrix>);
+static_assert(std::ranges::common_range<Matrix>);
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr Matrix::Iterator<ElementType, UnderlyingIteratorType>::Iterator(size_t rowsNumber, size_t columnsNumber,
+                                                                          UnderlyingIteratorType dataIterator,
+                                                                          bool                   isEnd) noexcept :
+    m_columnsNumber{columnsNumber},
+    m_dataIterator{dataIterator}, m_maxIndex{rowsNumber * columnsNumber - 1}, m_rowsNumber{rowsNumber}
+{
+    if (isEnd)
+    {
+        setInvalidState();
+    }
+    else
+    {
+        updateCurrentPosition(0, 0);
+    }
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr Matrix::Iterator<ElementType, UnderlyingIteratorType>::Iterator(Iterator&&)
+{
+    throwUnexpectedUsageExceptionWithHint("Iterator(Iterator&&)");
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator=(const Iterator&) -> Iterator&
+{
+    throwUnexpectedUsageExceptionWithHint("operator=(const Iterator&)");
+    return *this;
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator=(Iterator&&) -> Iterator&
+{
+    throwUnexpectedUsageExceptionWithHint("operator=(Iterator&&)");
+    return *this;
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator*() const noexcept -> reference
+{
+    return isValid() ? Element{.i = m_currentI, .j = m_currentJ, .value = &(*m_dataIterator)}
+                     : Element{.i = m_rowsNumber, .j = 0, .value = nullptr};
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator++() noexcept -> Iterator&  // prefix ++
+{
+    moveIterator(1);
+    return *this;
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator++(int) noexcept
+  -> Iterator  // postfix ++
+{
+    auto temp = Iterator<ElementType, UnderlyingIteratorType>{*this};
+    ++*this;
+    return temp;
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator--() noexcept -> Iterator&  // prefix --
+{
+    moveIterator(-1);
+    return *this;
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator--(int) noexcept
+  -> Iterator  // postfix --
+{
+    auto temp = Iterator<ElementType, UnderlyingIteratorType>{*this};
+    --*this;
+    return temp;
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator+=(difference_type n) noexcept
+  -> Iterator&
+{
+    moveIterator(n);
+    return *this;
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator-=(difference_type n) noexcept
+  -> Iterator&
+{
+    moveIterator(-n);
+    return *this;
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator[](difference_type offset) const noexcept
+  -> reference
+{
+    return *(*this + offset);
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr bool Matrix::Iterator<ElementType, UnderlyingIteratorType>::isValid() const noexcept
+{
+    return m_currentI < m_rowsNumber && m_currentJ < m_columnsNumber;
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr void Matrix::Iterator<ElementType, UnderlyingIteratorType>::setInvalidState() noexcept
+{
+    updateCurrentPosition(m_rowsNumber, 0);
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr void Matrix::Iterator<ElementType, UnderlyingIteratorType>::updateCurrentPosition(size_t i, size_t j) noexcept
+{
+    m_currentI = i;
+    m_currentJ = j;
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::distanceTo(const Iterator& j) const noexcept
+  -> difference_type
+{
+    const auto thisPosition = size_t{m_currentI * m_columnsNumber + m_currentJ};
+    const auto jPosition    = size_t{j.m_currentI * j.m_columnsNumber + j.m_currentJ};
+    return thisPosition - jPosition;
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
+constexpr void Matrix::Iterator<ElementType, UnderlyingIteratorType>::moveIterator(difference_type n) noexcept
+{
+    m_dataIterator += n;
+
+    const auto currentIndex = size_t{m_currentI * m_columnsNumber + m_currentJ};
+    const auto newIndex     = size_t{currentIndex + n};
+
+    if (newIndex <= m_maxIndex)
+    {
+        m_currentJ = newIndex % m_columnsNumber;
+        m_currentI = (newIndex - m_currentJ) / m_columnsNumber;
+    }
+    else
+    {
+        setInvalidState();
+    }
+}
+
+//------
 
 Matrix::Matrix(size_t rowsNumber, size_t columnsNumber, float defaultValue) :
     m_columnsNumber{columnsNumber}, m_rowsNumber{rowsNumber}
@@ -150,6 +307,36 @@ Matrix& Matrix::operator/=(float num)
     // clang-format off
     this->performOnEvery([=](Index, float element) { return element / num; });  // clang-format on
     return *this;
+}
+
+Matrix::iterator Matrix::begin() noexcept
+{
+    return iterator{m_rowsNumber, m_columnsNumber, m_data.begin()};
+}
+
+Matrix::const_iterator Matrix::begin() const noexcept
+{
+    return const_iterator{m_rowsNumber, m_columnsNumber, m_data.begin()};
+}
+
+Matrix::const_iterator Matrix::cbegin() const noexcept
+{
+    return const_iterator{m_rowsNumber, m_columnsNumber, m_data.cbegin()};
+}
+
+Matrix::iterator Matrix::end() noexcept
+{
+    return iterator{m_rowsNumber, m_columnsNumber, m_data.end(), true};
+}
+
+Matrix::const_iterator Matrix::end() const noexcept
+{
+    return const_iterator{m_rowsNumber, m_columnsNumber, m_data.end(), true};
+}
+
+Matrix::const_iterator Matrix::cend() const noexcept
+{
+    return const_iterator{m_rowsNumber, m_columnsNumber, m_data.cend(), true};
 }
 
 float Matrix::getValue(size_t row, size_t column) const
@@ -530,6 +717,18 @@ namespace
                            columnsNumber);
     }
 
+    void throwUnexpectedUsageExceptionWithHint(const char* operatorName)
+    {
+        throw std::domain_error{
+          std::format("Matrix::Iterator::{} is not allowed by the design of the Matrix class. Hint: attempting "
+                      "to use Matrix::Iterator to modify the underlying Matrix data container outside of the "
+                      "Matrix implementation by adding or removing container elements.",
+                      operatorName)};
+    }
+
 }  // namespace
+
+template class Matrix::Iterator<float, std::vector<float>::iterator>;
+template class Matrix::Iterator<const float, std::vector<float>::const_iterator>;
 
 }  // namespace ogls::mathCore

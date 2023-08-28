@@ -44,7 +44,7 @@
   using 1
   using 2
 
-  type 1
+  type 1  // also can be before using-statement, if using-statement uses this type
   // this empty line can be omitted if type 1 is declaration, not a definition 
   type 2
 

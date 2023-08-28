@@ -22,6 +22,7 @@ target_compile_options(OpenGL_Study_compiler_flags INTERFACE
   "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wextra;-Wshadow;-Wformat=2;-Wunused>>"
   "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>"
 )
+set_target_properties(OpenGL_Study_compiler_flags PROPERTIES CXX_ISO_COMPLIANT ON)
 
 
 # === SOME USEFUL CONFIGURATION
