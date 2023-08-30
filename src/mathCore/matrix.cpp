@@ -361,19 +361,20 @@ bool Matrix::isIdentityMatrix() const noexcept
         return false;  // Identity matrices must be square
     }
 
-    const auto size = m_rowsNumber;
-    for (auto i = size_t{0}; i < size; ++i)
+    for (const auto& el : *this)
     {
-        if (m_data[i * size + i] != 1.0f)
+        if (el.i != el.j)
         {
-            return false;  // Diagonal elements must be 1
-        }
-
-        for (auto j = size_t{0}; j < size; ++j)
-        {
-            if (i != j && m_data[i * size + j] != 0.0f)
+            if (el.getValue() != 0.0f)
             {
                 return false;  // Non-diagonal elements must be 0
+            }
+        }
+        else
+        {
+            if (el.getValue() != 1.0f)
+            {
+                return false;  // Diagonal elements must be 1
             }
         }
     }
@@ -480,26 +481,25 @@ std::string Matrix::toFullString(int columnWidth) const
         ss << ":\n";
     }
 
-    for (auto i = size_t{0}; i < m_rowsNumber; ++i)
+    auto el = this->begin();
+    ss << "  | " << std::left << std::setw(columnWidth) << (*el).getValue() << ", ";
+
+    for (++el; el != end(); ++el)
     {
-        ss << "  | ";
-
-        for (auto j = size_t{0}; j < m_columnsNumber; ++j)
+        if ((*el).j == 0)
         {
-            ss << std::left << std::setw(columnWidth) << m_data[i * m_columnsNumber + j];
-
-            if (j != m_columnsNumber - 1)
-            {
-                ss << ", ";
-            }
+            ss << " |\n  | ";
         }
 
-        ss << " |";
-        if (i != m_rowsNumber - 1)
+        ss << std::left << std::setw(columnWidth) << (*el).getValue();
+
+        if ((*el).j != m_columnsNumber - 1)
         {
-            ss << "\n";
+            ss << ", ";
         }
     }
+
+    ss << " |";
 
     return ss.str();
 }
