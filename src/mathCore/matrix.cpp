@@ -21,23 +21,45 @@ namespace
     std::string formatInvalidElementPositionErrorMessage(size_t rowsNumber, size_t columnsNumber,
                                                          const Matrix::Index& position);
     std::string formatZeroDimensionErrorMessage(size_t rowsNumber, size_t columnsNumber);
+    void        throwCannotCreateDiagonalIterator(size_t rowsNumber, size_t columnsNumber);
     void        throwUnexpectedUsageExceptionWithHint(const char* operatorName);
 
 }  // namespace
 
 //------ MATRIX::ITERATOR
 
+static_assert(std::random_access_iterator<Matrix::const_iterator>);
+static_assert(std::random_access_iterator<Matrix::const_diagonal_iterator>);
+static_assert(std::random_access_iterator<Matrix::diagonal_iterator>);
 static_assert(std::random_access_iterator<Matrix::iterator>);
 static_assert(std::ranges::random_access_range<Matrix>);
 static_assert(std::ranges::sized_range<Matrix>);
 static_assert(std::ranges::common_range<Matrix>);
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr Matrix::Iterator<ElementType, UnderlyingIteratorType>::Iterator(size_t rowsNumber, size_t columnsNumber,
-                                                                          UnderlyingIteratorType dataIterator,
-                                                                          bool                   isEnd) noexcept :
-    m_columnsNumber{columnsNumber},
-    m_dataIterator{dataIterator}, m_maxIndex{rowsNumber * columnsNumber - 1}, m_rowsNumber{rowsNumber}
+constexpr auto Matrix::DiagonalIteratorImpl::calculateOffset(difference_type iteratorN) const noexcept
+  -> difference_type
+{
+    if ((m_currentI == m_rowsNumber - 1) && (iteratorN > 0))
+    {
+        return 1;
+    }
+    else if ((m_currentI == m_rowsNumber) && (iteratorN < 0))
+    {
+        const auto n = iteratorN + 1;
+        return -1 + (n * static_cast<difference_type>(m_columnsNumber) + n);
+    }
+    else
+    {
+        return iteratorN * static_cast<difference_type>(m_columnsNumber) + iteratorN;
+    }
+}
+
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+         IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+constexpr Matrix::Iterator<ElementType, UnderlyingIteratorType, ConcreteIteratorImpl>::Iterator(
+  size_t rowsNumber, size_t columnsNumber, UnderlyingIteratorType dataIterator, bool isEnd) noexcept :
+    ConcreteIteratorImpl{columnsNumber, rowsNumber * columnsNumber - 1, rowsNumber},
+    m_dataIterator{dataIterator}, m_isDefaultInitialised{false}
 {
     if (isEnd)
     {
@@ -49,132 +71,150 @@ constexpr Matrix::Iterator<ElementType, UnderlyingIteratorType>::Iterator(size_t
     }
 }
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr Matrix::Iterator<ElementType, UnderlyingIteratorType>::Iterator(Iterator&&)
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+         IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+constexpr Matrix::Iterator<ElementType, UnderlyingIteratorType, ConcreteIteratorImpl>::Iterator(Iterator&&)
 {
     throwUnexpectedUsageExceptionWithHint("Iterator(Iterator&&)");
 }
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator=(const Iterator&) -> Iterator&
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+         IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType, ConcreteIteratorImpl>::operator=(const Iterator&)
+  -> Iterator&
 {
     throwUnexpectedUsageExceptionWithHint("operator=(const Iterator&)");
     return *this;
 }
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator=(Iterator&&) -> Iterator&
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+         IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType, ConcreteIteratorImpl>::operator=(Iterator&&)
+  -> Iterator&
 {
     throwUnexpectedUsageExceptionWithHint("operator=(Iterator&&)");
     return *this;
 }
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator*() const noexcept -> reference
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+         IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType, ConcreteIteratorImpl>::operator*() const noexcept
+  -> reference
 {
-    return isValid() ? Element{.i = m_currentI, .j = m_currentJ, .value = &(*m_dataIterator)}
-                     : Element{.i = m_rowsNumber, .j = 0, .value = nullptr};
+    return isValid() ? Element{.i = this->m_currentI, .j = this->m_currentJ, .value = &(*m_dataIterator)}
+                     : Element{.i = this->m_rowsNumber, .j = 0, .value = nullptr};
 }
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator++() noexcept -> Iterator&  // prefix ++
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+         IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType, ConcreteIteratorImpl>::operator++() noexcept
+  -> Iterator&  // prefix ++
 {
     moveIterator(1);
     return *this;
 }
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator++(int) noexcept
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+         IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType, ConcreteIteratorImpl>::operator++(int) noexcept
   -> Iterator  // postfix ++
 {
-    auto temp = Iterator<ElementType, UnderlyingIteratorType>{*this};
+    auto temp = Iterator{*this};
     ++*this;
     return temp;
 }
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator--() noexcept -> Iterator&  // prefix --
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+         IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType, ConcreteIteratorImpl>::operator--() noexcept
+  -> Iterator&  // prefix --
 {
     moveIterator(-1);
     return *this;
 }
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator--(int) noexcept
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+         IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType, ConcreteIteratorImpl>::operator--(int) noexcept
   -> Iterator  // postfix --
 {
-    auto temp = Iterator<ElementType, UnderlyingIteratorType>{*this};
+    auto temp = Iterator{*this};
     --*this;
     return temp;
 }
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator+=(difference_type n) noexcept
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+         IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+constexpr auto
+  Matrix::Iterator<ElementType, UnderlyingIteratorType, ConcreteIteratorImpl>::operator+=(difference_type n) noexcept
   -> Iterator&
 {
     moveIterator(n);
     return *this;
 }
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator-=(difference_type n) noexcept
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+         IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+constexpr auto
+  Matrix::Iterator<ElementType, UnderlyingIteratorType, ConcreteIteratorImpl>::operator-=(difference_type n) noexcept
   -> Iterator&
 {
     moveIterator(-n);
     return *this;
 }
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::operator[](difference_type offset) const noexcept
-  -> reference
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+         IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+constexpr auto
+  Matrix::Iterator<ElementType, UnderlyingIteratorType, ConcreteIteratorImpl>::operator[](difference_type offset)
+    const noexcept -> reference
 {
     return *(*this + offset);
 }
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr bool Matrix::Iterator<ElementType, UnderlyingIteratorType>::isValid() const noexcept
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+         IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+constexpr bool Matrix::Iterator<ElementType, UnderlyingIteratorType, ConcreteIteratorImpl>::isValid() const noexcept
 {
-    return m_currentI < m_rowsNumber && m_currentJ < m_columnsNumber;
+    return !m_isDefaultInitialised && this->m_currentI < this->m_rowsNumber && this->m_currentJ < this->m_columnsNumber;
 }
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr void Matrix::Iterator<ElementType, UnderlyingIteratorType>::setInvalidState() noexcept
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+         IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+constexpr void Matrix::Iterator<ElementType, UnderlyingIteratorType, ConcreteIteratorImpl>::setInvalidState() noexcept
 {
-    updateCurrentPosition(m_rowsNumber, 0);
+    updateCurrentPosition(this->m_rowsNumber, 0);
 }
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr void Matrix::Iterator<ElementType, UnderlyingIteratorType>::updateCurrentPosition(size_t i, size_t j) noexcept
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+         IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+constexpr void
+  Matrix::Iterator<ElementType, UnderlyingIteratorType, ConcreteIteratorImpl>::updateCurrentPosition(size_t i,
+                                                                                                     size_t j) noexcept
 {
-    m_currentI = i;
-    m_currentJ = j;
+    this->m_currentI = i;
+    this->m_currentJ = j;
 }
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr auto Matrix::Iterator<ElementType, UnderlyingIteratorType>::distanceTo(const Iterator& j) const noexcept
-  -> difference_type
+template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+         IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+constexpr void
+  Matrix::Iterator<ElementType, UnderlyingIteratorType, ConcreteIteratorImpl>::moveIterator(difference_type n) noexcept
 {
-    const auto thisPosition = size_t{m_currentI * m_columnsNumber + m_currentJ};
-    const auto jPosition    = size_t{j.m_currentI * j.m_columnsNumber + j.m_currentJ};
-    return thisPosition - jPosition;
-}
+    const auto offset     = this->calculateOffset(n);
+    this->m_dataIterator += offset;
 
-template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-constexpr void Matrix::Iterator<ElementType, UnderlyingIteratorType>::moveIterator(difference_type n) noexcept
-{
-    m_dataIterator += n;
+    const auto currentIndex = size_t{this->m_currentI * this->m_columnsNumber + this->m_currentJ};
+    const auto newIndex     = size_t{currentIndex + offset};
 
-    const auto currentIndex = size_t{m_currentI * m_columnsNumber + m_currentJ};
-    const auto newIndex     = size_t{currentIndex + n};
-
-    if (newIndex <= m_maxIndex)
+    if (newIndex <= this->m_maxIndex)
     {
-        m_currentJ = newIndex % m_columnsNumber;
-        m_currentI = (newIndex - m_currentJ) / m_columnsNumber;
+        this->m_currentJ = newIndex % this->m_columnsNumber;
+        this->m_currentI = (newIndex - this->m_currentJ) / this->m_columnsNumber;
     }
     else
     {
-        setInvalidState();
+        this->setInvalidState();
     }
 }
 
@@ -319,9 +359,39 @@ Matrix::const_iterator Matrix::begin() const noexcept
     return const_iterator{m_rowsNumber, m_columnsNumber, m_data.begin()};
 }
 
+Matrix::diagonal_iterator Matrix::beginDiagonal()
+{
+    if (!isSquareMatrix())
+    {
+        throwCannotCreateDiagonalIterator(m_rowsNumber, m_columnsNumber);
+    }
+
+    return diagonal_iterator{m_rowsNumber, m_columnsNumber, m_data.begin()};
+}
+
+Matrix::const_diagonal_iterator Matrix::beginDiagonal() const
+{
+    if (!isSquareMatrix())
+    {
+        throwCannotCreateDiagonalIterator(m_rowsNumber, m_columnsNumber);
+    }
+
+    return const_diagonal_iterator{m_rowsNumber, m_columnsNumber, m_data.begin()};
+}
+
 Matrix::const_iterator Matrix::cbegin() const noexcept
 {
     return const_iterator{m_rowsNumber, m_columnsNumber, m_data.cbegin()};
+}
+
+Matrix::const_diagonal_iterator Matrix::cbeginDiagonal() const
+{
+    if (!isSquareMatrix())
+    {
+        throwCannotCreateDiagonalIterator(m_rowsNumber, m_columnsNumber);
+    }
+
+    return const_diagonal_iterator{m_rowsNumber, m_columnsNumber, m_data.cbegin()};
 }
 
 Matrix::iterator Matrix::end() noexcept
@@ -334,9 +404,39 @@ Matrix::const_iterator Matrix::end() const noexcept
     return const_iterator{m_rowsNumber, m_columnsNumber, m_data.end(), true};
 }
 
+Matrix::diagonal_iterator Matrix::endDiagonal()
+{
+    if (!isSquareMatrix())
+    {
+        throwCannotCreateDiagonalIterator(m_rowsNumber, m_columnsNumber);
+    }
+
+    return diagonal_iterator{m_rowsNumber, m_columnsNumber, m_data.end(), true};
+}
+
+Matrix::const_diagonal_iterator Matrix::endDiagonal() const
+{
+    if (!isSquareMatrix())
+    {
+        throwCannotCreateDiagonalIterator(m_rowsNumber, m_columnsNumber);
+    }
+
+    return const_diagonal_iterator{m_rowsNumber, m_columnsNumber, m_data.end(), true};
+}
+
 Matrix::const_iterator Matrix::cend() const noexcept
 {
     return const_iterator{m_rowsNumber, m_columnsNumber, m_data.cend(), true};
+}
+
+Matrix::const_diagonal_iterator Matrix::cendDiagonal() const
+{
+    if (!isSquareMatrix())
+    {
+        throwCannotCreateDiagonalIterator(m_rowsNumber, m_columnsNumber);
+    }
+
+    return const_diagonal_iterator{m_rowsNumber, m_columnsNumber, m_data.cend(), true};
 }
 
 float Matrix::getValue(size_t row, size_t column) const
@@ -717,6 +817,12 @@ namespace
                            columnsNumber);
     }
 
+    void throwCannotCreateDiagonalIterator(size_t rowsNumber, size_t columnsNumber)
+    {
+        throw std::domain_error{std::format("Cannot create DiagonalIterator for not square Matrix (size is {}x{}).",
+                                            rowsNumber, columnsNumber)};
+    }
+
     void throwUnexpectedUsageExceptionWithHint(const char* operatorName)
     {
         throw std::domain_error{
@@ -728,7 +834,9 @@ namespace
 
 }  // namespace
 
-template class Matrix::Iterator<float, std::vector<float>::iterator>;
-template class Matrix::Iterator<const float, std::vector<float>::const_iterator>;
+template class Matrix::Iterator<float, std::vector<float>::iterator, Matrix::RowMajorIteratorImpl>;
+template class Matrix::Iterator<const float, std::vector<float>::const_iterator, Matrix::RowMajorIteratorImpl>;
+template class Matrix::Iterator<float, std::vector<float>::iterator, Matrix::DiagonalIteratorImpl>;
+template class Matrix::Iterator<const float, std::vector<float>::const_iterator, Matrix::DiagonalIteratorImpl>;
 
 }  // namespace ogls::mathCore

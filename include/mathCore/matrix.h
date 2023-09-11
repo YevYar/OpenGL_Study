@@ -11,6 +11,53 @@
 namespace ogls::mathCore
 {
 /**
+ * \brief IteratorImpl is a concept, which specifies the class, which can be used as a base class of
+ * ogls::mathCore::Matrix::Iterator.
+ *
+ * Impl is a class, which defines the order, in which the Iterator is moved, as well as mapping between iterator steps
+ * and actual elements of the underlying data container of Matrix (std::vector).
+ *
+ * 1. Impl must be inherited from ogls::mathCore::Matrix::BaseIterator.
+ * 2. Impl must have the method distanceTo(const Impl&), which calculates the signed number of elements between this
+ * Iterator and Iterator j. As a rule of thumb, it must return the signed number of calls of decrement/increment
+ * operator to move this Iterator to the position of the Iterator j. Return value is positive if the decrement
+ * operator must be applied to move to the position of Iterator j, otherwise it is negative.
+ * The type of the return value must be ogls::mathCore::Matrix::BaseIterator::difference_type.
+ * 3. Impl must have the method calculateOffset(Matrix::BaseIterator::difference_type N), which converts the number of
+ * iterator steps to the actual number of elements in underlying data container of Matrix (std::vector),
+ * that is, how many elements of the vector the iterator moves during N increment/decrement steps.
+ * The type of the return value must be Matrix::BaseIterator::difference_type.
+ *
+ * \param Impl         - a type to check constraints.
+ * \param BaseIterator - must be Matrix::BaseIterator.
+ */
+template<typename Impl, typename BaseIterator>
+concept IteratorImpl = requires(Impl obj) {
+    requires std::is_base_of_v<BaseIterator, Impl>;
+    // clang-format off
+    {obj.distanceTo(obj)}    -> std::same_as<std::ptrdiff_t>;
+    {obj.calculateOffset(1)} -> std::same_as<std::ptrdiff_t>;  // clang-format on
+};
+
+/**
+ * \brief MatrixIterator is a concept, which specifies the class, which is some instantiation of
+ * ogls::mathCore::Matrix::Iterator.
+ *
+ * \param DerivedIterator - a type to check constraints.
+ * \param BaseIterator    - must be ogls::mathCore::Matrix::BaseIterator.
+ */
+template<typename DerivedIterator, typename BaseIterator>
+concept MatrixIterator = requires(DerivedIterator obj) {
+    requires std::is_base_of_v<BaseIterator, DerivedIterator>;
+    // clang-format off
+    {obj.compareWithUnderlyingIterator(std::declval<std::vector<float>::iterator>())}
+      -> std::same_as<decltype(std::declval<std::vector<float>::iterator>()
+                               <=> std::declval<std::vector<float>::iterator>())>;
+    {obj.equalToUnderlyingIterator(std::declval<std::vector<float>::iterator>())} -> std::same_as<bool>;
+    // clang-format on
+};
+
+/**
  * \brief Matrix represents a N*M dimensional matrix.
  *
  * Matrix with dimensions equal to 0 can be created only by default constructor.
@@ -47,8 +94,118 @@ class Matrix
 {
     public:
         /**
-         * \brief Matrix::Iterator provides an access to Matrix elements in row-major order from element (0, 0) to
-         * element (N-1, M-1).
+         * \brief Matrix::BaseIterator is a base class of iterator types of the Matrix.
+         *
+         * It contains necessary fields and is used in Matrix iterator constraints.
+         */
+        class BaseIterator
+        {
+            public:
+                // The STL conventions
+                using difference_type = std::ptrdiff_t;
+
+            protected:
+                constexpr BaseIterator() noexcept = default;
+
+                constexpr BaseIterator(size_t columnsNumber, size_t maxIndex, size_t rowsNumber) noexcept :
+                    m_columnsNumber{columnsNumber}, m_maxIndex{maxIndex}, m_rowsNumber{rowsNumber}
+                {
+                }
+
+            protected:
+                /**
+                 * \brief The number of columns in represented Matrix.
+                 */
+                const size_t m_columnsNumber = {0};
+                /**
+                 * \brief The row index of the current element.
+                 */
+                size_t       m_currentI      = {0};
+                /**
+                 * \brief The column index of the current element.
+                 */
+                size_t       m_currentJ      = {0};
+                /**
+                 * \brief The maximum element index in the underlying Matrix data container.
+                 */
+                const size_t m_maxIndex      = {0};
+                /**
+                 * \brief The number of rows in represented Matrix.
+                 */
+                const size_t m_rowsNumber    = {0};
+
+        };  // class BaseIterator
+
+        /**
+         * \brief Matrix::DiagonalIteratorImpl provides an implementation of necessary methods for Iterator
+         * to iterate over Matrix elements, which belong to the main diagonal of the Matrix ((0, 0), (1, 1) etc.).
+         *
+         * It must be used only with square Matrix. Otherwise it usage can lead to runtime errors.
+         *
+         * \see Iterator.
+         */
+        class DiagonalIteratorImpl : public BaseIterator
+        {
+            public:
+                using typename BaseIterator::difference_type;
+
+            public:
+                /**
+                 * \see ogls::mathCore::IteratorImpl.
+                 */
+                constexpr difference_type calculateOffset(difference_type n) const noexcept;
+
+                /**
+                 * \see ogls::mathCore::IteratorImpl.
+                 */
+                constexpr difference_type distanceTo(const DiagonalIteratorImpl& j) const noexcept
+                {
+                    return m_currentI - j.m_currentI;
+                }
+
+            protected:
+                using BaseIterator::BaseIterator;
+
+        };  // class DiagonalIteratorImpl
+
+        /**
+         * \brief Matrix::RowMajorIteratorImpl provides an implementation of necessary methods for Iterator
+         * to iterate over Matrix elements in row-major order from element (0, 0) to element (N-1, M-1).
+         *
+         * \see Iterator.
+         */
+        class RowMajorIteratorImpl : public BaseIterator
+        {
+            public:
+                using typename BaseIterator::difference_type;
+
+            public:
+                /**
+                 * \see ogls::mathCore::IteratorImpl.
+                 */
+                constexpr difference_type calculateOffset(difference_type n) const noexcept
+                {
+                    return n;
+                }
+
+                /**
+                 * \see ogls::mathCore::IteratorImpl.
+                 */
+                constexpr difference_type distanceTo(const RowMajorIteratorImpl& j) const noexcept
+                {
+                    const auto thisPosition = size_t{m_currentI * m_columnsNumber + m_currentJ};
+                    const auto jPosition    = size_t{j.m_currentI * j.m_columnsNumber + j.m_currentJ};
+                    return thisPosition - jPosition;
+                }
+
+            protected:
+                using BaseIterator::BaseIterator;
+
+        };  // class RowMajorIteratorImpl
+
+        /**
+         * \brief Matrix::Iterator provides an access to Matrix elements in implementation defined order (see
+         * ConcreteIteratorImpl).
          *
          * Iterator implements std::random_access_iterator interface. Dereference operator of the Iterator returns
          * an Element object, which provides an access to the pointed element of the Matrix and information about the
@@ -59,10 +216,16 @@ class Matrix
          * throw an exception to prevent changing the number of elements of Matrix data container outside the logic
          * of Matrix class. Such algorithms as std::remove() cannot be used with Iterator.
          *
+         * \param ElementType            - the type of referenced elements (float, const float).
+         * \param UnderlyingIteratorType - the type of the iterator, which is used by the data container of Matrix
+         * (std::vector<float>::iterator, std::vector<float>::const_iterator).
+         * \param ConcreteIteratorImpl   - the base class, which provides an implementation of necessary stuff
+         * (see ogls::mathCore::IteratorImpl).
          * \see isValid().
          */
-        template<typename ElementType, std::random_access_iterator UnderlyingIteratorType>
-        class Iterator
+        template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
+                 IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
+        class Iterator final : protected ConcreteIteratorImpl
         {
             public:
                 /**
@@ -99,6 +262,14 @@ class Matrix
                         }
 
                         /**
+                         * \brief Returns a std::string representation of the Element object.
+                         */
+                        constexpr operator std::string() const
+                        {
+                            return std::format("Matrix::Iterator::Element({}, {}) = {}", i, j, getValue());
+                        }
+
+                        /**
                          * \brief Returns the reference on the referenced Matrix element.
                          *
                          * Use it to change the referenced Matrix element: getValue() = newValue;
@@ -130,7 +301,7 @@ class Matrix
                 };  // struct Element
 
                 // The following type aliases are STL conventions
-                using difference_type   = std::ptrdiff_t;
+                using typename ConcreteIteratorImpl::difference_type;
                 using iterator_category = std::random_access_iterator_tag;
                 using iterator_concept  = std::random_access_iterator_tag;
                 using value_type        = Element;
@@ -187,12 +358,26 @@ class Matrix
                 constexpr Iterator& operator++() noexcept;  // prefix ++
                 constexpr Iterator  operator++(int) noexcept;  // postfix ++
 
-                friend constexpr bool operator==(const Iterator& i, const Iterator& j) noexcept
+                /**
+                 * \brief Checks equality of the object of this Iterator type and any other Iterator,
+                 * which is derived from BaseIterator.
+                 */
+                template<MatrixIterator<BaseIterator> OtherIterator>
+                friend constexpr bool operator==(const Iterator& i, const OtherIterator& j) noexcept
                 {
-                    return i.m_dataIterator == j.m_dataIterator;
+                    // This trick is used, because this operator== cannot be a friend to both Iterator and OtherIterator
+                    // at the same time. So the public method of OtherIterator is called to compare m_dataIterator of
+                    // object j with m_dataIterator of object i, for which operator== is a friend and has an access to
+                    // m_dataIterator.
+                    return j.equalToUnderlyingIterator(i.m_dataIterator);
                 }
 
-                friend constexpr bool operator!=(const Iterator& i, const Iterator& j) noexcept
+                /**
+                 * \brief Checks non-equality of the object of this Iterator type and any other Iterator,
+                 * which is derived from BaseIterator.
+                 */
+                template<MatrixIterator<BaseIterator> OtherIterator>
+                friend constexpr bool operator!=(const Iterator& i, const OtherIterator& j) noexcept
                 {
                     return !(i == j);
                 }
@@ -215,7 +400,7 @@ class Matrix
 
                 friend constexpr Iterator operator+(const Iterator& i, difference_type n) noexcept
                 {
-                    auto temp  = Iterator<ElementType, UnderlyingIteratorType>{i};
+                    auto temp  = Iterator{i};
                     temp      += n;
                     return temp;
                 }
@@ -227,7 +412,7 @@ class Matrix
 
                 friend constexpr Iterator operator-(const Iterator& i, difference_type n) noexcept
                 {
-                    auto temp  = Iterator<ElementType, UnderlyingIteratorType>{i};
+                    auto temp  = Iterator{i};
                     temp      -= n;
                     return temp;
                 }
@@ -237,9 +422,37 @@ class Matrix
                     return i.distanceTo(j);
                 }
 
-                friend constexpr auto operator<=>(const Iterator& i, const Iterator& j) noexcept
+                /**
+                 * \brief Compares the object of this Iterator type with any other Iterator,
+                 * which is derived from BaseIterator.
+                 */
+                template<MatrixIterator<BaseIterator> OtherIterator>
+                friend constexpr auto operator<=>(const Iterator& i, const OtherIterator& j) noexcept
                 {
-                    return i.m_dataIterator <=> j.m_dataIterator;
+                    // This trick is used, because this operator<=> cannot be a friend to both Iterator and
+                    // OtherIterator at the same time. So the public method of OtherIterator is called to compare
+                    // m_dataIterator of object j with m_dataIterator of object i, for which operator<=> is a friend and
+                    // has an access to m_dataIterator.
+                    return j.compareWithUnderlyingIterator(i.m_dataIterator);
+                }
+
+                /**
+                 * \brief Compares underlying iterator of this object with underlying iterator of another object.
+                 */
+                template<std::random_access_iterator UnderlyingIterator>
+                constexpr auto compareWithUnderlyingIterator(const UnderlyingIterator& i) const noexcept
+                {
+                    return m_dataIterator <=> i;
+                }
+
+                /**
+                 * \brief Checks equality of underlying iterator of this object with underlying iterator of another
+                 * object.
+                 */
+                template<std::random_access_iterator UnderlyingIterator>
+                constexpr bool equalToUnderlyingIterator(const UnderlyingIterator& i) const noexcept
+                {
+                    return m_dataIterator == i;
                 }
 
                 /**
@@ -253,7 +466,7 @@ class Matrix
                  */
                 constexpr bool isValid() const noexcept;
 
-            protected:
+            private:
                 /**
                  * \brief Constructs the Iterator over provided data iterator.
                  *
@@ -284,17 +497,6 @@ class Matrix
                 constexpr void updateCurrentPosition(size_t i, size_t j) noexcept;
 
                 /**
-                 * \brief Calculates the signed number of elements between this Iterator and Iterator j.
-                 *
-                 * As a rule of thumb, it must return the signed number of calls of decrement/increment operator
-                 * to move this Iterator to the position of the Iterator j. Return value is positive if the
-                 * decrement operator must be applied to move to the position of Iterator j, otherwise it is negative.
-                 *
-                 * \param j - the Iterator to calculate the distance to it.
-                 * \return the signed number of elements between this Iterator and Iterator j.
-                 */
-                constexpr virtual difference_type distanceTo(const Iterator& j) const noexcept;
-                /**
                  * \brief Moves Iterator on n positions.
                  *
                  * It must be equal to n calls of increment operator if n is positive and
@@ -302,33 +504,14 @@ class Matrix
                  *
                  * \param n - an offset from the current Iterator position to another element.
                  */
-                constexpr virtual void            moveIterator(difference_type n) noexcept;
+                constexpr void moveIterator(difference_type n) noexcept;
 
-            protected:
-                /**
-                 * \brief The number of columns in represented Matrix.
-                 */
-                const size_t           m_columnsNumber = {0};
-                /**
-                 * \brief The row index of the current element.
-                 */
-                size_t                 m_currentI      = {0};
-                /**
-                 * \brief The column index of the current element.
-                 */
-                size_t                 m_currentJ      = {0};
+            private:
                 /**
                  * \brief The underlying iterator on the Matrix data.
                  */
                 UnderlyingIteratorType m_dataIterator;
-                /**
-                 * \brief The maximum element index in the underlying Matrix data container.
-                 */
-                const size_t           m_maxIndex   = {0};
-                /**
-                 * \brief The number of rows in represented Matrix.
-                 */
-                const size_t           m_rowsNumber = {0};
+                bool                   m_isDefaultInitialised = true;
 
 
                 friend class Matrix;
@@ -361,10 +544,31 @@ class Matrix
         /**
          * \brief Matrix::Index represents an index (position) of the element in the Matrix.
          */
-        using Index          = Size;
+        using Index = Size;
+
         // The following type aliases are the conventions of STL
-        using const_iterator = Iterator<const float, std::vector<float>::const_iterator>;
-        using iterator       = Iterator<float, std::vector<float>::iterator>;
+
+        /**
+         * \brief Iterates over Matrix elements in row-major order from element (0, 0) to element (N-1, M-1)
+         * without providing ability to change the referenced Matrix element.
+         */
+        using const_iterator = Iterator<const float, std::vector<float>::const_iterator, RowMajorIteratorImpl>;
+        /**
+         * \brief Iterates over Matrix elements in row-major order from element (0, 0) to element (N-1, M-1).
+         */
+        using iterator       = Iterator<float, std::vector<float>::iterator, RowMajorIteratorImpl>;
+
+        // Non-conventional iterator aliases
+
+        /**
+         * \brief Iterates over Matrix elements, which belong to the main diagonal of the Matrix ((0, 0), (1, 1) etc.)
+         * without providing ability to change the referenced Matrix element.
+         */
+        using const_diagonal_iterator = Iterator<const float, std::vector<float>::const_iterator, DiagonalIteratorImpl>;
+        /**
+         * \brief Iterates over Matrix elements, which belong to the main diagonal of the Matrix ((0, 0), (1, 1) etc.).
+         */
+        using diagonal_iterator       = Iterator<float, std::vector<float>::iterator, DiagonalIteratorImpl>;
 
     public:
         /**
@@ -554,27 +758,75 @@ class Matrix
         /**
          * \brief Returns an Iterator to the beginning.
          */
-        iterator       begin() noexcept;
+        iterator                begin() noexcept;
         /**
          * \brief Returns const Iterator to the beginning.
          */
-        const_iterator begin() const noexcept;
+        const_iterator          begin() const noexcept;
+        /**
+         * \brief Returns a DiagonalIterator to the beginning.
+         *
+         * Throws std::domain_error if the Matrix isn't square Matrix.
+         *
+         * \throw std::domain_error.
+         */
+        diagonal_iterator       beginDiagonal();
+        /**
+         * \brief Returns const DiagonalIterator to the beginning.
+         *
+         * Throws std::domain_error if the Matrix isn't square Matrix.
+         *
+         * \throw std::domain_error.
+         */
+        const_diagonal_iterator beginDiagonal() const;
         /**
          * \brief Returns const Iterator to the beginning.
          */
-        const_iterator cbegin() const noexcept;
+        const_iterator          cbegin() const noexcept;
+        /**
+         * \brief Returns const DiagonalIterator to the beginning.
+         *
+         * Throws std::domain_error if the Matrix isn't square Matrix.
+         *
+         * \throw std::domain_error.
+         */
+        const_diagonal_iterator cbeginDiagonal() const;
         /**
          * \brief Returns an Iterator to the end.
          */
-        iterator       end() noexcept;
+        iterator                end() noexcept;
         /**
          * \brief Returns const Iterator to the end.
          */
-        const_iterator end() const noexcept;
+        const_iterator          end() const noexcept;
+        /**
+         * \brief Returns a DiagonalIterator to the end.
+         *
+         * Throws std::domain_error if the Matrix isn't square Matrix.
+         *
+         * \throw std::domain_error.
+         */
+        diagonal_iterator       endDiagonal();
+        /**
+         * \brief Returns const DiagonalIterator to the end.
+         *
+         * Throws std::domain_error if the Matrix isn't square Matrix.
+         *
+         * \throw std::domain_error.
+         */
+        const_diagonal_iterator endDiagonal() const;
         /**
          * \brief Returns const Iterator to the end.
          */
-        const_iterator cend() const noexcept;
+        const_iterator          cend() const noexcept;
+        /**
+         * \brief Returns const DiagonalIterator to the end.
+         *
+         * Throws std::domain_error if the Matrix isn't square Matrix.
+         *
+         * \throw std::domain_error.
+         */
+        const_diagonal_iterator cendDiagonal() const;
 
         /**
          * \brief Returns the number of elements in the Matrix.
@@ -657,6 +909,16 @@ class Matrix
         bool isNullMatrix() const noexcept
         {
             return m_rowsNumber == 0 && m_columnsNumber == 0;
+        }
+
+        /**
+         * \brief Checks if the Matrix is a square Matrix (dimensions are equal).
+         *
+         * \return true if the Matrix is a square Matrix, false otherwise.
+         */
+        bool isSquareMatrix() const noexcept
+        {
+            return m_rowsNumber != 0 && m_rowsNumber == m_columnsNumber;
         }
 
         /**
