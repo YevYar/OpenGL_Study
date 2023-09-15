@@ -74,7 +74,7 @@ concept MatrixIterator = requires(DerivedIterator obj) {
  * for (const auto& el : someMatrix)
  * {
  *     std::cout << "element (" << el.i << ", " << el.j << ") = " << el.getValue() << "\n";
- *     el.getValue() = el.getValue() + el.i + el.j;
+ *     el.setValue(el.getValue() + el.i + el.j);
  * }
  * \endcode
  * \code{.cpp}
@@ -245,7 +245,7 @@ class Matrix
                         template<typename = std::enable_if_t<!std::is_const_v<ElementType>>>
                         constexpr Element& operator=(ElementType newValue) noexcept
                         {
-                            getValue() = newValue;
+                            setValue(newValue);
                             return *this;
                         }
 
@@ -278,6 +278,17 @@ class Matrix
                         {
                             OGLS_ASSERT(value != nullptr);
                             return *value;
+                        }
+
+                        /**
+                         * \brief Sets the new value of the referenced element.
+                         *
+                         * Changes the referenced Matrix element.
+                         */
+                        template<typename = std::enable_if_t<!std::is_const_v<ElementType>>>
+                        constexpr void setValue(ElementType newValue) noexcept
+                        {
+                            getValue() = newValue;
                         }
 
                     public:
@@ -330,7 +341,7 @@ class Matrix
                  * The move-copy constructor throws an exception,
                  * because the state of the source Iterator is affected by move operation.
                  *
-                 * \throw std::domain_error.
+                 * \throw ogls::exceptions::MatrixException().
                  */
                 constexpr Iterator(Iterator&&);  // it's required by iterator concept
 
@@ -340,7 +351,7 @@ class Matrix
                  * The operation throws an exception,
                  * because the state of this Iterator is erased and replaced by the state of other Iterator.
                  *
-                 * \throw std::domain_error.
+                 * \throw ogls::exceptions::MatrixException().
                  */
                 constexpr Iterator& operator=(const Iterator&);  // it's required by iterator concept
                 /**
@@ -349,7 +360,7 @@ class Matrix
                  * The operation throws an exception,
                  * because the state of this Iterator is erased and replaced by the state of other Iterator.
                  *
-                 * \throw std::domain_error.
+                 * \throw ogls::exceptions::MatrixException().
                  */
                 constexpr Iterator& operator=(Iterator&&);  // it's required by iterator concept
 
@@ -442,7 +453,7 @@ class Matrix
                 template<std::random_access_iterator UnderlyingIterator>
                 constexpr auto compareWithUnderlyingIterator(const UnderlyingIterator& i) const noexcept
                 {
-                    return m_dataIterator <=> i;
+                    return i <=> m_dataIterator;
                 }
 
                 /**
@@ -766,17 +777,17 @@ class Matrix
         /**
          * \brief Returns a DiagonalIterator to the beginning.
          *
-         * Throws std::domain_error if the Matrix isn't square Matrix.
+         * Throws the exception if the Matrix isn't square Matrix.
          *
-         * \throw std::domain_error.
+         * \throw ogls::exceptions::MatrixException().
          */
         diagonal_iterator       beginDiagonal();
         /**
          * \brief Returns const DiagonalIterator to the beginning.
          *
-         * Throws std::domain_error if the Matrix isn't square Matrix.
+         * Throws the exception if the Matrix isn't square Matrix.
          *
-         * \throw std::domain_error.
+         * \throw ogls::exceptions::MatrixException().
          */
         const_diagonal_iterator beginDiagonal() const;
         /**
@@ -786,9 +797,9 @@ class Matrix
         /**
          * \brief Returns const DiagonalIterator to the beginning.
          *
-         * Throws std::domain_error if the Matrix isn't square Matrix.
+         * Throws the exception if the Matrix isn't square Matrix.
          *
-         * \throw std::domain_error.
+         * \throw ogls::exceptions::MatrixException().
          */
         const_diagonal_iterator cbeginDiagonal() const;
         /**
@@ -802,17 +813,17 @@ class Matrix
         /**
          * \brief Returns a DiagonalIterator to the end.
          *
-         * Throws std::domain_error if the Matrix isn't square Matrix.
+         * Throws the exception if the Matrix isn't square Matrix.
          *
-         * \throw std::domain_error.
+         * \throw ogls::exceptions::MatrixException().
          */
         diagonal_iterator       endDiagonal();
         /**
          * \brief Returns const DiagonalIterator to the end.
          *
-         * Throws std::domain_error if the Matrix isn't square Matrix.
+         * Throws the exception if the Matrix isn't square Matrix.
          *
-         * \throw std::domain_error.
+         * \throw ogls::exceptions::MatrixException().
          */
         const_diagonal_iterator endDiagonal() const;
         /**
@@ -822,9 +833,9 @@ class Matrix
         /**
          * \brief Returns const DiagonalIterator to the end.
          *
-         * Throws std::domain_error if the Matrix isn't square Matrix.
+         * Throws the exception if the Matrix isn't square Matrix.
          *
-         * \throw std::domain_error.
+         * \throw ogls::exceptions::MatrixException().
          */
         const_diagonal_iterator cendDiagonal() const;
 

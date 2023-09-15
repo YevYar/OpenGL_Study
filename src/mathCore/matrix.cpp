@@ -582,7 +582,7 @@ std::string Matrix::toFullString(int columnWidth) const
     }
 
     auto el = this->begin();
-    ss << "  | " << std::left << std::setw(columnWidth) << (*el).getValue() << ", ";
+    ss << "  | " << std::left << std::setw(columnWidth) << (*el).getValue() << (m_columnsNumber > 1 ? ", " : "");
 
     for (++el; el != end(); ++el)
     {
@@ -819,13 +819,14 @@ namespace
 
     void throwCannotCreateDiagonalIterator(size_t rowsNumber, size_t columnsNumber)
     {
-        throw std::domain_error{std::format("Cannot create DiagonalIterator for not square Matrix (size is {}x{}).",
-                                            rowsNumber, columnsNumber)};
+        throw ogls::exceptions::MatrixException{
+          std::format("Cannot create DiagonalIterator for not square Matrix (size is {}x{}).", rowsNumber,
+                      columnsNumber)};
     }
 
     void throwUnexpectedUsageExceptionWithHint(const char* operatorName)
     {
-        throw std::domain_error{
+        throw ogls::exceptions::MatrixException{
           std::format("Matrix::Iterator::{} is not allowed by the design of the Matrix class. Hint: attempting "
                       "to use Matrix::Iterator to modify the underlying Matrix data container outside of the "
                       "Matrix implementation by adding or removing container elements.",
