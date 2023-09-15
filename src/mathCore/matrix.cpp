@@ -12,6 +12,7 @@ namespace ogls::mathCore
 {
 namespace
 {
+    float calculateDeterminant(const Matrix& m);
     template<typename Type>
     void initMatrixFromContainer(size_t rowsNumber, size_t columnsNumber, std::vector<float>& matrixData,
                                  Type& container);
@@ -439,6 +440,16 @@ Matrix::const_diagonal_iterator Matrix::cendDiagonal() const
     return const_diagonal_iterator{m_rowsNumber, m_columnsNumber, m_data.cend(), true};
 }
 
+float Matrix::determinant() const
+{
+    if (!isSquareMatrix())
+    {
+        throw ogls::exceptions::MatrixException{"The Determinant cannot be calculated for non-square Matrix."};
+    }
+
+    return calculateDeterminant(*this);
+}
+
 float Matrix::getValue(size_t row, size_t column) const
 {
     if (row >= m_rowsNumber || column >= m_columnsNumber)
@@ -609,6 +620,18 @@ std::string Matrix::toSizeOnlyString() const
     return std::format("Matrix {}x{}", m_rowsNumber, m_columnsNumber);
 }
 
+Matrix Matrix::transpose() const
+{
+    auto result = Matrix{m_columnsNumber, m_rowsNumber};
+
+    for (const auto& el : *this)
+    {
+        result.setValue(el.j, el.i, el.getValue());
+    }
+
+    return result;
+}
+
 bool operator==(const Matrix& m1, const Matrix& m2) noexcept
 {
     if (m1.size() != m2.size())
@@ -758,6 +781,42 @@ Matrix operator/(const Matrix& m, float num)
 
 namespace
 {
+    float calculateDeterminant(const Matrix& m)
+    {
+        if (m.dimensionality().rows == 2)
+        {
+            return (m.getValue(0, 0) * m.getValue(1, 1)) - (m.getValue(0, 1) * m.getValue(1, 0));
+        }
+        if (m.dimensionality().rows == 1)
+        {
+            return m.getValue(0, 0);
+        }
+
+        const auto N      = m.dimensionality().rows;
+        auto       result = float{0.0};
+
+        for (auto i = size_t{0}; i < N; ++i)
+        {
+            auto minor         = Matrix{N - 1, N - 1};
+            auto minorIterator = minor.begin();
+
+            // Skip first row
+            for (auto it = m.begin() + N; it < m.end(); ++it)
+            {
+                if ((*it).j != i)
+                {
+                    (*minorIterator) = (*it).getValue();
+                    ++minorIterator;
+                }
+            }
+
+            const auto sign  = float{(i % 2 == 0) ? 1.0f : -1.0f};
+            result          += sign * m.getValue(0, i) * minor.determinant();
+        }
+
+        return result;
+    }
+
     template<typename Type>
     void initMatrixFromContainer(size_t rowsNumber, size_t columnsNumber, std::vector<float>& matrixData,
                                  Type& container)

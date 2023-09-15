@@ -850,6 +850,15 @@ class Matrix
         //------
 
         /**
+         * \brief Calculates the determinant of the Matrix.
+         *
+         * \note The determinant can be calculated only for a square Matrix.
+         * \see isSquareMatrix().
+         * \throw ogls::exceptions::MatrixException().
+         */
+        float determinant() const;
+
+        /**
          * \brief Returns the dimensionality of the Matrix.
          */
         Size dimensionality() const noexcept
@@ -988,6 +997,10 @@ class Matrix
          * \brief Returns a std::string representation of the Vector object only with size of the Matrix.
          */
         std::string toSizeOnlyString() const;
+        /**
+         * \brief Returns new Matrix as the result of transpose of this Matrix.
+         */
+        Matrix      transpose() const;
 
     private:
         /**
