@@ -12,7 +12,6 @@ namespace ogls::mathCore
 {
 namespace
 {
-    float calculateDeterminant(const Matrix& m);
     template<typename Type>
     void initMatrixFromContainer(size_t rowsNumber, size_t columnsNumber, std::vector<float>& matrixData,
                                  Type& container);
@@ -23,6 +22,7 @@ namespace
                                                          const Matrix::Index& position);
     std::string formatZeroDimensionErrorMessage(size_t rowsNumber, size_t columnsNumber);
     void        throwCannotCreateDiagonalIterator(size_t rowsNumber, size_t columnsNumber);
+    void        throwNonSquareMatrixException(const char* operatorName);
     void        throwUnexpectedUsageExceptionWithHint(const char* operatorName);
 
 }  // namespace
@@ -440,14 +440,70 @@ Matrix::const_diagonal_iterator Matrix::cendDiagonal() const
     return const_diagonal_iterator{m_rowsNumber, m_columnsNumber, m_data.cend(), true};
 }
 
-float Matrix::determinant() const
+float Matrix::calculateAlgebraicComplement(const Index& pos) const
 {
     if (!isSquareMatrix())
     {
-        throw ogls::exceptions::MatrixException{"The Determinant cannot be calculated for non-square Matrix."};
+        throwNonSquareMatrixException("Algebraic complement");
     }
 
-    return calculateDeterminant(*this);
+    const auto sign = float{((pos.rows + pos.columns) % 2 == 0) ? 1.0f : -1.0f};
+    return sign * getMinor(pos).calculateDeterminant();
+}
+
+float Matrix::calculateDeterminant() const
+{
+    if (!isSquareMatrix())
+    {
+        throwNonSquareMatrixException("Determinant");
+    }
+
+    if (m_rowsNumber == 2)
+    {
+        return (getValue(0, 0) * getValue(1, 1)) - (getValue(0, 1) * getValue(1, 0));
+    }
+    if (m_rowsNumber == 1)
+    {
+        return getValue(0, 0);
+    }
+
+    auto result = float{0.0};
+
+    for (auto i = size_t{0}; i < m_rowsNumber; ++i)
+    {
+        result += getValue(0, i) * calculateAlgebraicComplement(Index{0, i});
+    }
+
+    return result;
+}
+
+Matrix Matrix::getMinor(const Index& pos) const
+{
+    if (!isSquareMatrix())
+    {
+        throwNonSquareMatrixException("Minor");
+    }
+
+    const auto N             = m_rowsNumber;
+    auto       minor         = Matrix{N - 1, N - 1};
+    auto       minorIterator = minor.begin();
+
+    for (auto it = begin(); it < end(); ++it)
+    {
+        // Skip the row, to which the element belongs
+        if ((*it).i == pos.rows)
+        {
+            it += N - 1;
+            continue;
+        }
+        if ((*it).j != pos.columns)
+        {
+            (*minorIterator) = (*it).getValue();
+            ++minorIterator;
+        }
+    }
+
+    return minor;
 }
 
 float Matrix::getValue(size_t row, size_t column) const
@@ -463,6 +519,29 @@ float Matrix::getValue(size_t row, size_t column) const
 float Matrix::getValue(const Index& elementPosition) const
 {
     return getValue(elementPosition.rows, elementPosition.columns);
+}
+
+Matrix Matrix::inverse() const
+{
+    if (!isSquareMatrix())
+    {
+        throwNonSquareMatrixException("Inverse Matrix");
+    }
+
+    const auto determinant = calculateDeterminant();
+    if (determinant == 0.0f)
+    {
+        return Matrix{};
+    }
+
+    auto additionalMatrix = Matrix{m_rowsNumber, m_columnsNumber};
+    for (const auto& el : *this)
+    {
+        // Set elements in transpose order in Matrix of algebraic complements
+        additionalMatrix.setValue(el.j, el.i, calculateAlgebraicComplement(Index{el.i, el.j}));
+    }
+
+    return (1.0f / determinant) * additionalMatrix;
 }
 
 bool Matrix::isIdentityMatrix() const noexcept
@@ -491,6 +570,16 @@ bool Matrix::isIdentityMatrix() const noexcept
     }
 
     return true;
+}
+
+bool Matrix::isInverseMatrixTo(const Matrix& otherMatrix) const
+{
+    if (getDimensionality() == otherMatrix.getDimensionality() && isSquareMatrix())
+    {
+        return (*this * otherMatrix).isIdentityMatrix();
+    }
+
+    return false;
 }
 
 bool Matrix::isMatrixOfOnes() const noexcept
@@ -781,42 +870,6 @@ Matrix operator/(const Matrix& m, float num)
 
 namespace
 {
-    float calculateDeterminant(const Matrix& m)
-    {
-        if (m.dimensionality().rows == 2)
-        {
-            return (m.getValue(0, 0) * m.getValue(1, 1)) - (m.getValue(0, 1) * m.getValue(1, 0));
-        }
-        if (m.dimensionality().rows == 1)
-        {
-            return m.getValue(0, 0);
-        }
-
-        const auto N      = m.dimensionality().rows;
-        auto       result = float{0.0};
-
-        for (auto i = size_t{0}; i < N; ++i)
-        {
-            auto minor         = Matrix{N - 1, N - 1};
-            auto minorIterator = minor.begin();
-
-            // Skip first row
-            for (auto it = m.begin() + N; it < m.end(); ++it)
-            {
-                if ((*it).j != i)
-                {
-                    (*minorIterator) = (*it).getValue();
-                    ++minorIterator;
-                }
-            }
-
-            const auto sign  = float{(i % 2 == 0) ? 1.0f : -1.0f};
-            result          += sign * m.getValue(0, i) * minor.determinant();
-        }
-
-        return result;
-    }
-
     template<typename Type>
     void initMatrixFromContainer(size_t rowsNumber, size_t columnsNumber, std::vector<float>& matrixData,
                                  Type& container)
@@ -881,6 +934,12 @@ namespace
         throw ogls::exceptions::MatrixException{
           std::format("Cannot create DiagonalIterator for not square Matrix (size is {}x{}).", rowsNumber,
                       columnsNumber)};
+    }
+
+    void throwNonSquareMatrixException(const char* operatorName)
+    {
+        throw ogls::exceptions::MatrixException{
+          std::format("The {} cannot be calculated for non-square Matrix.", operatorName)};
     }
 
     void throwUnexpectedUsageExceptionWithHint(const char* operatorName)

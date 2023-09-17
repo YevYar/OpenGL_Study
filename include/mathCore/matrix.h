@@ -850,21 +850,21 @@ class Matrix
         //------
 
         /**
+         * \brief Calculates the algebraic complement of the Matrix element.
+         *
+         * \note The algebraic complement can be calculated only for a square Matrix.
+         * \see isSquareMatrix().
+         * \throw ogls::exceptions::MatrixException().
+         */
+        float calculateAlgebraicComplement(const Index& elementPosition) const;
+        /**
          * \brief Calculates the determinant of the Matrix.
          *
          * \note The determinant can be calculated only for a square Matrix.
          * \see isSquareMatrix().
          * \throw ogls::exceptions::MatrixException().
          */
-        float determinant() const;
-
-        /**
-         * \brief Returns the dimensionality of the Matrix.
-         */
-        Size dimensionality() const noexcept
-        {
-            return Size{.rows = m_rowsNumber, .columns = m_columnsNumber};
-        }
+        float calculateDeterminant() const;
 
         /**
          * \brief Retrieves the number of columns in the Matrix.
@@ -875,6 +875,23 @@ class Matrix
         {
             return m_columnsNumber;
         }
+
+        /**
+         * \brief Returns the dimensionality of the Matrix.
+         */
+        Size getDimensionality() const noexcept
+        {
+            return Size{.rows = m_rowsNumber, .columns = m_columnsNumber};
+        }
+
+        /**
+         * \brief Gets the minor of the Matrix element.
+         *
+         * \note The minor is defined only for a square Matrix.
+         * \see isSquareMatrix().
+         * \throw ogls::exceptions::MatrixException().
+         */
+        Matrix getMinor(const Index& elementPosition) const;
 
         /**
          * \brief Retrieves the number of rows in the Matrix.
@@ -896,7 +913,7 @@ class Matrix
          * \return the value at the specified position.
          * \throw std::out_of_range.
          */
-        float getValue(size_t row, size_t column) const;
+        float  getValue(size_t row, size_t column) const;
         /**
          * \brief Retrieves the value at the specified position in the Matrix.
          *
@@ -906,20 +923,36 @@ class Matrix
          * \return the value at the specified position.
          * \throw std::out_of_range.
          */
-        float getValue(const Index& elementPosition) const;
+        float  getValue(const Index& elementPosition) const;
+        /**
+         * \brief Calculates the inverse Matrix of this Matrix.
+         *
+         * \note The inverse Matrix can be calculated only for a square Matrix.
+         * \see isNullMatrix(), isSquareMatrix().
+         * \return the inverse Matrix or null Matrix, if for this square Matrix the inverse Matrix cannot be calculated.
+         * \throw ogls::exceptions::MatrixException().
+         */
+        Matrix inverse() const;
         /**
          * \brief Checks if the Matrix is an identity matrix (square matrix with ones on the main diagonal
          * and zeros elsewhere).
          *
          * \return true if the Matrix is an identity matrix, false otherwise.
          */
-        bool  isIdentityMatrix() const noexcept;
+        bool   isIdentityMatrix() const noexcept;
+        /**
+         * \brief Checks if the Matrix is inverse Matrix of otherMatrix.
+         *
+         * \note If this Matrix is inverse Matrix of otherMatrix, otherMatrix is inverse Matrix of this Matrix too.
+         * \return true, if this Matrix is inverse Matrix of otherMatrix, false otherwise.
+         */
+        bool   isInverseMatrixTo(const Matrix& otherMatrix) const;
         /**
          * \brief Checks if the Matrix is a matrix of ones (matrix where every entry is equal to one).
          *
          * \return true if the Matrix is a matrix of ones, false otherwise.
          */
-        bool  isMatrixOfOnes() const noexcept;
+        bool   isMatrixOfOnes() const noexcept;
 
         /**
          * \brief Checks if the Matrix is a null Matrix (dimensions are 0).
