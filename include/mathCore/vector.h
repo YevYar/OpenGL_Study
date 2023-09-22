@@ -8,6 +8,8 @@
 
 namespace ogls::mathCore
 {
+class Matrix;
+
 /**
  * \brief Vector represents a vector in 3D (2D) orthonormal basis.
  */
@@ -312,10 +314,28 @@ class Vector
 
 };  // class Vector
 
+/**
+ * VectorIntoMatrixInsertionOrder defines in which order the Vector elements are inserted into the Matrix.
+ */
+enum class VectorIntoMatrixInsertionOrder
+{
+    ColumnMajor,
+    RowMajor
+};
+
 //------ OPERATIONS ON VECTOR
 
 /**
- * \brief Calculates dot product of two Vector by their coordinates.
+ * \brief Calculates a cross product of two Vector.
+ *
+ * \param v1 - Vector 1.
+ * \param v2 - Vector 2.
+ * \return the cross product of two Vector.
+ */
+/*constexpr*/ Vector crossProduct(const Vector& v1, const Vector& v2);
+
+/**
+ * \brief Calculates a dot product of two Vector by their coordinates.
  *
  * \return the dot product of two Vector.
  */
@@ -325,7 +345,7 @@ constexpr float dotProduct(const Vector& v1, const Vector& v2) noexcept
 }
 
 /**
- * \brief Calculates dot product of two Vector by their lengths and an angle between them.
+ * \brief Calculates a dot product of two Vector by their lengths and an angle between them.
  *
  * \param lengthV1 - length (magnitude) of Vector 1.
  * \param lengthV2 - length (magnitude) of Vector 2.
@@ -339,7 +359,7 @@ inline float dotProduct(float lengthV1, float lengthV2, float angle, AngleUnit u
 }
 
 /**
- * \brief Calculates dot product of two Vector by their lengths and an angle between them.
+ * \brief Calculates a dot product of two Vector by their lengths and an angle between them.
  *
  * \param v1    - Vector 1.
  * \param v2    - Vector 2.
@@ -372,6 +392,34 @@ constexpr float cosBetweenVectors(const Vector& v1, const Vector& v2) noexcept
 inline float angleBetweenVectors(const Vector& v1, const Vector& v2)
 {
     return std::acosf(mapValueToUnitRange(cosBetweenVectors(v1, v2)));
+}
+
+/**
+ * \brief Inserts the Vector into the Matrix in some order.
+ *
+ * Throws if the index is out of range of the Matrix.
+ *
+ * \param m           - the Matrix, in which the Vector is inserted.
+ * \param v           - the Vector to insert.
+ * \param order       - the order, in which elements of the Vector are inserted into the Matrix.
+ * \param index       - the index of the row/column, in which the elements of the Vector are inserted.
+ * \param placeholder - the value, which is inserted in the row/column of the Matrix, if it has size > 3
+ * (size of the Vector).
+ * \throw std::out_of_range.
+ */
+void insertVectorIntoMatrix(Matrix& m, const Vector& v, VectorIntoMatrixInsertionOrder order, size_t index,
+                            float placeholder = {0.0f});
+
+/**
+ * \brief Creates new normalized vector of the passed vector.
+ *
+ * \param v - the Vector to normalize.
+ * \return normalized Vector of the Vector v or zero-vector if v is zero-vector.
+ */
+constexpr Vector normalize(const Vector& v) noexcept
+{
+    const auto length = v.length();
+    return length == 0.0f ? v : Vector{v.x() / length, v.y() / length, v.z() / length};
 }
 
 /**
@@ -495,18 +543,6 @@ constexpr Vector operator/(const Vector& v, float num)
     return Vector{v.x() / num, v.y() / num, v.z() / num};
 }
 
-/**
- * \brief Creates new normalized vector of the passed vector.
- *
- * \param v - the Vector to normalize.
- * \return normalized Vector of the Vector v or zero-vector if v is zero-vector.
- */
-constexpr Vector normalize(const Vector& v) noexcept
-{
-    const auto length = v.length();
-    return length == 0.0f ? v : Vector{v.x() / length, v.y() / length, v.z() / length};
-}
-
 //------ CHECKERS OF VECTOR PROPERTIES
 
 /**
@@ -517,6 +553,16 @@ constexpr Vector normalize(const Vector& v) noexcept
 inline bool isVectorsCodirected(const Vector& v1, const Vector& v2)
 {
     return angleBetweenVectors(v1, v2) == 0.0f;
+}
+
+/**
+ * \brief Checks if two Vector are collinear.
+ *
+ * \return true if collinear, false otherwise.
+ */
+inline bool isVectorsCollinear(const Vector& v1, const Vector& v2)
+{
+    return crossProduct(v1, v2).isZeroVector();
 }
 
 /**
