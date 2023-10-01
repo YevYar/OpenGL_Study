@@ -8,7 +8,7 @@ namespace ogls::helpers
 /**
  * \brief The precision of float-type calculations.
  */
-constexpr inline auto FLOAT_EPSILON = float{1.0E-8};
+constexpr inline auto FLOAT_EPSILON = float{1.0E-6};
 
 /**
  * \brief Returns the absolute value of x: |x|.
