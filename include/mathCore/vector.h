@@ -4,12 +4,11 @@
 #include <functional>
 
 #include "exceptions.h"
+#include "mathCore/matrix.h"
 #include "mathCore/point.h"
 
 namespace ogls::mathCore
 {
-class Matrix;
-
 /**
  * \brief Vector represents a vector in 3D (2D) orthonormal basis.
  */
@@ -188,7 +187,7 @@ class Vector
         constexpr bool isNormalized() const noexcept
         {
             // Check approximately, because it's rare case, when actually normalized Vector has length exactly 1.0.
-            return ogls::helpers::isFloatsEqual(length(), 1.0f, 1.0E-6f);
+            return ogls::helpers::isFloatsEqual(length(), 1.0f);
         }
 
         /**
@@ -326,15 +325,6 @@ enum class VectorIntoMatrixInsertionOrder
 //------ OPERATIONS ON VECTOR
 
 /**
- * \brief Calculates a cross product of two Vector.
- *
- * \param v1 - Vector 1.
- * \param v2 - Vector 2.
- * \return the cross product of two Vector.
- */
-/*constexpr*/ Vector crossProduct(const Vector& v1, const Vector& v2);
-
-/**
  * \brief Calculates a dot product of two Vector by their coordinates.
  *
  * \return the dot product of two Vector.
@@ -407,8 +397,60 @@ inline float angleBetweenVectors(const Vector& v1, const Vector& v2)
  * (size of the Vector).
  * \throw std::out_of_range.
  */
-void insertVectorIntoMatrix(Matrix& m, const Vector& v, VectorIntoMatrixInsertionOrder order, size_t index,
-                            float placeholder = {0.0f});
+template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+constexpr void insertVectorIntoMatrix(Matrix<N, M>& m, const Vector& v, VectorIntoMatrixInsertionOrder order,
+                                      size_t index, float placeholder = {0.0f})
+{
+    const auto inserter = [&](size_t k, float value)
+    {
+        if (order == VectorIntoMatrixInsertionOrder::RowMajor)
+        {
+            m.setValue(index, k, value);
+        }
+        else
+        {
+            m.setValue(k, index, value);
+        };
+    };
+
+    const auto maxIndex = order == VectorIntoMatrixInsertionOrder::RowMajor ? M : N;
+    for (auto i = size_t{0}; i < maxIndex; ++i)
+    {
+        switch (i)
+        {
+            case 0:
+                inserter(0, v.x());
+                break;
+            case 1:
+                inserter(1, v.y());
+                break;
+            case 2:
+                inserter(2, v.z());
+                break;
+            default:
+                inserter(i, placeholder);
+        }
+    }
+}
+
+/**
+ * \brief Calculates a cross product of two Vector.
+ *
+ * \param v1 - Vector 1.
+ * \param v2 - Vector 2.
+ * \return the cross product of two Vector.
+ */
+constexpr Vector crossProduct(const Vector& v1, const Vector& v2) noexcept
+{
+    auto m = Matrix<3, 3>{1.0f};
+
+    insertVectorIntoMatrix(m, v1, VectorIntoMatrixInsertionOrder::RowMajor, 1);
+    insertVectorIntoMatrix(m, v2, VectorIntoMatrixInsertionOrder::RowMajor, 2);
+
+    return Vector{m.calculateAlgebraicComplement(BaseMatrix::Index{.rows = 0, .columns = 0}),
+                  m.calculateAlgebraicComplement(BaseMatrix::Index{.rows = 0, .columns = 1}),
+                  m.calculateAlgebraicComplement(BaseMatrix::Index{.rows = 0, .columns = 2})};
+}
 
 /**
  * \brief Creates new normalized vector of the passed vector.
@@ -552,7 +594,7 @@ constexpr Vector operator/(const Vector& v, float num)
  */
 inline bool isVectorsCodirected(const Vector& v1, const Vector& v2)
 {
-    return angleBetweenVectors(v1, v2) == 0.0f;
+    return helpers::isFloatsEqual(angleBetweenVectors(v1, v2), 0.0f);
 }
 
 /**
@@ -582,7 +624,7 @@ inline bool isVectorsOppositelyDirected(const Vector& v1, const Vector& v2)
  */
 constexpr bool isVectorsOrthogonal(const Vector& v1, const Vector& v2) noexcept
 {
-    return dotProduct(v1, v2) == 0.0f;
+    return helpers::isFloatsEqual(dotProduct(v1, v2), 0.0f);
 }
 
 }  // namespace ogls::mathCore

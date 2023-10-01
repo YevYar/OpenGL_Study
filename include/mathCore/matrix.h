@@ -1,73 +1,72 @@
 #ifndef OGLS_MATHCORE_MATRIX_H
 #define OGLS_MATHCORE_MATRIX_H
 
-#include <format>
-#include <functional>
-#include <string>
+#include <array>
+#include <iomanip>
+#include <optional>
+#include <sstream>
 
-#include "helpers/debugHelpers.h"
-#include "helpers/macros.h"
+#include "exceptions.h"
+#include "floats.h"
+#include "mathCore/baseMatrix.h"
+
+#define OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, functionName)                              \
+    static_assert(isSquareMatrixCheck(N, M), "Attempt to use the function " #functionName \
+                                             "(), which is defined for a square Matrix, on a non-square Matrix.")
 
 namespace ogls::mathCore
 {
 /**
- * \brief IteratorImpl is a concept, which specifies the class, which can be used as a base class of
- * ogls::mathCore::Matrix::Iterator.
- *
- * Impl is a class, which defines the order, in which the Iterator is moved, as well as mapping between iterator steps
- * and actual elements of the underlying data container of Matrix (std::vector).
- *
- * 1. Impl must be inherited from ogls::mathCore::Matrix::BaseIterator.
- * 2. Impl must have the method distanceTo(const Impl&), which calculates the signed number of elements between this
- * Iterator and Iterator j. As a rule of thumb, it must return the signed number of calls of decrement/increment
- * operator to move this Iterator to the position of the Iterator j. Return value is positive if the decrement
- * operator must be applied to move to the position of Iterator j, otherwise it is negative.
- * The type of the return value must be ogls::mathCore::Matrix::BaseIterator::difference_type.
- * 3. Impl must have the method calculateOffset(Matrix::BaseIterator::difference_type N), which converts the number of
- * iterator steps to the actual number of elements in underlying data container of Matrix (std::vector),
- * that is, how many elements of the vector the iterator moves during N increment/decrement steps.
- * The type of the return value must be Matrix::BaseIterator::difference_type.
- *
- * \param Impl         - a type to check constraints.
- * \param BaseIterator - must be Matrix::BaseIterator.
+ * \brief IsNotNullMatrix checks if the both dimensions of the Matrix are greater than 0.
  */
-template<typename Impl, typename BaseIterator>
-concept IteratorImpl = requires(Impl obj) {
-    requires std::is_base_of_v<BaseIterator, Impl>;
+template<size_t N, size_t M>
+using IsNotNullMatrix = std::enable_if_t<(N > 0) && (M > 0)>;
+
+/**
+ * \brief MatrixFunctor checks if the provided functor can be used with Matrix::performOnEvery().
+ */
+template<typename Functor>
+concept MatrixFunctor = requires(Functor obj) {
     // clang-format off
-    {obj.distanceTo(obj)}    -> std::same_as<std::ptrdiff_t>;
-    {obj.calculateOffset(1)} -> std::same_as<std::ptrdiff_t>;  // clang-format on
+    {obj(std::declval<BaseMatrix::Index>(), 0.0f)} -> std::convertible_to<float>;  // clang-format on
 };
 
 /**
- * \brief MatrixIterator is a concept, which specifies the class, which is some instantiation of
- * ogls::mathCore::Matrix::Iterator.
- *
- * \param DerivedIterator - a type to check constraints.
- * \param BaseIterator    - must be ogls::mathCore::Matrix::BaseIterator.
+ * \brief MatrixConstFunctor checks if the provided functor can be used with Matrix::performOnEvery() const.
  */
-template<typename DerivedIterator, typename BaseIterator>
-concept MatrixIterator = requires(DerivedIterator obj) {
-    requires std::is_base_of_v<BaseIterator, DerivedIterator>;
+template<typename Functor>
+concept MatrixConstFunctor = requires(Functor obj) {
     // clang-format off
-    {obj.compareWithUnderlyingIterator(std::declval<std::vector<float>::iterator>())}
-      -> std::same_as<decltype(std::declval<std::vector<float>::iterator>()
-                               <=> std::declval<std::vector<float>::iterator>())>;
-    {obj.equalToUnderlyingIterator(std::declval<std::vector<float>::iterator>())} -> std::same_as<bool>;
-    // clang-format on
+    {obj(std::declval<BaseMatrix::Index>(), 0.0f)};  // clang-format on
 };
+
+/**
+ * \brief Checks if the Matrix is a null Matrix (dimensions are 0).
+ */
+constexpr bool isNullMatrixCheck(size_t n, size_t m) noexcept
+{
+    return n == 0 && m == 0;
+}
+
+/**
+ * \brief Checks if the Matrix of size N*M is a square Matrix.
+ */
+constexpr bool isSquareMatrixCheck(size_t n, size_t m) noexcept
+{
+    return n != 0 && n == m;
+}
 
 /**
  * \brief Matrix represents a N*M dimensional matrix.
  *
- * Matrix with dimensions equal to 0 can be created only by default constructor.
- * Such Matrix is considered as null Matrix.
- * All other constructors require not zero values of dimensions.
+ * Matrix with dimensions equal to 0 is considered as null Matrix.
  *
  * Indexes are counted starting from 0.
  *
  * Matrix provides class users with iterators, which can be used with STL algorithms, which don't change
- * the number of elements in provided data container (see Matrix::Iterator).
+ * the number of elements in provided data container (see BaseMatrix::Iterator).
+ *
+ * Matrix can be used in constexpr contexts.
  *
  * \code{.cpp}
  * // Usage of range for-loop
@@ -89,485 +88,30 @@ concept MatrixIterator = requires(DerivedIterator obj) {
  *                               })
  *                << std::endl;
  * \endcode
+ *
+ * \param N - a number of rows in the Matrix.
+ * \param M - a number of columns in the Matrix.
  */
-class Matrix
+template<size_t N, size_t M>
+class Matrix : public BaseMatrix
 {
+        static_assert(N <= 50 && M <= 50,
+                      "The dimensionality of the Matrix seems to be too big. "
+                      "Check if you passed the correct N and M.");
+
     public:
-        /**
-         * \brief Matrix::BaseIterator is a base class of iterator types of the Matrix.
-         *
-         * It contains necessary fields and is used in Matrix iterator constraints.
-         */
-        class BaseIterator
-        {
-            public:
-                // The STL conventions
-                using difference_type = std::ptrdiff_t;
-
-            protected:
-                constexpr BaseIterator() noexcept = default;
-
-                constexpr BaseIterator(size_t columnsNumber, size_t maxIndex, size_t rowsNumber) noexcept :
-                    m_columnsNumber{columnsNumber}, m_maxIndex{maxIndex}, m_rowsNumber{rowsNumber}
-                {
-                }
-
-            protected:
-                /**
-                 * \brief The number of columns in represented Matrix.
-                 */
-                const size_t m_columnsNumber = {0};
-                /**
-                 * \brief The row index of the current element.
-                 */
-                size_t       m_currentI      = {0};
-                /**
-                 * \brief The column index of the current element.
-                 */
-                size_t       m_currentJ      = {0};
-                /**
-                 * \brief The maximum element index in the underlying Matrix data container.
-                 */
-                const size_t m_maxIndex      = {0};
-                /**
-                 * \brief The number of rows in represented Matrix.
-                 */
-                const size_t m_rowsNumber    = {0};
-
-        };  // class BaseIterator
-
-        /**
-         * \brief Matrix::DiagonalIteratorImpl provides an implementation of necessary methods for Iterator
-         * to iterate over Matrix elements, which belong to the main diagonal of the Matrix ((0, 0), (1, 1) etc.).
-         *
-         * It must be used only with square Matrix. Otherwise it usage can lead to runtime errors.
-         *
-         * \see Iterator.
-         */
-        class DiagonalIteratorImpl : public BaseIterator
-        {
-            public:
-                using typename BaseIterator::difference_type;
-
-            public:
-                /**
-                 * \see ogls::mathCore::IteratorImpl.
-                 */
-                constexpr difference_type calculateOffset(difference_type n) const noexcept;
-
-                /**
-                 * \see ogls::mathCore::IteratorImpl.
-                 */
-                constexpr difference_type distanceTo(const DiagonalIteratorImpl& j) const noexcept
-                {
-                    return m_currentI - j.m_currentI;
-                }
-
-            protected:
-                using BaseIterator::BaseIterator;
-
-        };  // class DiagonalIteratorImpl
-
-        /**
-         * \brief Matrix::RowMajorIteratorImpl provides an implementation of necessary methods for Iterator
-         * to iterate over Matrix elements in row-major order from element (0, 0) to element (N-1, M-1).
-         *
-         * \see Iterator.
-         */
-        class RowMajorIteratorImpl : public BaseIterator
-        {
-            public:
-                using typename BaseIterator::difference_type;
-
-            public:
-                /**
-                 * \see ogls::mathCore::IteratorImpl.
-                 */
-                constexpr difference_type calculateOffset(difference_type n) const noexcept
-                {
-                    return n;
-                }
-
-                /**
-                 * \see ogls::mathCore::IteratorImpl.
-                 */
-                constexpr difference_type distanceTo(const RowMajorIteratorImpl& j) const noexcept
-                {
-                    const auto thisPosition = size_t{m_currentI * m_columnsNumber + m_currentJ};
-                    const auto jPosition    = size_t{j.m_currentI * j.m_columnsNumber + j.m_currentJ};
-                    return thisPosition - jPosition;
-                }
-
-            protected:
-                using BaseIterator::BaseIterator;
-
-        };  // class RowMajorIteratorImpl
-
-        /**
-         * \brief Matrix::Iterator provides an access to Matrix elements in implementation defined order (see
-         * ConcreteIteratorImpl).
-         *
-         * Iterator implements std::random_access_iterator interface. Dereference operator of the Iterator returns
-         * an Element object, which provides an access to the pointed element of the Matrix and information about the
-         * index of this element.
-         *
-         * Iterator follows the convention of the STL iterators to not throw an exception, when its user tries to
-         * dereference invalid Iterator (see isValid()). However move operations as well as copy assignment
-         * throw an exception to prevent changing the number of elements of Matrix data container outside the logic
-         * of Matrix class. Such algorithms as std::remove() cannot be used with Iterator.
-         *
-         * \param ElementType            - the type of referenced elements (float, const float).
-         * \param UnderlyingIteratorType - the type of the iterator, which is used by the data container of Matrix
-         * (std::vector<float>::iterator, std::vector<float>::const_iterator).
-         * \param ConcreteIteratorImpl   - the base class, which provides an implementation of necessary stuff
-         * (see ogls::mathCore::IteratorImpl).
-         * \see isValid().
-         */
-        template<typename ElementType, std::random_access_iterator UnderlyingIteratorType,
-                 IteratorImpl<Matrix::BaseIterator> ConcreteIteratorImpl>
-        class Iterator final : protected ConcreteIteratorImpl
-        {
-            public:
-                /**
-                 * \brief Element keeps the data of the Matrix element, on which the Iterator points.
-                 *
-                 * Element provides necessary data about the Matrix element -
-                 * its row and column indexes as well as the element data.
-                 */
-                struct Element
-                {
-                    public:
-                        /**
-                         * \brief Allows copy assignment of the float value.
-                         *
-                         * Changes the referenced Matrix element. Makes it possible to use algorithms like std::fill().
-                         */
-                        template<typename = std::enable_if_t<!std::is_const_v<ElementType>>>
-                        constexpr Element& operator=(ElementType newValue) noexcept
-                        {
-                            setValue(newValue);
-                            return *this;
-                        }
-
-                        /**
-                         * \brief Returns an ElementType representation of the Element object.
-                         *
-                         * Makes it possible to use algorithms like std::accumulate().
-                         *
-                         * \see getValue().
-                         */
-                        constexpr operator ElementType() const noexcept
-                        {
-                            return getValue();
-                        }
-
-                        /**
-                         * \brief Returns a std::string representation of the Element object.
-                         */
-                        constexpr operator std::string() const
-                        {
-                            return std::format("Matrix::Iterator::Element({}, {}) = {}", i, j, getValue());
-                        }
-
-                        /**
-                         * \brief Returns the reference on the referenced Matrix element.
-                         *
-                         * Use it to change the referenced Matrix element: getValue() = newValue;
-                         */
-                        constexpr ElementType& getValue() const noexcept
-                        {
-                            OGLS_ASSERT(value != nullptr);
-                            return *value;
-                        }
-
-                        /**
-                         * \brief Sets the new value of the referenced element.
-                         *
-                         * Changes the referenced Matrix element.
-                         */
-                        template<typename = std::enable_if_t<!std::is_const_v<ElementType>>>
-                        constexpr void setValue(ElementType newValue) noexcept
-                        {
-                            getValue() = newValue;
-                        }
-
-                    public:
-                        /**
-                         * \brief The index of the Matrix row of this Element (counts from 0).
-                         *
-                         * Changing this field has no effect on Iterator state.
-                         */
-                        size_t       i     = {0};
-                        /**
-                         * \brief The index of the Matrix column of this Element (counts from 0).
-                         *
-                         * Changing this field has no effect on Iterator state.
-                         */
-                        size_t       j     = {0};
-                        /**
-                         * \brief The pointer to the value of the Element.
-                         */
-                        ElementType* value = nullptr;
-
-                };  // struct Element
-
-                // The following type aliases are STL conventions
-                using typename ConcreteIteratorImpl::difference_type;
-                using iterator_category = std::random_access_iterator_tag;
-                using iterator_concept  = std::random_access_iterator_tag;
-                using value_type        = Element;
-                using reference         = value_type;
-
-            public:
-                /**
-                 * \brief Constructs the default Iterator.
-                 *
-                 * The created instance has an null-initialized state, which is the kind of invalid state (see
-                 * isValid()). Don't dereference it!
-                 *
-                 * \see isValid().
-                 */
-                constexpr Iterator() noexcept                = default;  // it's required by iterator concept
-                /**
-                 * \brief Constructs new Iterator as copy of the other Iterator.
-                 *
-                 * The copy constructor doesn't throw an exception,
-                 * because the state of the source Iterator isn't affected by copy operation.
-                 */
-                constexpr Iterator(const Iterator&) noexcept = default;  // it's required by iterator concept
-                /**
-                 * \brief Constructs new Iterator as move-copy of the other Iterator.
-                 *
-                 * The move-copy constructor throws an exception,
-                 * because the state of the source Iterator is affected by move operation.
-                 *
-                 * \throw ogls::exceptions::MatrixException().
-                 */
-                constexpr Iterator(Iterator&&);  // it's required by iterator concept
-
-                /**
-                 * \brief Copies the state of the other Iterator.
-                 *
-                 * The operation throws an exception,
-                 * because the state of this Iterator is erased and replaced by the state of other Iterator.
-                 *
-                 * \throw ogls::exceptions::MatrixException().
-                 */
-                constexpr Iterator& operator=(const Iterator&);  // it's required by iterator concept
-                /**
-                 * \brief Move-copies the state of the other Iterator.
-                 *
-                 * The operation throws an exception,
-                 * because the state of this Iterator is erased and replaced by the state of other Iterator.
-                 *
-                 * \throw ogls::exceptions::MatrixException().
-                 */
-                constexpr Iterator& operator=(Iterator&&);  // it's required by iterator concept
-
-                // concept forward_iterator
-                constexpr reference operator*() const noexcept;
-                constexpr Iterator& operator++() noexcept;  // prefix ++
-                constexpr Iterator  operator++(int) noexcept;  // postfix ++
-
-                /**
-                 * \brief Checks equality of the object of this Iterator type and any other Iterator,
-                 * which is derived from BaseIterator.
-                 */
-                template<MatrixIterator<BaseIterator> OtherIterator>
-                friend constexpr bool operator==(const Iterator& i, const OtherIterator& j) noexcept
-                {
-                    // This trick is used, because this operator== cannot be a friend to both Iterator and OtherIterator
-                    // at the same time. So the public method of OtherIterator is called to compare m_dataIterator of
-                    // object j with m_dataIterator of object i, for which operator== is a friend and has an access to
-                    // m_dataIterator.
-                    return j.equalToUnderlyingIterator(i.m_dataIterator);
-                }
-
-                /**
-                 * \brief Checks non-equality of the object of this Iterator type and any other Iterator,
-                 * which is derived from BaseIterator.
-                 */
-                template<MatrixIterator<BaseIterator> OtherIterator>
-                friend constexpr bool operator!=(const Iterator& i, const OtherIterator& j) noexcept
-                {
-                    return !(i == j);
-                }
-
-                // concept bidirectional_iterator
-                constexpr Iterator& operator--() noexcept;  // prefix --
-                constexpr Iterator  operator--(int) noexcept;  // postfix --
-
-                // concept random_access_iterator
-                constexpr Iterator& operator+=(difference_type n) noexcept;
-                constexpr Iterator& operator-=(difference_type n) noexcept;
-                /**
-                 * \brief Provides access to element at a certain index relative to the current iterator position.
-                 *
-                 * It's used to mimic the behavior of array subscripting for your iterator type.
-                 *
-                 * \param index - an offset from the current Iterator position to another element.
-                 */
-                constexpr reference operator[](difference_type index) const noexcept;
-
-                friend constexpr Iterator operator+(const Iterator& i, difference_type n) noexcept
-                {
-                    auto temp  = Iterator{i};
-                    temp      += n;
-                    return temp;
-                }
-
-                friend constexpr Iterator operator+(difference_type n, const Iterator& i) noexcept
-                {
-                    return i + n;
-                }
-
-                friend constexpr Iterator operator-(const Iterator& i, difference_type n) noexcept
-                {
-                    auto temp  = Iterator{i};
-                    temp      -= n;
-                    return temp;
-                }
-
-                friend constexpr difference_type operator-(const Iterator& i, const Iterator& j) noexcept
-                {
-                    return i.distanceTo(j);
-                }
-
-                /**
-                 * \brief Compares the object of this Iterator type with any other Iterator,
-                 * which is derived from BaseIterator.
-                 */
-                template<MatrixIterator<BaseIterator> OtherIterator>
-                friend constexpr auto operator<=>(const Iterator& i, const OtherIterator& j) noexcept
-                {
-                    // This trick is used, because this operator<=> cannot be a friend to both Iterator and
-                    // OtherIterator at the same time. So the public method of OtherIterator is called to compare
-                    // m_dataIterator of object j with m_dataIterator of object i, for which operator<=> is a friend and
-                    // has an access to m_dataIterator.
-                    return j.compareWithUnderlyingIterator(i.m_dataIterator);
-                }
-
-                /**
-                 * \brief Compares underlying iterator of this object with underlying iterator of another object.
-                 */
-                template<std::random_access_iterator UnderlyingIterator>
-                constexpr auto compareWithUnderlyingIterator(const UnderlyingIterator& i) const noexcept
-                {
-                    return i <=> m_dataIterator;
-                }
-
-                /**
-                 * \brief Checks equality of underlying iterator of this object with underlying iterator of another
-                 * object.
-                 */
-                template<std::random_access_iterator UnderlyingIterator>
-                constexpr bool equalToUnderlyingIterator(const UnderlyingIterator& i) const noexcept
-                {
-                    return m_dataIterator == i;
-                }
-
-                /**
-                 * \brief Checks if Iterator is in valid state.
-                 *
-                 * An invalid state of the Iterator means that the Iterator point on the next element after
-                 * the end of the data container of the parent Matrix (element with I (element row index) = N
-                 * (a number of rows in the Matrix) and J (element column index) = 0).
-                 *
-                 * \return true if Iterator is in valid state, false otherwise.
-                 */
-                constexpr bool isValid() const noexcept;
-
-            private:
-                /**
-                 * \brief Constructs the Iterator over provided data iterator.
-                 *
-                 * \param rowsNumber    - a number of rows in the parent Matrix.
-                 * \param columnsNumber - a number of columns in the parent Matrix.
-                 * \param dataIterator  - an iterator for the data container of the parent Matrix.
-                 * \param isEndIterator - indicator, which is necessary for correct initialisation of the Iterator.
-                 * If true the Iterator is initialised to point on the next element after the end of the data container
-                 * of the parent Matrix (element with I (element row index) = N (a number of rows in the Matrix) and
-                 * J (element column index) = 0). If false the Iterator points on the element (0, 0).
-                 * \see isValid().
-                 */
-                constexpr Iterator(size_t rowsNumber, size_t columnsNumber, UnderlyingIteratorType dataIterator,
-                                   bool isEndIterator = false) noexcept;
-
-                /**
-                 * \brief Sets the invalid state of the Iterator.
-                 *
-                 * \see isValid().
-                 */
-                constexpr void setInvalidState() noexcept;
-                /**
-                 * \brief Updates the position (row and column indexes) on which Iterator points.
-                 *
-                 * \param i - the index of the Matrix row of the current Element.
-                 * \param j - the index of the Matrix column of the current Element.
-                 */
-                constexpr void updateCurrentPosition(size_t i, size_t j) noexcept;
-
-                /**
-                 * \brief Moves Iterator on n positions.
-                 *
-                 * It must be equal to n calls of increment operator if n is positive and
-                 * to n calls of decrement operator if n is negative.
-                 *
-                 * \param n - an offset from the current Iterator position to another element.
-                 */
-                constexpr void moveIterator(difference_type n) noexcept;
-
-            private:
-                /**
-                 * \brief The underlying iterator on the Matrix data.
-                 */
-                UnderlyingIteratorType m_dataIterator;
-                bool                   m_isDefaultInitialised = true;
-
-
-                friend class Matrix;
-
-        };  // class Iterator
-
-        /**
-         * \brief Matrix::Size represents a dimension of the Matrix or specific index in the Matrix.
-         */
-        struct Size
-        {
-            public:
-                /**
-                 * \brief Returns a std::string representation of the Size object.
-                 */
-                operator std::string() const
-                {
-                    return std::format("Matrix::Size(rows={}, columns={})", rows, columns);
-                }
-
-            public:
-                size_t rows    = {0};
-                size_t columns = {0};
-
-
-                friend bool operator==(const Size&, const Size&) = default;
-
-        };  // struct Size
-
-        /**
-         * \brief Matrix::Index represents an index (position) of the element in the Matrix.
-         */
-        using Index = Size;
-
         // The following type aliases are the conventions of STL
 
         /**
          * \brief Iterates over Matrix elements in row-major order from element (0, 0) to element (N-1, M-1)
          * without providing ability to change the referenced Matrix element.
          */
-        using const_iterator = Iterator<const float, std::vector<float>::const_iterator, RowMajorIteratorImpl>;
+        using const_iterator =
+          Iterator<const float, typename std::array<float, N * M>::const_iterator, RowMajorIteratorImpl>;
         /**
          * \brief Iterates over Matrix elements in row-major order from element (0, 0) to element (N-1, M-1).
          */
-        using iterator       = Iterator<float, std::vector<float>::iterator, RowMajorIteratorImpl>;
+        using iterator = Iterator<float, typename std::array<float, N * M>::iterator, RowMajorIteratorImpl>;
 
         // Non-conventional iterator aliases
 
@@ -575,106 +119,61 @@ class Matrix
          * \brief Iterates over Matrix elements, which belong to the main diagonal of the Matrix ((0, 0), (1, 1) etc.)
          * without providing ability to change the referenced Matrix element.
          */
-        using const_diagonal_iterator = Iterator<const float, std::vector<float>::const_iterator, DiagonalIteratorImpl>;
+        using const_diagonal_iterator =
+          Iterator<const float, typename std::array<float, N * M>::const_iterator, DiagonalIteratorImpl>;
         /**
          * \brief Iterates over Matrix elements, which belong to the main diagonal of the Matrix ((0, 0), (1, 1) etc.).
          */
-        using diagonal_iterator       = Iterator<float, std::vector<float>::iterator, DiagonalIteratorImpl>;
+        using diagonal_iterator = Iterator<float, typename std::array<float, N * M>::iterator, DiagonalIteratorImpl>;
 
     public:
-        /**
-         * \brief Constructs a null Matrix.
-         *
-         * The Matrix has size 0x0.
-         */
-        Matrix() = default;
-        OGLS_DEFAULT_COPYABLE_MOVABLE(Matrix)
+        OGLS_DEFAULT_CONSTEXPR_NOEXCEPT_COPYABLE_MOVABLE(Matrix)
 
         /**
-         * \brief Constructs a Matrix with the specified number of rows and columns.
+         * \brief Constructs a Matrix and fills it with the provided value.
          *
-         * The exception is thrown if one of dimensions is 0.
-         *
-         * \param rowsNumber    - a number of rows in the Matrix.
-         * \param columnsNumber - a number of columns in the Matrix.
-         * \param defaultValue  - a default value of Matrix elements.
-         * \throw ogls::exceptions::MatrixException().
-         */
-        Matrix(size_t rowsNumber, size_t columnsNumber, float defaultValue = {0.0f});
-        /**
-         * \brief Constructs a Matrix with the specified number of rows and columns.
-         *
-         * The exception is thrown if one of dimensions is 0.
-         *
-         * \param size         - a dimension of the Matrix.
          * \param defaultValue - a default value of Matrix elements.
-         * \throw ogls::exceptions::MatrixException().
          */
-        explicit Matrix(const Size& size, float defaultValue = {0.0f});
+        constexpr explicit Matrix(float defaultValue = {0.0f}) noexcept : BaseMatrix{N, M}
+        {
+            for (auto& el : m_data)
+            {
+                el = defaultValue;
+            }
+        }
+
         /**
          * \brief Constructs a Matrix with the specified elements.
          *
-         * Both dimensions must be more then 0 and all columns must have the same size,
-         * otherwise the exception is thrown.
+         * It is assumed that the values are provided in row-major order.
          *
          * \param values - the elements of the Matrix.
-         * \throw ogls::exceptions::MatrixException().
          */
-        explicit Matrix(std::initializer_list<std::initializer_list<float>> values);
-        /**
-         * \brief Constructs a Matrix with the specified elements.
-         *
-         * It is assumed that the values are provided in row-major order. If the input list has more elements then
-         * the rowsNumber * columnsNumber, the values out of this range are ignored.
-         *
-         * The exception is thrown if one of dimensions is 0 or if the size of the input list is less then
-         * the expected size based on the provided dimensions.
-         *
-         * \param rowsNumber    - a number of rows in the Matrix.
-         * \param columnsNumber - a number of columns in the Matrix.
-         * \param values        - the elements of the Matrix.
-         * \throw ogls::exceptions::MatrixException().
-         */
-        Matrix(size_t rowsNumber, size_t columnsNumber, std::initializer_list<float> values);
-        /**
-         * \brief Constructs a Matrix with the specified elements.
-         *
-         * Both dimensions must be more then 0 and all column-vectors must have the same size,
-         * otherwise the exception is thrown.
-         *
-         * \param values - the elements of the Matrix.
-         * \throw ogls::exceptions::MatrixException().
-         */
-        explicit Matrix(const std::vector<std::vector<float>>& values);
-        /**
-         * \brief Constructs a Matrix with the specified elements.
-         *
-         * It is assumed that the values are provided in row-major order. If the input vector has more elements then
-         * the rowsNumber * columnsNumber, the values out of this range are ignored.
-         *
-         * The exception is thrown if one of dimensions is 0 or if the size of the input vector is less then
-         * the expected size based on the provided dimensions.
-         *
-         * \param rowsNumber    - a number of rows in the Matrix.
-         * \param columnsNumber - a number of columns in the Matrix.
-         * \param values        - the elements of the Matrix.
-         * \throw ogls::exceptions::MatrixException().
-         */
-        Matrix(size_t rowsNumber, size_t columnsNumber, const std::vector<float>& values);
+        template<typename = IsNotNullMatrix<N, M>>
+        constexpr Matrix(const std::array<float, N * M>& values) noexcept : BaseMatrix{N, M}, m_data{values}
+        {
+        }
 
         //------ SOME UNARY OPERATIONS
 
         /**
          * \brief Returns new Matrix as the result of negation of this Matrix.
          */
-        Matrix operator-() const;
+        template<typename = IsNotNullMatrix<N, M>>
+        constexpr Matrix operator-() const noexcept
+        {
+            auto result = Matrix{*this};
+            // clang-format off
+            result.performOnEvery([](Index, float element) { return -element; });  // clang-format on
+            return result;
+        }
 
         /**
          * \brief Returns true if this Matrix is null Matrix or zero-matrix, false otherwise.
          *
          * \see isNullMatrix(), isZeroMatrix().
          */
-        bool operator!() const noexcept
+        constexpr bool operator!() const noexcept
         {
             return !bool{*this};
         }
@@ -685,13 +184,18 @@ class Matrix
          * \brief Adds another Matrix to this Matrix.
          *
          * Changes this Matrix by performing addition of elements of m to elements of this Matrix.
-         * Both Matrix must have equal dimensionality, otherwise the exception is thrown.
          *
          * \param m - another Matrix to add to this Matrix.
          * \return this Matrix with changed elements.
-         * \throw ogls::exceptions::MatricesDimensionalityException().
          */
-        Matrix& operator+=(const Matrix& m);
+        template<typename = IsNotNullMatrix<N, M>>
+        constexpr Matrix& operator+=(const Matrix& m) noexcept
+        {
+            // clang-format off
+            performOnEvery([&](Index pos, float element) { return element + m.getValue(pos); });  // clang-format on
+            return *this;
+        }
+
         /**
          * \brief Adds number to all elements of this Matrix.
          *
@@ -700,18 +204,30 @@ class Matrix
          * \param num - a number to add to all elements of this Matrix.
          * \return this Matrix with changed elements.
          */
-        Matrix& operator+=(float num) noexcept;
+        template<typename = IsNotNullMatrix<N, M>>
+        constexpr Matrix& operator+=(float num) noexcept
+        {
+            // clang-format off
+            performOnEvery([=](Index, float element) { return element + num; });  // clang-format on
+            return *this;
+        }
+
         /**
          * \brief Subtracts another Matrix from this Matrix.
          *
          * Changes this Matrix by performing subtraction of elements of m from elements of this Matrix.
-         * Both Matrix must have equal dimensionality, otherwise the exception is thrown.
          *
          * \param m - another Matrix to subtract from this Matrix.
          * \return this Matrix with changed elements.
-         * \throw ogls::exceptions::MatricesDimensionalityException().
          */
-        Matrix& operator-=(const Matrix& m);
+        template<typename = IsNotNullMatrix<N, M>>
+        constexpr Matrix& operator-=(const Matrix& m) noexcept
+        {
+            // clang-format off
+            performOnEvery([&](Index pos, float element) { return element - m.getValue(pos); });  // clang-format on
+            return *this;
+        }
+
         /**
          * \brief Subtracts number from all elements of this Matrix.
          *
@@ -720,7 +236,14 @@ class Matrix
          * \param num - a number to subtract from all elements of this Matrix.
          * \return this Matrix with changed elements.
          */
-        Matrix& operator-=(float num) noexcept;
+        template<typename = IsNotNullMatrix<N, M>>
+        constexpr Matrix& operator-=(float num) noexcept
+        {
+            // clang-format off
+            performOnEvery([=](Index, float element) { return element - num; });  // clang-format on
+            return *this;
+        }
+
         /**
          * \brief Multiplies all elements of this Matrix by number.
          *
@@ -729,7 +252,14 @@ class Matrix
          * \param num - a number to multiply elements of this Matrix by.
          * \return this Matrix with changed elements.
          */
-        Matrix& operator*=(float num) noexcept;
+        template<typename = IsNotNullMatrix<N, M>>
+        constexpr Matrix& operator*=(float num) noexcept
+        {
+            // clang-format off
+            performOnEvery([=](Index, float element) { return element * num; });  // clang-format on
+            return *this;
+        }
+
         /**
          * \brief Divides all elements of this Matrix by number.
          *
@@ -739,19 +269,37 @@ class Matrix
          * \return this Matrix with changed elements.
          * \throw ogls::exceptions::DivisionByZeroException().
          */
-        Matrix& operator/=(float num);
+        template<typename = IsNotNullMatrix<N, M>>
+        constexpr Matrix& operator/=(float num)
+        {
+            if (num == 0.0f)
+            {
+                throw ogls::exceptions::DivisionByZeroException{std::format("{} /= 0.0", toSizeOnlyString())};
+            }
+
+            // clang-format off
+            performOnEvery([=](Index, float element) { return element / num; });  // clang-format on
+            return *this;
+        }
 
         //------ SOME TYPE CASTING OPERATIONS
 
         /**
          * \brief Returns boolean representation of the Matrix object.
          *
-         * \see isNullMatrix(), isZeroMatrix().
+         * \see isZeroMatrix().
          * \return false if the Matrix is null Matrix or zero-matrix, true otherwise.
          */
-        explicit operator bool() const noexcept
+        constexpr explicit operator bool() const noexcept
         {
-            return !(isNullMatrix() || isZeroMatrix());
+            if constexpr (isNullMatrixCheck(N, M))
+            {
+                return false;
+            }
+            else
+            {
+                return !isZeroMatrix();
+            }
         }
 
         /**
@@ -769,82 +317,103 @@ class Matrix
         /**
          * \brief Returns an Iterator to the beginning.
          */
-        iterator                begin() noexcept;
+        constexpr iterator begin() noexcept
+        {
+            return iterator{m_rowsNumber, m_columnsNumber, m_data.begin()};
+        }
+
         /**
          * \brief Returns const Iterator to the beginning.
          */
-        const_iterator          begin() const noexcept;
+        constexpr const_iterator begin() const noexcept
+        {
+            return const_iterator{m_rowsNumber, m_columnsNumber, m_data.cbegin()};
+        }
+
         /**
          * \brief Returns a DiagonalIterator to the beginning.
-         *
-         * Throws the exception if the Matrix isn't square Matrix.
-         *
-         * \throw ogls::exceptions::MatrixException().
          */
-        diagonal_iterator       beginDiagonal();
+        constexpr diagonal_iterator beginDiagonal() noexcept
+        {
+            OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, beginDiagonal);
+            return diagonal_iterator{m_rowsNumber, m_columnsNumber, m_data.begin()};
+        }
+
         /**
          * \brief Returns const DiagonalIterator to the beginning.
-         *
-         * Throws the exception if the Matrix isn't square Matrix.
-         *
-         * \throw ogls::exceptions::MatrixException().
          */
-        const_diagonal_iterator beginDiagonal() const;
+        constexpr const_diagonal_iterator beginDiagonal() const noexcept
+        {
+            OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, beginDiagonal);
+            return const_diagonal_iterator{m_rowsNumber, m_columnsNumber, m_data.cbegin()};
+        }
+
         /**
          * \brief Returns const Iterator to the beginning.
          */
-        const_iterator          cbegin() const noexcept;
+        constexpr const_iterator cbegin() const noexcept
+        {
+            return const_iterator{m_rowsNumber, m_columnsNumber, m_data.cbegin()};
+        }
+
         /**
          * \brief Returns const DiagonalIterator to the beginning.
-         *
-         * Throws the exception if the Matrix isn't square Matrix.
-         *
-         * \throw ogls::exceptions::MatrixException().
          */
-        const_diagonal_iterator cbeginDiagonal() const;
+        constexpr const_diagonal_iterator cbeginDiagonal() const noexcept
+        {
+            OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, cbeginDiagonal);
+            return const_diagonal_iterator{m_rowsNumber, m_columnsNumber, m_data.cbegin()};
+        }
+
         /**
          * \brief Returns an Iterator to the end.
          */
-        iterator                end() noexcept;
-        /**
-         * \brief Returns const Iterator to the end.
-         */
-        const_iterator          end() const noexcept;
-        /**
-         * \brief Returns a DiagonalIterator to the end.
-         *
-         * Throws the exception if the Matrix isn't square Matrix.
-         *
-         * \throw ogls::exceptions::MatrixException().
-         */
-        diagonal_iterator       endDiagonal();
-        /**
-         * \brief Returns const DiagonalIterator to the end.
-         *
-         * Throws the exception if the Matrix isn't square Matrix.
-         *
-         * \throw ogls::exceptions::MatrixException().
-         */
-        const_diagonal_iterator endDiagonal() const;
-        /**
-         * \brief Returns const Iterator to the end.
-         */
-        const_iterator          cend() const noexcept;
-        /**
-         * \brief Returns const DiagonalIterator to the end.
-         *
-         * Throws the exception if the Matrix isn't square Matrix.
-         *
-         * \throw ogls::exceptions::MatrixException().
-         */
-        const_diagonal_iterator cendDiagonal() const;
+        constexpr iterator end() noexcept
+        {
+            return iterator{m_rowsNumber, m_columnsNumber, m_data.end(), true};
+        }
 
         /**
-         * \brief Returns the number of elements in the Matrix.
+         * \brief Returns const Iterator to the end.
          */
-        size_t size() const noexcept
+        constexpr const_iterator end() const noexcept
         {
-            return m_rowsNumber * m_columnsNumber;
+            return const_iterator{m_rowsNumber, m_columnsNumber, m_data.cend(), true};
+        }
+
+        /**
+         * \brief Returns a DiagonalIterator to the end.
+         */
+        constexpr diagonal_iterator endDiagonal() noexcept
+        {
+            OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, endDiagonal);
+            return diagonal_iterator{m_rowsNumber, m_columnsNumber, m_data.end(), true};
+        }
+
+        /**
+         * \brief Returns const DiagonalIterator to the end.
+         */
+        constexpr const_diagonal_iterator endDiagonal() const noexcept
+        {
+            OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, endDiagonal);
+            return const_diagonal_iterator{m_rowsNumber, m_columnsNumber, m_data.cend(), true};
+        }
+
+        /**
+         * \brief Returns const Iterator to the end.
+         */
+        constexpr const_iterator cend() const noexcept
+        {
+            return const_iterator{m_rowsNumber, m_columnsNumber, m_data.cend(), true};
+        }
+
+        /**
+         * \brief Returns const DiagonalIterator to the end.
+         */
+        constexpr const_diagonal_iterator cendDiagonal() const noexcept
+        {
+            OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, cendDiagonal);
+            return const_diagonal_iterator{m_rowsNumber, m_columnsNumber, m_data.cend(), true};
         }
 
         //------
@@ -853,54 +422,79 @@ class Matrix
          * \brief Calculates the algebraic complement of the Matrix element.
          *
          * \note The algebraic complement can be calculated only for a square Matrix.
+         * \param elementPosition - position of the element in the Matrix.
          * \see isSquareMatrix().
-         * \throw ogls::exceptions::MatrixException().
          */
-        float calculateAlgebraicComplement(const Index& elementPosition) const;
+        constexpr float calculateAlgebraicComplement(const Index& elementPosition) const noexcept
+        {
+            OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, calculateAlgebraicComplement);
+
+            const auto sign = float{((elementPosition.rows + elementPosition.columns) % 2 == 0) ? 1.0f : -1.0f};
+            return sign * getMinor(elementPosition).calculateDeterminant();
+        }
+
         /**
          * \brief Calculates the determinant of the Matrix.
          *
          * \note The determinant can be calculated only for a square Matrix.
          * \see isSquareMatrix().
-         * \throw ogls::exceptions::MatrixException().
          */
-        float calculateDeterminant() const;
-
-        /**
-         * \brief Retrieves the number of columns in the Matrix.
-         *
-         * \return the number of columns.
-         */
-        size_t getColumnCount() const noexcept
+        constexpr float calculateDeterminant() const noexcept
         {
-            return m_columnsNumber;
-        }
+            OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, calculateDeterminant);
 
-        /**
-         * \brief Returns the dimensionality of the Matrix.
-         */
-        Size getDimensionality() const noexcept
-        {
-            return Size{.rows = m_rowsNumber, .columns = m_columnsNumber};
+            if constexpr (N == 2)
+            {
+                return (getValue(0, 0) * getValue(1, 1)) - (getValue(0, 1) * getValue(1, 0));
+            }
+            else if constexpr (N == 1)
+            {
+                return getValue(0, 0);
+            }
+            else
+            {
+                auto result = float{0.0};
+
+                for (auto i = size_t{0}; i < m_rowsNumber; ++i)
+                {
+                    result += getValue(0, i) * calculateAlgebraicComplement(Index{0, i});
+                }
+
+                return result;
+            }
         }
 
         /**
          * \brief Gets the minor of the Matrix element.
          *
          * \note The minor is defined only for a square Matrix.
+         * \param elementPosition - position of the element in the Matrix.
          * \see isSquareMatrix().
-         * \throw ogls::exceptions::MatrixException().
          */
-        Matrix getMinor(const Index& elementPosition) const;
-
-        /**
-         * \brief Retrieves the number of rows in the Matrix.
-         *
-         * \return the number of rows.
-         */
-        size_t getRowCount() const noexcept
+        constexpr auto getMinor(const Index& elementPosition) const noexcept
         {
-            return m_rowsNumber;
+            OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, getMinor);
+
+            constexpr auto MinorN        = size_t{N > 0 ? N - 1 : 0};
+            auto           minor         = Matrix<MinorN, MinorN>{};
+            auto           minorIterator = minor.begin();
+
+            for (auto it = begin(); it < end(); ++it)
+            {
+                // Skip the row, to which the element belongs
+                if ((*it).i == elementPosition.rows)
+                {
+                    it += MinorN;
+                    continue;
+                }
+                if ((*it).j != elementPosition.columns)
+                {
+                    (*minorIterator) = (*it).getValue();
+                    ++minorIterator;
+                }
+            }
+
+            return minor;
         }
 
         /**
@@ -913,7 +507,18 @@ class Matrix
          * \return the value at the specified position.
          * \throw std::out_of_range.
          */
-        float  getValue(size_t row, size_t column) const;
+        template<typename = IsNotNullMatrix<N, M>>
+        constexpr float getValue(size_t row, size_t column) const
+        {
+            if (row >= m_rowsNumber || column >= m_columnsNumber)
+            {
+                throw std::out_of_range{
+                  formatInvalidElementPositionErrorMessage(m_rowsNumber, m_columnsNumber,
+                                                           Index{.rows = row, .columns = column})};
+            }
+            return m_data[row * m_columnsNumber + column];
+        }
+
         /**
          * \brief Retrieves the value at the specified position in the Matrix.
          *
@@ -923,55 +528,99 @@ class Matrix
          * \return the value at the specified position.
          * \throw std::out_of_range.
          */
-        float  getValue(const Index& elementPosition) const;
+        template<typename = IsNotNullMatrix<N, M>>
+        constexpr float getValue(const Index& elementPosition) const
+        {
+            return getValue(elementPosition.rows, elementPosition.columns);
+        }
+
         /**
          * \brief Calculates the inverse Matrix of this Matrix.
          *
          * \note The inverse Matrix can be calculated only for a square Matrix.
-         * \see isNullMatrix(), isSquareMatrix().
-         * \return the inverse Matrix or null Matrix, if for this square Matrix the inverse Matrix cannot be calculated.
-         * \throw ogls::exceptions::MatrixException().
+         * \see isSquareMatrix().
+         * \return the inverse Matrix or std::nullopt, if for this square Matrix the inverse Matrix cannot be calculated.
          */
-        Matrix inverse() const;
+        constexpr std::optional<Matrix> inverse() const noexcept
+        {
+            OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, inverse);
+
+            const auto determinant = calculateDeterminant();
+            if (ogls::helpers::isFloatsEqual(determinant, 0.0f))
+            {
+                return std::nullopt;
+            }
+
+            auto additionalMatrix = Matrix{};
+            for (const auto& el : *this)
+            {
+                // Set elements in transpose order in Matrix of algebraic complements
+                additionalMatrix.setValue(el.j, el.i, calculateAlgebraicComplement(Index{el.i, el.j}));
+            }
+
+            return (1.0f / determinant) * additionalMatrix;
+        }
+
         /**
          * \brief Checks if the Matrix is an identity matrix (square matrix with ones on the main diagonal
          * and zeros elsewhere).
          *
          * \return true if the Matrix is an identity matrix, false otherwise.
          */
-        bool   isIdentityMatrix() const noexcept;
+        constexpr bool isIdentityMatrix() const noexcept
+        {
+            OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, isIdentityMatrix);
+
+            for (const auto& el : *this)
+            {
+                if (el.i != el.j)
+                {
+                    if (ogls::helpers::isFloatsNotEqual(el.getValue(), 0.0f))
+                    {
+                        return false;  // Non-diagonal elements must be 0
+                    }
+                }
+                else
+                {
+                    if (ogls::helpers::isFloatsNotEqual(el.getValue(), 1.0f))
+                    {
+                        return false;  // Diagonal elements must be 1
+                    }
+                }
+            }
+
+            return true;
+        }
+
         /**
          * \brief Checks if the Matrix is inverse Matrix of otherMatrix.
          *
          * \note If this Matrix is inverse Matrix of otherMatrix, otherMatrix is inverse Matrix of this Matrix too.
          * \return true, if this Matrix is inverse Matrix of otherMatrix, false otherwise.
          */
-        bool   isInverseMatrixTo(const Matrix& otherMatrix) const;
+        constexpr bool isInverseMatrixTo(const Matrix& otherMatrix) const noexcept
+        {
+            OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, isInverseMatrixTo);
+            return (*this * otherMatrix).isIdentityMatrix();
+        }
+
         /**
          * \brief Checks if the Matrix is a matrix of ones (matrix where every entry is equal to one).
          *
          * \return true if the Matrix is a matrix of ones, false otherwise.
          */
-        bool   isMatrixOfOnes() const noexcept;
-
-        /**
-         * \brief Checks if the Matrix is a null Matrix (dimensions are 0).
-         *
-         * \return true if the Matrix is a null Matrix, false otherwise.
-         */
-        bool isNullMatrix() const noexcept
+        template<typename = IsNotNullMatrix<N, M>>
+        constexpr bool isMatrixOfOnes() const noexcept
         {
-            return m_rowsNumber == 0 && m_columnsNumber == 0;
-        }
+            for (const auto element : m_data)
+            {
+                if (ogls::helpers::isFloatsNotEqual(element, 1.0f))
+                {
+                    return false;
+                }
+            }
 
-        /**
-         * \brief Checks if the Matrix is a square Matrix (dimensions are equal).
-         *
-         * \return true if the Matrix is a square Matrix, false otherwise.
-         */
-        bool isSquareMatrix() const noexcept
-        {
-            return m_rowsNumber != 0 && m_rowsNumber == m_columnsNumber;
+            return true;
         }
 
         /**
@@ -979,26 +628,66 @@ class Matrix
          *
          * \return true if the Matrix is a zero-matrix, false otherwise.
          */
-        bool        isZeroMatrix() const noexcept;
+        template<typename = IsNotNullMatrix<N, M>>
+        constexpr bool isZeroMatrix() const noexcept
+        {
+            for (const auto element : m_data)
+            {
+                if (ogls::helpers::isFloatsNotEqual(element, 0.0f))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         /**
          * \brief Executes the provided functor on every element of the Matrix.
          *
+         * Throws, if the functor throws.
+         *
          * \param functor - a function to execute on every element of the Matrix. Such functor receives the position
-         * of the current element via first argument as object of Matrix::Index structure and the value of the current
-         * element via second argument. Functor must return new value of the passed element.
+         * of the current element via first argument as object of BaseMatrix::Index structure and the value of
+         * the current element via second argument. Functor must return new value of the passed element.
          */
-        void        performOnEvery(std::function<float(Index, float)> functor);
+        template<MatrixFunctor Functor, typename = IsNotNullMatrix<N, M>>
+        constexpr void performOnEvery(Functor functor)
+        {
+            for (auto i = size_t{0}; i < m_rowsNumber; ++i)
+            {
+                for (auto j = size_t{0}; j < m_columnsNumber; ++j)
+                {
+                    const auto index = i * m_columnsNumber + j;
+                    m_data[index]    = functor(Index{.rows = i, .columns = j}, m_data[index]);
+                }
+            }
+        }
+
         /**
          * \brief Executes the provided functor on every element of the Matrix without changing the element of Matrix.
          *
          * This method allows to iterate over elements of the Matrix and perform an action,
          * which doesn't change the elements of the Matrix.
          *
+         * Throws, if the functor throws.
+         *
          * \param functor - a function to execute on every element of the Matrix. Such functor receives the position
-         * of the current element via first argument as object of Matrix::Index structure and the value of the current
-         * element via second argument.
+         * of the current element via first argument as object of BaseMatrix::Index structure and the value of
+         * the current element via second argument.
          */
-        void        performOnEvery(std::function<void(Index, float)> functor) const;
+        template<MatrixConstFunctor Functor, typename = IsNotNullMatrix<N, M>>
+        constexpr void performOnEvery(Functor functor) const
+        {
+            for (auto i = size_t{0}; i < m_rowsNumber; ++i)
+            {
+                for (auto j = size_t{0}; j < m_columnsNumber; ++j)
+                {
+                    functor(Index{.rows = i, .columns = j}, m_data[i * m_columnsNumber + j]);
+                }
+            }
+        }
+
         /**
          * \brief Sets the value at the specified row and column in the Matrix.
          *
@@ -1009,7 +698,18 @@ class Matrix
          * \param value  - the value to set.
          * \throw std::out_of_range.
          */
-        void        setValue(size_t row, size_t column, float value);
+        template<typename = IsNotNullMatrix<N, M>>
+        constexpr void setValue(size_t row, size_t column, float value)
+        {
+            if (row >= m_rowsNumber || column >= m_columnsNumber)
+            {
+                throw std::out_of_range{
+                  formatInvalidElementPositionErrorMessage(m_rowsNumber, m_columnsNumber,
+                                                           Index{.rows = row, .columns = column})};
+            }
+            m_data[row * m_columnsNumber + column] = value;
+        }
+
         /**
          * \brief Sets the value at the specified position in the Matrix.
          *
@@ -1019,35 +719,87 @@ class Matrix
          * \param value           - the value to set.
          * \throw std::out_of_range.
          */
-        void        setValue(const Index& elementPosition, float value);
+        template<typename = IsNotNullMatrix<N, M>>
+        constexpr void setValue(const Index& elementPosition, float value)
+        {
+            setValue(elementPosition.rows, elementPosition.columns, value);
+        }
+
         /**
-         * \brief Returns a std::string representation of the Vector object with all elements and size.
+         * \brief Returns a std::string representation of the Matrix object with all elements and size.
          *
          * \param columnWidth - is a minimum number of characters (digits + dot) of Matrix element to be displayed.
          */
-        std::string toFullString(int columnWidth = 6) const;
-        /**
-         * \brief Returns a std::string representation of the Vector object only with size of the Matrix.
-         */
-        std::string toSizeOnlyString() const;
+        std::string toFullString(int columnWidth = 6) const
+        {
+            auto ss = std::stringstream{};
+
+            ss << "Matrix " << m_rowsNumber << "x" << m_columnsNumber;
+
+            if (isNullMatrix())
+            {
+                return ss.str();
+            }
+            else
+            {
+                ss << ":\n";
+            }
+
+            auto el = this->begin();
+            ss << "  | " << std::left << std::setw(columnWidth) << (*el).getValue()
+               << (m_columnsNumber > 1 ? ", " : "");
+
+            for (++el; el != end(); ++el)
+            {
+                if ((*el).j == 0)
+                {
+                    ss << " |\n  | ";
+                }
+
+                ss << std::left << std::setw(columnWidth) << (*el).getValue();
+
+                if ((*el).j != m_columnsNumber - 1)
+                {
+                    ss << ", ";
+                }
+            }
+
+            ss << " |";
+
+            return ss.str();
+        }
+
         /**
          * \brief Returns new Matrix as the result of transpose of this Matrix.
          */
-        Matrix      transpose() const;
+        template<typename = IsNotNullMatrix<N, M>>
+        constexpr auto transpose() const noexcept
+        {
+            auto result = Matrix<M, N>{};
+
+            for (const auto& el : *this)
+            {
+                result.setValue(el.j, el.i, el.getValue());
+            }
+
+            return result;
+        }
+
+    private:
+        template<typename = IsNotNullMatrix<N, M>>
+        static std::string formatInvalidElementPositionErrorMessage(size_t rowsNumber, size_t columnsNumber,
+                                                                    const Index& position)
+        {
+            return std::format("Matrix size is {}x{}, but passed element position is [{}][{}]", rowsNumber,
+                               columnsNumber, position.rows, position.columns);
+        }
 
     private:
         /**
-         * \brief The number of columns.
-         */
-        size_t             m_columnsNumber = {0};
-        /**
          * \brief The elements of Matrix.
          */
-        std::vector<float> m_data;
-        /**
-         * \brief The number of rows.
-         */
-        size_t             m_rowsNumber = {0};
+        // clang-format off
+        std::array<float, N * M> m_data = std::array<float, N * M>{};  // clang-format on
 
 };  // class Matrix
 
@@ -1056,16 +808,39 @@ class Matrix
 /**
  * \brief Checks equality of two Matrix.
  *
- * \return true if two Matrix have equal dimensionality and equal elements, false otherwise.
+ * \return true if two Matrix have equal elements, false otherwise.
  */
-bool operator==(const Matrix& m1, const Matrix& m2) noexcept;
+template<size_t N, size_t M>
+constexpr bool operator==(const Matrix<N, M>& m1, const Matrix<N, M>& m2) noexcept
+{
+    if constexpr (isNullMatrixCheck(N, M))
+    {
+        return true;
+    }
+    else
+    {
+        auto result = true;
+        m1.performOnEvery(
+          [&](BaseMatrix::Index pos, float element)
+          {
+              if (helpers::isFloatsNotEqual(element, m2.getValue(pos)))
+              {
+                  result = false;
+                  return;
+              }
+          });
+
+        return result;
+    }
+}
 
 /**
  * \brief Checks if two Matrix are not equal.
  *
- * \return true if two Matrix have different dimensionality or different elements, false otherwise.
+ * \return true if two Matrix have different elements, false otherwise.
  */
-inline bool operator!=(const Matrix& m1, const Matrix& m2) noexcept
+template<size_t N, size_t M>
+constexpr bool operator!=(const Matrix<N, M>& m1, const Matrix<N, M>& m2) noexcept
 {
     return !(m1 == m2);
 }
@@ -1073,12 +848,16 @@ inline bool operator!=(const Matrix& m1, const Matrix& m2) noexcept
 /**
  * \brief Adds two Matrix.
  *
- * Both Matrix must have equal dimensionality, otherwise the exception is thrown.
- *
  * \return Matrix, which is the result of addition of two Matrix.
- * \throw ogls::exceptions::MatricesDimensionalityException().
  */
-Matrix operator+(const Matrix& m1, const Matrix& m2);
+template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+constexpr auto operator+(const Matrix<N, M>& m1, const Matrix<N, M>& m2) noexcept
+{
+    auto result = Matrix{m1};
+    // clang-format off
+    result.performOnEvery([&](BaseMatrix::Index pos, float element) { return element + m2.getValue(pos); });  // clang-format on
+    return result;
+}
 
 /**
  * \brief Adds number to a Matrix.
@@ -1087,7 +866,13 @@ Matrix operator+(const Matrix& m1, const Matrix& m2);
  * \param m   - a source Matrix.
  * \return new Matrix, which is a result of addition of the number to every element of Matrix m.
  */
-Matrix operator+(float num, const Matrix& m);
+template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+constexpr auto operator+(float num, const Matrix<N, M>& m) noexcept
+{
+    auto result  = Matrix{m};
+    result      += num;
+    return result;
+}
 
 /**
  * \brief Adds number to a Matrix.
@@ -1096,7 +881,8 @@ Matrix operator+(float num, const Matrix& m);
  * \param num - a number to add to every element of the Matrix.
  * \return new Matrix, which is a result of addition of the number to every element of Matrix m.
  */
-inline Matrix operator+(const Matrix& m, float num)
+template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+constexpr auto operator+(const Matrix<N, M>& m, float num) noexcept
 {
     return num + m;
 }
@@ -1104,12 +890,16 @@ inline Matrix operator+(const Matrix& m, float num)
 /**
  * \brief Subtracts two Matrix.
  *
- * Both Matrix must have equal dimensionality, otherwise the exception is thrown.
- *
  * \return Matrix, which is the result of subtraction of two Matrix.
- * \throw ogls::exceptions::MatricesDimensionalityException().
  */
-Matrix operator-(const Matrix& m1, const Matrix& m2);
+template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+constexpr auto operator-(const Matrix<N, M>& m1, const Matrix<N, M>& m2) noexcept
+{
+    auto result = Matrix{m1};
+    // clang-format off
+    result.performOnEvery([&](BaseMatrix::Index pos, float element) { return element - m2.getValue(pos); });  // clang-format on
+    return result;
+}
 
 /**
  * \brief Subtracts the number from the Matrix.
@@ -1118,18 +908,47 @@ Matrix operator-(const Matrix& m1, const Matrix& m2);
  * \param num - a number to subtract from every element of the Matrix.
  * \return new Matrix, which is a result of subtraction of the number from every element of Matrix m.
  */
-Matrix operator-(const Matrix& m, float num);
+template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+constexpr auto operator-(const Matrix<N, M>& m, float num) noexcept
+{
+    auto result  = Matrix{m};
+    result      -= num;
+    return result;
+}
 
 /**
  * \brief Multiplies two Matrix.
  *
- * The number of columns of the Matrix m1 must be equal to the number of rows of the Matrix m2,
- * otherwise the exception is thrown.
- *
+ * \note The number of columns of the Matrix m1 must be equal to the number of rows of the Matrix m2.
  * \return Matrix, which is the result of multiplication of two Matrix.
- * \throw ogls::exceptions::MatricesDimensionalityException().
  */
-Matrix operator*(const Matrix& m1, const Matrix& m2);
+// clang-format off
+template<size_t N1, size_t M1, size_t N2, size_t M2,
+         typename = IsNotNullMatrix<N1, M1>,
+         typename = IsNotNullMatrix<N2, M2>,
+         typename = std::enable_if_t<M1 == N2>>
+// clang-format on
+constexpr auto operator*(const Matrix<N1, M1>& m1, const Matrix<N2, M2>& m2) noexcept
+{
+    auto result = Matrix<N1, M2>{};
+
+    for (auto i = size_t{0}; i < N1; ++i)
+    {
+        for (auto j = size_t{0}; j < M2; ++j)
+        {
+            auto resultElement = float{0.0};
+
+            for (auto iInner = size_t{0}; iInner < M1; ++iInner)
+            {
+                resultElement += m1.getValue(i, iInner) * m2.getValue(iInner, j);
+            }
+
+            result.setValue(i, j, resultElement);
+        }
+    }
+
+    return result;
+}
 
 /**
  * \brief Multiplies all elements of the Matrix by number.
@@ -1138,7 +957,13 @@ Matrix operator*(const Matrix& m1, const Matrix& m2);
  * \param m   - a source Matrix.
  * \return new Matrix, which is a result of multiplication of every element of Matrix m by number.
  */
-Matrix operator*(float num, const Matrix& m);
+template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+constexpr auto operator*(float num, const Matrix<N, M>& m) noexcept
+{
+    auto result  = Matrix{m};
+    result      *= num;
+    return result;
+}
 
 /**
  * \brief Multiplies all elements of the Matrix by number.
@@ -1147,7 +972,8 @@ Matrix operator*(float num, const Matrix& m);
  * \param num - a number to multiply elements of the Matrix by.
  * \return new Matrix, which is a result of multiplication of every element of Matrix m by number.
  */
-inline Matrix operator*(const Matrix& m, float num)
+template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+constexpr auto operator*(const Matrix<N, M>& m, float num) noexcept
 {
     return num * m;
 }
@@ -1160,8 +986,21 @@ inline Matrix operator*(const Matrix& m, float num)
  * \return new Matrix, which is a result of division of every element of Matrix m by number.
  * \throw ogls::exceptions::DivisionByZeroException().
  */
-Matrix operator/(const Matrix& m, float num);
+template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+constexpr auto operator/(const Matrix<N, M>& m, float num)
+{
+    if (num == 0.0f)
+    {
+        throw ogls::exceptions::DivisionByZeroException{std::format("{} / 0.0", m.toSizeOnlyString())};
+    }
+
+    auto result  = Matrix{m};
+    result      /= num;
+    return result;
+}
 
 }  // namespace ogls::mathCore
+
+#undef OGLS_SQUARE_MATRIX_STATIC_ASSERT
 
 #endif
