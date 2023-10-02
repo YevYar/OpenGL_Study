@@ -11,18 +11,9 @@
 #include "mathCore/baseMatrix.h"
 
 /**
- * \brief Adds an accessor to the Matrix element on the position.
+ * \brief Adds a getter/setter pair for the Matrix element on the position.
  */
 #define OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(RequiredI, RequiredJ, RequiredN, RequiredM, PassedN, PassedM) \
-    /**                                                                                                   \
-     * \brief Provides an access to the element of the Matrix on the position [RequiredI][RequiredJ].     \
-     */                                                                                                   \
-    template<typename = EnableElementAccessor<RequiredN, RequiredM, PassedN, PassedM>>                    \
-    constexpr float& m##RequiredN##RequiredM() noexcept                                                   \
-    {                                                                                                     \
-        return m_data[RequiredI * m_columnsNumber + RequiredJ];                                           \
-    }                                                                                                     \
-                                                                                                          \
     /**                                                                                                   \
      * \brief Returns the element of the Matrix on the position [RequiredI][RequiredJ].                   \
      */                                                                                                   \
@@ -30,6 +21,17 @@
     constexpr float m##RequiredN##RequiredM() const noexcept                                              \
     {                                                                                                     \
         return m_data[RequiredI * m_columnsNumber + RequiredJ];                                           \
+    }                                                                                                     \
+                                                                                                          \
+    /**                                                                                                   \
+     * \brief Sets the value of the element of the Matrix on the position [RequiredI][RequiredJ].         \
+     *                                                                                                    \
+     * \param value - the value to set.                                                                   \
+     */                                                                                                   \
+    template<typename = EnableElementAccessor<RequiredN, RequiredM, PassedN, PassedM>>                    \
+    constexpr void setM##RequiredN##RequiredM(float value) noexcept                                       \
+    {                                                                                                     \
+        m_data[RequiredI * m_columnsNumber + RequiredJ] = value;                                          \
     }
 
 
