@@ -18,6 +18,7 @@ target_link_libraries(OpenGL_Study_Exe PRIVATE glad
 	OpenGL_Study_compiler_flags
 	OpenGL_Study_General
 	OpenGL_Study_Helpers
+    OpenGL_Study_Math_Core
 	OpenGL_Study_OpenGL_Core)
 
 

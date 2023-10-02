@@ -41,4 +41,5 @@ source_group(
 
 
 add_subdirectory(helpers)
+add_subdirectory(mathCore)
 add_subdirectory(openglCore)

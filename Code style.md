@@ -44,7 +44,7 @@
   using 1
   using 2
 
-  type 1
+  type 1  // also can be before using-statement, if using-statement uses this type
   // this empty line can be omitted if type 1 is declaration, not a definition 
   type 2
 
@@ -53,7 +53,7 @@
   function 2
 
 
-  variable 1
+  variable 1  // also can be before types and functions if they use it
   variable 2
 
   /* anonymous namespace definition */ namespace
@@ -170,6 +170,7 @@ class MyClass
 - As long as you can, stick to the **Rule of Zero**, but if you have to write at least one of the Big Five, default the rest.
 - Order methods of one group in alphabetical order.
 - Use alphabetical order of class fields. If necessary, group class fields and apply alphabetical order inside this groups.
+- Alphabetical order may be broken, if functions are inlined and they use other function or variable, which must be defined before the function. 
 ### Line breaks in class/struct declaration:
 - 2 empty lines after static asserts.
 - 1 empty line before access modifier.
