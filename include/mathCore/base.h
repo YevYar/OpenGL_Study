@@ -94,6 +94,17 @@ constexpr float mapValueToUnitRange(float value) noexcept
 }
 
 /**
+ * \brief Returns the sign of the value.
+ *
+ * \return -1, 0 or 1.
+ */
+template<typename Type>
+constexpr int sign(Type value) noexcept
+{
+    return (Type{0} < value) - (value < Type{0});
+}
+
+/**
  * \brief Calculates the square of a number.
  *
  * \param Type - a type, which supports operator*.
