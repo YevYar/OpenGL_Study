@@ -10,12 +10,45 @@
 #include "floats.h"
 #include "mathCore/baseMatrix.h"
 
+/**
+ * \brief Adds an accessor to the Matrix element on the position.
+ */
+#define OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(RequiredI, RequiredJ, RequiredN, RequiredM, PassedN, PassedM) \
+    /**                                                                                                   \
+     * \brief Provides an access to the element of the Matrix on the position [RequiredI][RequiredJ].     \
+     */                                                                                                   \
+    template<typename = EnableElementAccessor<RequiredN, RequiredM, PassedN, PassedM>>                    \
+    constexpr float& m##RequiredN##RequiredM() noexcept                                                   \
+    {                                                                                                     \
+        return m_data[RequiredI * m_columnsNumber + RequiredJ];                                           \
+    }                                                                                                     \
+                                                                                                          \
+    /**                                                                                                   \
+     * \brief Returns the element of the Matrix on the position [RequiredI][RequiredJ].                   \
+     */                                                                                                   \
+    template<typename = EnableElementAccessor<RequiredN, RequiredM, PassedN, PassedM>>                    \
+    constexpr float m##RequiredN##RequiredM() const noexcept                                              \
+    {                                                                                                     \
+        return m_data[RequiredI * m_columnsNumber + RequiredJ];                                           \
+    }
+
+
+/**
+ * \brief Adds a static_assert to check if the Matrix is a square Matrix.
+ */
 #define OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, functionName)                              \
     static_assert(isSquareMatrixCheck(N, M), "Attempt to use the function " #functionName \
                                              "(), which is defined for a square Matrix, on a non-square Matrix.")
 
 namespace ogls::mathCore
 {
+/**
+ * \brief EnableElementAccessor checks if the accessor to the Matrix element is defined for the Matrix of such
+ * dimensionality.
+ */
+template<size_t RequiredN, size_t RequiredM, size_t PassedN, size_t PassedM>
+using EnableElementAccessor = std::enable_if_t<(PassedN >= RequiredN) && (PassedM >= RequiredM)>;
+
 /**
  * \brief IsNotNullMatrix checks if the both dimensions of the Matrix are greater than 0.
  */
@@ -415,6 +448,25 @@ class Matrix : public BaseMatrix
             OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, cendDiagonal);
             return const_diagonal_iterator{m_rowsNumber, m_columnsNumber, m_data.cend(), true};
         }
+
+        //------ NAMED ACCESSORS TO THE MOST USED MATRIX ELEMENTS
+
+        OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(0, 0, 1, 1, N, M)
+        OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(0, 1, 1, 2, N, M)
+        OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(0, 2, 1, 3, N, M)
+        OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(0, 3, 1, 4, N, M)
+        OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(1, 0, 2, 1, N, M)
+        OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(1, 1, 2, 2, N, M)
+        OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(1, 2, 2, 3, N, M)
+        OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(1, 3, 2, 4, N, M)
+        OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(2, 0, 3, 1, N, M)
+        OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(2, 1, 3, 2, N, M)
+        OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(2, 2, 3, 3, N, M)
+        OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(2, 3, 3, 4, N, M)
+        OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(3, 0, 4, 1, N, M)
+        OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(3, 1, 4, 2, N, M)
+        OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(3, 2, 4, 3, N, M)
+        OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR(3, 3, 4, 4, N, M)
 
         //------
 
@@ -1001,6 +1053,7 @@ constexpr auto operator/(const Matrix<N, M>& m, float num)
 
 }  // namespace ogls::mathCore
 
+#undef OGLS_DEFINE_MATRIX_ELEMENT_ACCESSOR
 #undef OGLS_SQUARE_MATRIX_STATIC_ASSERT
 
 #endif
