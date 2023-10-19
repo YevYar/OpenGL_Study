@@ -1,6 +1,7 @@
 #ifndef OGLS_HELPERS_HELPERS_H
 #define OGLS_HELPERS_HELPERS_H
 
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -22,6 +23,22 @@ namespace ogls::helpers
  * \param textureData - texture data object to be cleaned.
  */
 void freeTextureData(ogls::oglCore::texture::TextureData& textureData);
+
+/**
+ * \brief Constructs an instance of std::array<Type, N> using the provided data.
+ *
+ * \param Type - the type of the array data.
+ * \param N    - a number of elements in the array.
+ * \param data - the standard C-style array with the data.
+ * \return the std::array<Type, N> filled with the provided data.
+ */
+template<typename Type, size_t N>
+constexpr std::array<Type, N> makeStdArray(Type (&data)[N]) noexcept
+{
+    auto result = std::array<Type, N>{};
+    std::copy(std::begin(data), std::end(data), result.begin());
+    return result;
+}
 
 /**
  * \brief Opens the file and reads the content.

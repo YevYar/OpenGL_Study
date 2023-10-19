@@ -1,8 +1,9 @@
 #include "uniforms.h"
 #include "uniformsImpl.h"
 
+#include <array>
+
 #include "exceptions.h"
-#include "helpers/debugHelpers.h"
 #include "helpers/openglHelpers.h"
 
 namespace ogls::oglCore::shader
@@ -43,31 +44,31 @@ BaseUniform::BaseUniform(std::unique_ptr<BaseImpl> impl) noexcept : m_impl{std::
 
 BaseUniform::~BaseUniform() noexcept = default;
 
-template<typename Type, unsigned int Count>
+template<typename Type, size_t Count>
 Uniform<Type, Count>::Uniform(GLuint shaderProgram, GLint location, std::string name) :
     BaseUniform{std::make_unique<Impl>(shaderProgram, location, std::move(name))}
 {
 }
 
-template<typename Type, unsigned int Count>
-Uniform<Type, Count>::operator Type() const
+template<typename Type, size_t Count>
+Uniform<Type, Count>::operator DataType() const
 {
-    return getValue();
+    return getData();
 }
 
-template<typename Type, unsigned int Count>
-Type Uniform<Type, Count>::getValue() const
+template<typename Type, size_t Count>
+auto Uniform<Type, Count>::getData() const -> DataType
 {
-    return impl()->getValue();
+    return impl()->getData();
 }
 
-template<typename Type, unsigned int Count>
-void Uniform<Type, Count>::setData(const void* data)
+template<typename Type, size_t Count>
+void Uniform<Type, Count>::setData(DataType data)
 {
     impl()->setData(data);
 }
 
-template<typename Type, unsigned int Count>
+template<typename Type, size_t Count>
 typename Uniform<Type, Count>::Impl* Uniform<Type, Count>::impl() const noexcept
 {
     return static_cast<Uniform<Type, Count>::Impl*>(m_impl.get());
@@ -84,7 +85,7 @@ BaseUniform::BaseImpl::BaseImpl(GLuint sProgram, GLint loc, std::string n) :
     }
 }
 
-template<typename Type, unsigned int Count>
+template<typename Type, size_t Count>
 Uniform<Type, Count>::Impl::Impl(GLuint shaderProgram, GLint location, std::string name) :
     BaseImpl{shaderProgram, location, std::move(name)},
     getter{reinterpret_cast<ConcreteUniformGetter>(getUniformGetter(typeid(Type).name()))},
@@ -98,20 +99,6 @@ Uniform<Type, Count>::Impl::Impl(GLuint shaderProgram, GLint location, std::stri
     {
         throw exceptions::GLRecAcquisitionException{"No uniform setter function for specified template arguments."};
     }
-}
-
-template<typename Type, unsigned int Count>
-Type Uniform<Type, Count>::Impl::getValue() const
-{
-    auto value = Type{0};
-    OGLS_GLCall(getter(shaderProgram, location, &value));
-    return value;
-}
-
-template<typename Type, unsigned int Count>
-void Uniform<Type, Count>::Impl::setData(const void* data)
-{
-    OGLS_GLCall(setter(location, Count, reinterpret_cast<const Type*>(data)));
 }
 
 namespace

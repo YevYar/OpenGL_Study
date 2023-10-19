@@ -3,6 +3,9 @@
 
 #include "uniforms.h"
 
+#include "helpers/debugHelpers.h"
+#include "helpers/helpers.h"
+
 namespace ogls::oglCore::shader
 {
 /**
@@ -25,13 +28,6 @@ class BaseUniform::BaseImpl
         OGLS_NOT_COPYABLE_MOVABLE(BaseImpl)
         virtual ~BaseImpl() noexcept = default;
 
-        /**
-         * \brief Sets the data of OpenGL uniform variable.
-         *
-         * \param data - pointer to a data, which must be set in the uniform.
-         */
-        virtual void setData(const void* data) = 0;
-
     public:
         /**
          * \brief Location (ID) of the referenced OpenGL uniform variable in a shader program.
@@ -51,7 +47,7 @@ class BaseUniform::BaseImpl
 /**
  * \brief Impl contains private data and methods of Uniform.
  */
-template<typename Type, unsigned int Count>
+template<typename Type, size_t Count>
 class Uniform<Type, Count>::Impl : public BaseUniform::BaseImpl
 {
     public:
@@ -80,11 +76,43 @@ class Uniform<Type, Count>::Impl : public BaseUniform::BaseImpl
         OGLS_NOT_COPYABLE_MOVABLE(Impl)
 
         /**
-         * \brief Returns current value, which is stored in OpenGL uniform variable inside OpenGL state machine.
+         * \brief Returns current data, which is stored in OpenGL uniform variable inside the OpenGL state machine.
          */
-        Type getValue() const;
+        auto getData() const
+        {
+            if constexpr (Count == 1)
+            {
+                auto result = Type{0};
+                OGLS_GLCall(getter(shaderProgram, location, &result));
+                return result;
+            }
+            else
+            {
+                Type result[Count];
+                OGLS_GLCall(getter(shaderProgram, location, result));
+                return helpers::makeStdArray(result);
+            }
+        }
 
-        void setData(const void* data) override;
+        /**
+         * \brief Updates the data, which is stored in OpenGL uniform variable inside the OpenGL state machine.
+         *
+         * \param data - the data, which must be set in the OpenGL uniform variable.
+         */
+        void setData(DataType data)
+        {
+            if constexpr (Count == 1)
+            {
+                OGLS_GLCall(setter(location, 1, &data));
+            }
+            else
+            {
+                // From OpenGL docs: A count of 1 should be used if modifying the value of a single uniform variable,
+                // and a count of 1 or greater can be used to modify an entire array or part of an array.
+                // This call modifies the uniform variable of type vec, so 1 is passed.
+                OGLS_GLCall(setter(location, 1, data.data()));
+            }
+        }
 
     public:
         /**

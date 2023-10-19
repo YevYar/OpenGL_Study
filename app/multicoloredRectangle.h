@@ -5,7 +5,7 @@
 
 namespace ogls::oglCore::shader
 {
-template<typename Type, unsigned int Count>
+template<typename Type, size_t Count>
 class Uniform;
 
 }

@@ -30,7 +30,7 @@ void MulticoloredRectangle::setColorCoefficient(float k)
     if (k >= 0.0 && !isgreater(k, 1.0))
     {
         m_shaderProgram->use();
-        m_colorCoefficient.setData(&k);
+        m_colorCoefficient.setData(k);
         return;
     }
     // throw std::out_of_range{"k must be in the range [0; 1]."};

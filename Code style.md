@@ -315,6 +315,10 @@ avoid possible misunderstanding between `auto lst = {1}; // lst is an initialize
 - Before `#endif`.
 - Between functions (except methods in type declaration) and between function and type declaration.
 
+## Constness
+The `const` class methods (**inspectors**) MUST mean **logical constness** of the method, not just a syntactical constness.
+For example ``Uniform::setData()`` doesn't change the internal state of the Uniform object, however it changes the state of the uniform variable inside the OpenGL state machine. That is why ``Uniform::setData()`` cannot be declared as const method.
+
 ## Noexcept
 - Destructors must be declared as `noexcept`. If destructor calls potentially-throwing function, `try-catch` block must wrap this call.
 - Functions, which use macros `OGLS_CALL()`, cannot be declared as `noexcept`, because `OGLS_CALL()` can be changed to become potentially-throwing.

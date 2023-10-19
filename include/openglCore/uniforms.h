@@ -34,13 +34,6 @@ class BaseUniform
         OGLS_NOT_COPYABLE_MOVABLE(BaseUniform)
         virtual ~BaseUniform() noexcept;
 
-        /**
-         * \brief Sets the data of OpenGL uniform variable.
-         *
-         * \param data - pointer to a data, which must be set in the uniform.
-         */
-        virtual void setData(const void* data) = 0;
-
     protected:
         /**
          * \brief Constructs new BaseUniform object using pointer to BaseImpl object or to object of the class,
@@ -67,7 +60,7 @@ class BaseUniform
  * \param Type  - one of the list: GLfloat, GLdouble, GLint, GLuint.
  * \param Count - the integer value in the range [1, 4].
  */
-template<typename Type, unsigned int Count>
+template<typename Type, size_t Count>
 class Uniform : public BaseUniform
 {
         static_assert(std::is_same_v<GLfloat, Type> || std::is_same_v<GLdouble, Type> || std::is_same_v<GLint, Type>
@@ -83,21 +76,31 @@ class Uniform : public BaseUniform
         class Impl;
 
     public:
+        /**
+         * \brief DataType is a type to represent the data of the uniform variable inside the OpenGL state machine.
+         */
+        using DataType = std::conditional_t<Count == 1, Type, std::array<Type, Count>>;
+
+    public:
         Uniform() = delete;
 
         /**
-         * \brief Returns a Type representation of Uniform object.
+         * \brief Returns a Uniform::DataType representation of the Uniform object.
          *
-         * \see getValue().
+         * \see getData().
          */
-        explicit operator Type() const;
+        explicit operator DataType() const;
 
         /**
-         * \brief Returns current value, which is stored in OpenGL uniform variable inside OpenGL state machine.
+         * \brief Returns current data, which is stored in OpenGL uniform variable inside the OpenGL state machine.
          */
-        Type getValue() const;
-
-        void setData(const void* data) override;
+        DataType getData() const;
+        /**
+         * \brief Updates the data, which is stored in OpenGL uniform variable inside the OpenGL state machine.
+         *
+         * \param data - the data, which must be set in the OpenGL uniform variable.
+         */
+        void     setData(DataType data);
 
     protected:
         /**
