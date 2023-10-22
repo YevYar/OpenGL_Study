@@ -610,6 +610,16 @@ class Matrix : public BaseMatrix
         }
 
         /**
+         * Returns the pointer to the underlaying array, in which the Matrix data is stored.
+         *
+         * Use it with ATTENTION!
+         */
+        constexpr auto getPointerToData() const noexcept
+        {
+            return m_data.data();
+        }
+
+        /**
          * \brief Retrieves the value at the specified row and column in the Matrix.
          *
          * Indexes are counted starting from 0.

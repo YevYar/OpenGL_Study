@@ -8,6 +8,7 @@
 #include <glad/glad.h>
 
 #include "helpers/macros.h"
+#include "mathCore/matrix.h"
 
 namespace ogls::oglCore::shader
 {
@@ -53,6 +54,80 @@ class BaseUniform
         friend class ShaderProgram;
 
 };  // class BaseUniform
+
+/**
+ * \brief MatrixUniform represents a matrix uniform variable, which contains N*M elements.
+ *
+ * \param N - a number of rows in the Matrix in range [2, 4].
+ * \param M - a number of columns in the Matrix in range [2, 4].
+ */
+template<size_t N, size_t M>
+class MatrixUniform : public BaseUniform
+{
+        static_assert((N > 1 && N <= 4) && (M > 1 && M <= 4), "N and M must be in range [2, 4].");
+
+
+    private:
+        /**
+         * \brief Impl contains private data and methods of MatrixUniform.
+         */
+        class Impl;
+
+    public:
+        /**
+         * \brief DataType is a type to represent the data of the uniform variable inside the OpenGL state machine.
+         *
+         * mathCore::Matrix elements must be ordered in a column-row order.
+         */
+        using DataType = mathCore::Matrix<N, M>;
+
+    public:
+        MatrixUniform() = delete;
+
+        /**
+         * \brief Returns a MatrixUniform::DataType representation of the MatrixUniform object.
+         *
+         * \see getData().
+         */
+        explicit operator DataType() const;
+
+        /**
+         * \brief Returns current data, which is stored in OpenGL uniform variable inside the OpenGL state machine.
+         *
+         * mathCore::Matrix elements are ordered in a column-row order.
+         */
+        DataType getData() const;
+        /**
+         * \brief Updates the data, which is stored in OpenGL uniform variable inside the OpenGL state machine.
+         *
+         * \param data - the data, which must be set in the OpenGL uniform variable.
+         * mathCore::Matrix elements must be ordered in a column-row order.
+         */
+        void     setData(DataType data);
+
+    protected:
+        /**
+         * \brief Constructs new object.
+         *
+         * It is also checked that the uniform is attached to a shader program.
+         *
+         * \param shaderProgram - an ID of parent shader program.
+         * \param location      - a location of the uniform in a shader program.
+         * \param name          - a name of the uniform variable.
+         * \throw ogls::exceptions::GLRecAcquisitionException().
+         */
+        MatrixUniform(GLuint shaderProgram, GLint location, std::string name);
+
+    private:
+        /**
+         * \brief Returns a pointer to an object of implementation class, casted from BaseUniform::BaseImpl to Impl.
+         */
+        Impl* impl() const noexcept;
+
+
+        friend class ShaderProgram;
+
+};  // class MatrixUniform
 
 /**
  * \brief Uniform represents one dimensional uniform variable, which contains [1, 4] elements.

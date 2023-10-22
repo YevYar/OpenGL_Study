@@ -45,6 +45,51 @@ class BaseUniform::BaseImpl
 };  // class BaseUniform::BaseImpl
 
 /**
+ * \brief Impl contains private data and methods of MatrixUniform.
+ */
+template<size_t N, size_t M>
+class MatrixUniform<N, M>::Impl : public BaseUniform::BaseImpl
+{
+    public:
+        /**
+         * \brief MatrixUniformSetter is a signature of OpenGL function, which is used by setData() to set the data
+         * of this uniform variable.
+         */
+        using MatrixUniformSetter = void (*)(GLint, GLsizei, GLboolean, const GLfloat*);
+
+    public:
+        /**
+         * \brief Constructs new object.
+         *
+         * \param shaderProgram - an ID of parent shader program.
+         * \param location      - a location of the uniform in a shader program.
+         * \param name          - a name of the uniform variable.
+         * \see BaseUniform::BaseImpl().
+         * \throw ogls::exceptions::GLRecAcquisitionException().
+         */
+        Impl(GLuint shaderProgram, GLint location, std::string name);
+        OGLS_NOT_COPYABLE_MOVABLE(Impl)
+
+        /**
+         * \brief Returns current data, which is stored in OpenGL uniform variable inside the OpenGL state machine.
+         */
+        DataType getData() const;
+        /**
+         * \brief Updates the data, which is stored in OpenGL uniform variable inside the OpenGL state machine.
+         *
+         * \param data - the data, which must be set in the OpenGL uniform variable.
+         */
+        void     setData(DataType data);
+
+    public:
+        /**
+         * \brief The pointer to OpenGL function to set value of this uniform in OpenGL state machine.
+         */
+        const MatrixUniformSetter setter = nullptr;
+
+};  // class MatrixUniform::Impl
+
+/**
  * \brief Impl contains private data and methods of Uniform.
  */
 template<typename Type, size_t Count>
@@ -78,47 +123,15 @@ class Uniform<Type, Count>::Impl : public BaseUniform::BaseImpl
         /**
          * \brief Returns current data, which is stored in OpenGL uniform variable inside the OpenGL state machine.
          */
-        auto getData() const
-        {
-            if constexpr (Count == 1)
-            {
-                auto result = Type{0};
-                OGLS_GLCall(getter(shaderProgram, location, &result));
-                return result;
-            }
-            else
-            {
-                Type result[Count];
-                OGLS_GLCall(getter(shaderProgram, location, result));
-                return helpers::makeStdArray(result);
-            }
-        }
-
+        auto getData() const;
         /**
          * \brief Updates the data, which is stored in OpenGL uniform variable inside the OpenGL state machine.
          *
          * \param data - the data, which must be set in the OpenGL uniform variable.
          */
-        void setData(DataType data)
-        {
-            if constexpr (Count == 1)
-            {
-                OGLS_GLCall(setter(location, 1, &data));
-            }
-            else
-            {
-                // From OpenGL docs: A count of 1 should be used if modifying the value of a single uniform variable,
-                // and a count of 1 or greater can be used to modify an entire array or part of an array.
-                // This call modifies the uniform variable of type vec, so 1 is passed.
-                OGLS_GLCall(setter(location, 1, data.data()));
-            }
-        }
+        void setData(DataType data);
 
     public:
-        /**
-         * \brief The number of elements in the uniform variable.
-         */
-        const unsigned int          count  = {Count};
         /**
          * \brief The pointer to OpenGL function to get value of this uniform in OpenGL state machine.
          */
