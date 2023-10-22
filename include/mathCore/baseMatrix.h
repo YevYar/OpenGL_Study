@@ -115,6 +115,77 @@ class BaseMatrix
         };  // class BaseIterator
 
         /**
+         * \brief BaseMatrix::ColumnMajorIteratorImpl provides an implementation of necessary methods for Iterator
+         * to iterate over Matrix elements in column-major order from element (0, 0) to element (N-1, M-1).
+         *
+         * \see Iterator.
+         */
+        class ColumnMajorIteratorImpl : public BaseIterator
+        {
+            public:
+                using typename BaseIterator::difference_type;
+
+            public:
+                /**
+                 * \see ogls::mathCore::IteratorImpl.
+                 */
+                constexpr difference_type calculateOffset(difference_type iteratorN) const noexcept
+                {
+                    if ((m_currentI == m_rowsNumber - 1) && (m_currentJ == m_columnsNumber - 1) && (iteratorN > 0))
+                    {
+                        return 1;
+                    }
+
+                    auto currentI = m_currentI, currentJ = m_currentJ;
+                    if ((currentI == m_rowsNumber) && (iteratorN < 0))
+                    {
+                        iteratorN += 1;
+                        --currentI;
+                        currentJ = m_columnsNumber - 1;
+                    }
+
+                    const auto iOffset = iteratorN % static_cast<difference_type>(m_rowsNumber);
+                    const auto jOffset = iteratorN / static_cast<difference_type>(m_rowsNumber);
+                    auto       newI    = static_cast<difference_type>(currentI) + iOffset;
+                    auto       newJ    = static_cast<difference_type>(currentJ) + jOffset;
+
+                    if (newI < 0)
+                    {
+                        --newJ;
+                        newI = m_rowsNumber + newI;
+                    }
+                    if (newI >= m_rowsNumber)
+                    {
+                        ++newJ;
+                        newI -= m_rowsNumber;
+                    }
+
+                    const auto thisPosition = static_cast<difference_type>(m_currentI * m_columnsNumber + m_currentJ);
+                    const auto newPosition  = static_cast<difference_type>(newI * m_columnsNumber + newJ);
+                    return newPosition - thisPosition;
+                }
+
+                /**
+                 * \see ogls::mathCore::IteratorImpl.
+                 */
+                constexpr difference_type distanceTo(const ColumnMajorIteratorImpl& j) const noexcept
+                {
+                    return calculateStepsFromBegin() - j.calculateStepsFromBegin();
+                }
+
+            protected:
+                using BaseIterator::BaseIterator;
+
+            private:
+                constexpr size_t calculateStepsFromBegin() const noexcept
+                {
+                    return m_currentI == m_rowsNumber ? m_rowsNumber * m_columnsNumber
+                                                      : m_currentJ * m_rowsNumber + m_currentI;
+                }
+
+        };  // class ColumnMajorIteratorImpl
+
+        /**
          * \brief BaseMatrix::DiagonalIteratorImpl provides an implementation of necessary methods for Iterator
          * to iterate over Matrix elements, which belong to the main diagonal of the Matrix ((0, 0), (1, 1) etc.).
          *

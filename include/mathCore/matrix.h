@@ -151,6 +151,16 @@ class Matrix : public BaseMatrix
         // Non-conventional iterator aliases
 
         /**
+         * \brief Iterates over Matrix elements in column-major order from element (0, 0) to element (N-1, M-1)
+         * without providing ability to change the referenced Matrix element.
+         */
+        using const_column_iterator =
+          Iterator<const float, typename std::array<float, N * M>::const_iterator, ColumnMajorIteratorImpl>;
+        /**
+         * \brief Iterates over Matrix elements in column-major order from element (0, 0) to element (N-1, M-1).
+         */
+        using column_iterator = Iterator<float, typename std::array<float, N * M>::iterator, ColumnMajorIteratorImpl>;
+        /**
          * \brief Iterates over Matrix elements, which belong to the main diagonal of the Matrix ((0, 0), (1, 1) etc.)
          * without providing ability to change the referenced Matrix element.
          */
@@ -366,6 +376,22 @@ class Matrix : public BaseMatrix
         }
 
         /**
+         * \brief Returns a ColumnIterator to the beginning.
+         */
+        constexpr column_iterator beginColumn() noexcept
+        {
+            return column_iterator{m_rowsNumber, m_columnsNumber, m_data.begin()};
+        }
+
+        /**
+         * \brief Returns const ColumnIterator to the beginning.
+         */
+        constexpr const_column_iterator beginColumn() const noexcept
+        {
+            return const_column_iterator{m_rowsNumber, m_columnsNumber, m_data.cbegin()};
+        }
+
+        /**
          * \brief Returns a DiagonalIterator to the beginning.
          */
         constexpr diagonal_iterator beginDiagonal() noexcept
@@ -389,6 +415,14 @@ class Matrix : public BaseMatrix
         constexpr const_iterator cbegin() const noexcept
         {
             return const_iterator{m_rowsNumber, m_columnsNumber, m_data.cbegin()};
+        }
+
+        /**
+         * \brief Returns const ColumnIterator to the beginning.
+         */
+        constexpr const_column_iterator cbeginColumn() const noexcept
+        {
+            return const_column_iterator{m_rowsNumber, m_columnsNumber, m_data.cbegin()};
         }
 
         /**
@@ -417,6 +451,22 @@ class Matrix : public BaseMatrix
         }
 
         /**
+         * \brief Returns a ColumnIterator to the end.
+         */
+        constexpr column_iterator endColumn() noexcept
+        {
+            return column_iterator{m_rowsNumber, m_columnsNumber, m_data.end(), true};
+        }
+
+        /**
+         * \brief Returns const ColumnIterator to the end.
+         */
+        constexpr const_column_iterator endColumn() const noexcept
+        {
+            return const_column_iterator{m_rowsNumber, m_columnsNumber, m_data.cend(), true};
+        }
+
+        /**
          * \brief Returns a DiagonalIterator to the end.
          */
         constexpr diagonal_iterator endDiagonal() noexcept
@@ -440,6 +490,14 @@ class Matrix : public BaseMatrix
         constexpr const_iterator cend() const noexcept
         {
             return const_iterator{m_rowsNumber, m_columnsNumber, m_data.cend(), true};
+        }
+
+        /**
+         * \brief Returns const ColumnIterator to the end.
+         */
+        constexpr const_column_iterator cendColumn() const noexcept
+        {
+            return const_column_iterator{m_rowsNumber, m_columnsNumber, m_data.cend(), true};
         }
 
         /**
