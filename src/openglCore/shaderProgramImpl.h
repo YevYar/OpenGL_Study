@@ -75,6 +75,34 @@ class ShaderProgram::Impl
         ~Impl() noexcept;
 
         /**
+         * \brief Finds uniform location and creates DerivedUniformType object,
+         * which wraps the OpenGL uniform variable with specified name.
+         *
+         * Uses [glGetUniformLocation()](https://docs.gl/gl4/glGetUniformLocation).
+         *
+         * \param DerivedUniformType - a type of the uniform wrapper object to return.
+         * \param name               - a name of uniform variable, which is used in OpenGL shader program.
+         * \return DerivedUniformType object via reference to base class BaseUniform
+         * or throws an exception if nothing is found.
+         * \throw ogls::exceptions::GLRecAcquisitionException().
+         */
+        template<typename DerivedUniformType>
+        requires std::derived_from<DerivedUniformType, BaseUniform>
+        BaseUniform& findUniform(std::string name);
+        /**
+         * \brief Returns uniform wrapper object via reference to base class BaseUniform,
+         * which wraps the OpenGL uniform variable with specified name.
+         *
+         * To get uniform wrapper object for specified uniform variable this uniform must be previously found
+         * and created by calling findUniform().
+         *
+         * \param name - a name of uniform variable, which is used in OpenGL shader program.
+         * \see findUniform().
+         * \return found BaseUniform object or throws an exception if nothing is found.
+         * \throw std::out_of_range.
+         */
+        BaseUniform& getUniform(const std::string& name) const;
+        /**
          * \brief Finds uniform location of uniform variable with specified name.
          *
          * Wraps [glGetUniformLocation()](https://docs.gl/gl4/glGetUniformLocation).
@@ -83,7 +111,7 @@ class ShaderProgram::Impl
          * \return location of uniform variable with specified name or throws an exception if nothing is found.
          * \throw ogls::exceptions::GLRecAcquisitionException().
          */
-        GLint getUniformLocation(const std::string& uniformName) const;
+        GLint        getUniformLocation(const std::string& uniformName) const;
 
     public:
         /**

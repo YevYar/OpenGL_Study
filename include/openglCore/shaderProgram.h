@@ -109,6 +109,22 @@ class ShaderProgram
         ~ShaderProgram() noexcept;
 
         /**
+         * \brief Finds matrix uniform location and creates MatrixUniform<N, M> object,
+         * which wraps the OpenGL matrix uniform variable with specified name.
+         *
+         * Uses [glGetUniformLocation()](https://docs.gl/gl4/glGetUniformLocation).
+         *
+         * \param N    - a number of rows in the Matrix in range [2, 4].
+         * \param M    - a number of columns in the Matrix in range [2, 4].
+         * \param name - a name of matrix uniform variable, which is used in OpenGL shader program.
+         * \see MatrixUniform.
+         * \return created MatrixUniform<N, M> object via reference to base class BaseUniform
+         * or throws an exception if nothing is found.
+         * \throw ogls::exceptions::GLRecAcquisitionException().
+         */
+        template<size_t N, size_t M>
+        BaseUniform& findMatrixUniform(std::string name);
+        /**
          * \brief Finds uniform location and creates Uniform<Type, Count> object,
          * which wraps the OpenGL uniform variable with specified name.
          *
@@ -117,6 +133,7 @@ class ShaderProgram
          * \param Type  - one of the list: GLfloat, GLdouble, GLint, GLuint.
          * \param Count - the integer value in the range [1, 4].
          * \param name  - a name of uniform variable, which is used in OpenGL shader program.
+         * \see Uniform.
          * \return created Uniform<Type, Count> object via reference to base class BaseUniform
          * or throws an exception if nothing is found.
          * \throw ogls::exceptions::GLRecAcquisitionException().
@@ -124,14 +141,14 @@ class ShaderProgram
         template<typename Type, unsigned int Count>
         BaseUniform& findUniform(std::string name);
         /**
-         * \brief Returns Uniform object via reference to base class BaseUniform,
+         * \brief Returns uniform wrapper object via reference to base class BaseUniform,
          * which wraps the OpenGL uniform variable with specified name.
          *
-         * To get Uniform for specified uniform variable this uniform must be previously found and created
-         * by calling findUniform().
+         * To get uniform wrapper object for specified uniform variable this uniform must be previously found
+         * and created by calling findMatrixUniform() or findUniform().
          *
          * \param name - a name of uniform variable, which is used in OpenGL shader program.
-         * \see findUniform().
+         * \see findMatrixUniform(), findUniform().
          * \return found BaseUniform object or throws an exception if nothing is found.
          * \throw std::out_of_range.
          */
