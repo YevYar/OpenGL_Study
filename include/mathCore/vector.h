@@ -11,6 +11,10 @@ namespace ogls::mathCore
 {
 /**
  * \brief Vector represents a vector in 3D (2D) orthonormal basis.
+ *
+ * It has W-component too.
+ *
+ * \see [Homogeneous coordinates](https://en.wikipedia.org/wiki/Homogeneous_coordinates).
  */
 class Vector
 {
@@ -22,30 +26,34 @@ class Vector
         OGLS_DEFAULT_CONSTEXPR_NOEXCEPT_COPYABLE_MOVABLE(Vector)
 
         /**
-         * \brief Constructs Vector with passed Vector coordinates X, Y and Z.
+         * \brief Constructs Vector with passed Vector coordinates X, Y and Z and W-component.
+         *
+         * \see [Homogeneous coordinates](https://en.wikipedia.org/wiki/Homogeneous_coordinates).
          */
-        constexpr Vector(float x, float y, float z = {0.0f}) noexcept : m_x{x}, m_y{y}, m_z{z}
+        constexpr Vector(float x, float y, float z = {0.0f}, float w = {1.0f}) noexcept : m_x{x}, m_y{y}, m_z{z}, m_w{w}
         {
         }
 
         /**
          * \brief Constructs Vector from two Point.
          *
+         * \note W-component is set to 1.
          * \param p1 - a start point of the Vector.
          * \param p2 - an end point of the Vector.
          */
         constexpr Vector(const Point& p1, const Point& p2) noexcept :
-            m_x{p2.x - p1.x}, m_y{p2.y - p1.y}, m_z{p2.z - p1.z}
+            m_x{p2.x - p1.x}, m_y{p2.y - p1.y}, m_z{p2.z - p1.z}, m_w{1.0f}
         {
         }
 
         /**
          * \brief Constructs Vector with all coordinates set to the value of generalCoordinate.
          *
+         * \note W-component is set to 1.
          * \param generalCoordinate - value of X, Y and Z coordinates.
          */
         constexpr explicit Vector(float generalCoordinate) noexcept :
-            m_x{generalCoordinate}, m_y{generalCoordinate}, m_z{generalCoordinate}
+            m_x{generalCoordinate}, m_y{generalCoordinate}, m_z{generalCoordinate}, m_w{1.0f}
         {
         }
 
@@ -53,10 +61,12 @@ class Vector
 
         /**
          * \brief Returns new Vector as the result of negation of this Vector.
+         *
+         * \note W-component is not affected.
          */
         constexpr Vector operator-() const noexcept
         {
-            return Vector{-m_x, -m_y, -m_z};
+            return Vector{-m_x, -m_y, -m_z, m_w};
         }
 
         /**
@@ -76,6 +86,7 @@ class Vector
          *
          * Changes this Vector by performing addition of coordinates of v to coordinates of this Vector.
          *
+         * \note W-component is not affected.
          * \param v - another Vector to add to this Vector.
          * \return this Vector with changed coordinates.
          */
@@ -89,6 +100,7 @@ class Vector
          *
          * Changes this Vector by performing addition of the number to all coordinates of this Vector.
          *
+         * \note W-component is not affected.
          * \param num - a number to add to all coordinates of this Vector.
          * \return this Vector with changed coordinates.
          */
@@ -102,6 +114,7 @@ class Vector
          *
          * Changes this Vector by performing subtraction of coordinates of v from coordinates of this Vector.
          *
+         * \note W-component is not affected.
          * \param v - another Vector to subtract from this Vector.
          * \return this Vector with changed coordinates.
          */
@@ -115,6 +128,7 @@ class Vector
          *
          * Changes this Vector by performing subtraction of the number from all coordinates of this Vector.
          *
+         * \note W-component is not affected.
          * \param num - a number to subtract from all coordinates of this Vector.
          * \return this Vector with changed coordinates.
          */
@@ -128,6 +142,7 @@ class Vector
          *
          * Changes this Vector by performing multiplication of all coordinates of this Vector by number.
          *
+         * \note W-component is not affected.
          * \param num - a number to multiply coordinates of this Vector by.
          * \return this Vector with changed coordinates.
          */
@@ -141,6 +156,7 @@ class Vector
          *
          * Changes this Vector by performing division of all coordinates of this Vector by number.
          *
+         * \note W-component is not affected.
          * \param num - a number to divide coordinates of this Vector by.
          * \return this Vector with changed coordinates.
          * \throw ogls::exceptions::DivisionByZeroException().
@@ -174,7 +190,7 @@ class Vector
          */
         explicit operator std::string() const
         {
-            return std::format("Vector(x={}, y={}, z={} | length={})", m_x, m_y, m_z, length());
+            return std::format("Vector(x={}, y={}, z={}, w={} | length={})", m_x, m_y, m_z, m_w, length());
         }
 
         //------
@@ -182,6 +198,7 @@ class Vector
         /**
          * \brief Checks if the Vector is normalized vector (unit vector, length is equal to 1.0).
          *
+         * \note W-component is not considered.
          * \return true if the Vector is unit-vector, false otherwise.
          */
         constexpr bool isNormalized() const noexcept
@@ -193,6 +210,7 @@ class Vector
         /**
          * \brief Checks if the Vector is zero-vector (length is equal to 0.0).
          *
+         * \note W-component is not considered.
          * \return true if the Vector is zero-vector, false otherwise.
          */
         constexpr bool isZeroVector() const noexcept
@@ -202,11 +220,23 @@ class Vector
 
         /**
          * \brief Returns the length (magnitude) of the Vector.
+         *
+         * \note W-component is not taken into account.
          */
         constexpr float length() const noexcept
         {
             return m_x == 0.0f && m_y == 0.0f && m_z == 0.0f ? 0.0f
                                                              : std::sqrtf(square(m_x) + square(m_y) + square(m_z));
+        }
+
+        /**
+         * \brief Sets the W-component of the Vector.
+         *
+         * \param w - value to set.
+         */
+        constexpr void setW(float w) noexcept
+        {
+            m_w = w;
         }
 
         /**
@@ -242,6 +272,7 @@ class Vector
         /**
          * \brief Sets the X, Y, Z coordinates of the Vector.
          *
+         * \note W-component is not affected.
          * \param x, y, z - values to set.
          */
         constexpr void setCoordinates(float x, float y, float z = {0.0f}) noexcept
@@ -254,6 +285,7 @@ class Vector
         /**
          * \brief Sets the X, Y, Z coordinates of the Vector to the value of generalCoordinate.
          *
+         * \note W-component is not affected.
          * \param generalCoordinate - value of X, Y and Z coordinates.
          */
         constexpr void setCoordinates(float generalCoordinate) noexcept
@@ -269,6 +301,14 @@ class Vector
         std::string toString() const
         {
             return static_cast<std::string>(*this);
+        }
+
+        /**
+         * \brief Returns W-component of the Vector.
+         */
+        constexpr float w() const noexcept
+        {
+            return m_w;
         }
 
         /**
@@ -299,6 +339,8 @@ class Vector
         /**
          * \brief Returns this Vector with changed coordinates in the result of applying of operand to all coordinates
          * of the Vector.
+         *
+         * \note W-component is not affected.
          */
         constexpr Vector& changeCoordinatesViaOperand(float x, float y, float z, auto operand)
         {
@@ -309,7 +351,7 @@ class Vector
         }
 
     private:
-        float m_x = {0.0f}, m_y = {0.0f}, m_z = {0.0f};
+        float m_x = {0.0f}, m_y = {0.0f}, m_z = {0.0f}, m_w = {1.0f};
 
 };  // class Vector
 
@@ -327,6 +369,7 @@ enum class VectorIntoMatrixInsertionOrder
 /**
  * \brief Calculates a dot product of two Vector by their coordinates.
  *
+ * \note W-components are not considered.
  * \return the dot product of two Vector.
  */
 constexpr float dotProduct(const Vector& v1, const Vector& v2) noexcept
@@ -351,6 +394,7 @@ inline float dotProduct(float lengthV1, float lengthV2, float angle, AngleUnit u
 /**
  * \brief Calculates a dot product of two Vector by their lengths and an angle between them.
  *
+ * \note W-components are not considered.
  * \param v1    - Vector 1.
  * \param v2    - Vector 2.
  * \param angle - angle between two Vector.
@@ -436,6 +480,7 @@ constexpr void insertVectorIntoMatrix(Matrix<N, M>& m, const Vector& v, VectorIn
 /**
  * \brief Calculates a cross product of two Vector.
  *
+ * \note W-component of the result Vector is set to 1.
  * \param v1 - Vector 1.
  * \param v2 - Vector 2.
  * \return the cross product of two Vector.
@@ -455,6 +500,7 @@ constexpr Vector crossProduct(const Vector& v1, const Vector& v2) noexcept
 /**
  * \brief Creates new normalized vector of the passed vector.
  *
+ * \note W-component of the result Vector is set to 1.
  * \param v - the Vector to normalize.
  * \return normalized Vector of the Vector v or zero-vector if v is zero-vector.
  */
@@ -467,6 +513,7 @@ constexpr Vector normalize(const Vector& v) noexcept
 /**
  * \brief Checks equality of two Vector.
  *
+ * \note W-components are not considered.
  * \return true if two Vector have equal coordinates, false otherwise.
  */
 constexpr bool operator==(const Vector& v1, const Vector& v2) noexcept
@@ -480,6 +527,7 @@ constexpr bool operator==(const Vector& v1, const Vector& v2) noexcept
 /**
  * \brief Checks if two Vector are not equal.
  *
+ * \note W-components are not considered.
  * \return true if two Vector have different coordinates, false otherwise.
  */
 constexpr bool operator!=(const Vector& v1, const Vector& v2) noexcept
@@ -490,6 +538,7 @@ constexpr bool operator!=(const Vector& v1, const Vector& v2) noexcept
 /**
  * \brief Adds two Vector.
  *
+ * \note W-component of the result Vector is set to 1.
  * \return Vector, which is the result of addition of two Vector.
  */
 constexpr Vector operator+(const Vector& v1, const Vector& v2) noexcept
@@ -500,6 +549,7 @@ constexpr Vector operator+(const Vector& v1, const Vector& v2) noexcept
 /**
  * \brief Adds number to a Vector.
  *
+ * \note W-component of the result Vector is set to 1.
  * \param num - a number to add to every coordinate of the Vector.
  * \param v   - a source Vector.
  * \return new Vector, which is a result of addition of the number to every coordinate of Vector v.
@@ -512,6 +562,7 @@ constexpr Vector operator+(float num, const Vector& v) noexcept
 /**
  * \brief Adds number to a Vector.
  *
+ * \note W-component of the result Vector is set to 1.
  * \param v   - a source Vector.
  * \param num - a number to add to every coordinate of the Vector.
  * \return new Vector, which is a result of addition of the number to every coordinate of Vector v.
@@ -524,6 +575,7 @@ constexpr Vector operator+(const Vector& v, float num) noexcept
 /**
  * \brief Subtracts two Vector.
  *
+ * \note W-component of the result Vector is set to 1.
  * \return Vector, which is the result of subtraction of two Vector.
  */
 constexpr Vector operator-(const Vector& v1, const Vector& v2) noexcept
@@ -534,6 +586,7 @@ constexpr Vector operator-(const Vector& v1, const Vector& v2) noexcept
 /**
  * \brief Subtracts the number from the Vector.
  *
+ * \note W-component of the result Vector is set to 1.
  * \param v   - a source Vector.
  * \param num - a number to subtract from every coordinate of the Vector.
  * \return new Vector, which is a result of subtraction of the number from every coordinate of Vector v.
@@ -546,6 +599,7 @@ constexpr Vector operator-(const Vector& v, float num) noexcept
 /**
  * \brief Multiplies all coordinates of the Vector by number.
  *
+ * \note W-component of the result Vector is set to 1.
  * \param num - a number to multiply coordinates of the Vector by.
  * \param v   - a source Vector.
  * \return new Vector, which is a result of multiplication of every coordinate of Vector v by number.
@@ -558,6 +612,7 @@ constexpr Vector operator*(float num, const Vector& v) noexcept
 /**
  * \brief Multiplies all coordinates of the Vector by number.
  *
+ * \note W-component of the result Vector is set to 1.
  * \param v   - a source Vector.
  * \param num - a number to multiply coordinates of the Vector by.
  * \return new Vector, which is a result of multiplication of every coordinate of Vector v by number.
@@ -570,6 +625,7 @@ constexpr Vector operator*(const Vector& v, float num) noexcept
 /**
  * \brief Divides all coordinates of the Vector by number.
  *
+ * \note W-component of the result Vector is set to 1.
  * \param v   - a source Vector.
  * \param num - a number to divide coordinates of the Vector by.
  * \return new Vector, which is a result of division of every coordinate of Vector v by number.
@@ -590,6 +646,7 @@ constexpr Vector operator/(const Vector& v, float num)
 /**
  * \brief Checks if two Vector are co-directed.
  *
+ * \note W-components are not considered.
  * \return true if co-directed, false otherwise.
  */
 inline bool isVectorsCodirected(const Vector& v1, const Vector& v2)
@@ -600,6 +657,7 @@ inline bool isVectorsCodirected(const Vector& v1, const Vector& v2)
 /**
  * \brief Checks if two Vector are collinear.
  *
+ * \note W-components are not considered.
  * \return true if collinear, false otherwise.
  */
 inline bool isVectorsCollinear(const Vector& v1, const Vector& v2)
@@ -610,6 +668,7 @@ inline bool isVectorsCollinear(const Vector& v1, const Vector& v2)
 /**
  * \brief Checks if two Vector are oppositely directed (the angle between Vector is 180 degrees).
  *
+ * \note W-components are not considered.
  * \return true if oppositely directed, false otherwise.
  */
 inline bool isVectorsOppositelyDirected(const Vector& v1, const Vector& v2)
@@ -620,6 +679,7 @@ inline bool isVectorsOppositelyDirected(const Vector& v1, const Vector& v2)
 /**
  * \brief Checks if two Vector are orthogonal.
  *
+ * \note W-components are not considered.
  * \return true if orthogonal, false otherwise.
  */
 constexpr bool isVectorsOrthogonal(const Vector& v1, const Vector& v2) noexcept
