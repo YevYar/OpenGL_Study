@@ -103,7 +103,7 @@ class MatrixUniform : public BaseUniform
          * \param data - the data, which must be set in the OpenGL uniform variable.
          * mathCore::Matrix elements must be ordered in a column-row order.
          */
-        void     setData(DataType data);
+        void     setData(const DataType& data);
 
     protected:
         /**
@@ -175,7 +175,7 @@ class Uniform : public BaseUniform
          *
          * \param data - the data, which must be set in the OpenGL uniform variable.
          */
-        void     setData(DataType data);
+        void     setData(const DataType& data);
 
     protected:
         /**

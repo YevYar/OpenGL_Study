@@ -74,7 +74,7 @@ auto MatrixUniform<N, M>::getData() const -> DataType
 }
 
 template<size_t N, size_t M>
-void MatrixUniform<N, M>::setData(DataType data)
+void MatrixUniform<N, M>::setData(const DataType& data)
 {
     impl()->setData(data);
 }
@@ -104,7 +104,7 @@ auto Uniform<Type, Count>::getData() const -> DataType
 }
 
 template<typename Type, size_t Count>
-void Uniform<Type, Count>::setData(DataType data)
+void Uniform<Type, Count>::setData(const DataType& data)
 {
     impl()->setData(data);
 }
@@ -156,7 +156,7 @@ auto MatrixUniform<N, M>::Impl::getData() const -> DataType
 }
 
 template<size_t N, size_t M>
-void MatrixUniform<N, M>::Impl::setData(DataType data)
+void MatrixUniform<N, M>::Impl::setData(const DataType& data)
 {
     // From https://docs.gl/gl4/glUniform:
     // A count of 1 should be used if modifying the value of a single uniform variable,
@@ -202,7 +202,7 @@ auto Uniform<Type, Count>::Impl::getData() const
 }
 
 template<typename Type, size_t Count>
-void Uniform<Type, Count>::Impl::setData(DataType data)
+void Uniform<Type, Count>::Impl::setData(const DataType& data)
 {
     if constexpr (Count == 1)
     {

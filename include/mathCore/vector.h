@@ -487,14 +487,10 @@ constexpr void insertVectorIntoMatrix(Matrix<N, M>& m, const Vector& v, VectorIn
  */
 constexpr Vector crossProduct(const Vector& v1, const Vector& v2) noexcept
 {
-    auto m = Matrix<3, 3>{1.0f};
-
-    insertVectorIntoMatrix(m, v1, VectorIntoMatrixInsertionOrder::RowMajor, 1);
-    insertVectorIntoMatrix(m, v2, VectorIntoMatrixInsertionOrder::RowMajor, 2);
-
-    return Vector{m.calculateAlgebraicComplement(BaseMatrix::Index{.rows = 0, .columns = 0}),
-                  m.calculateAlgebraicComplement(BaseMatrix::Index{.rows = 0, .columns = 1}),
-                  m.calculateAlgebraicComplement(BaseMatrix::Index{.rows = 0, .columns = 2})};
+    // clang-format off
+    return Vector{(v1.y() * v2.z()) - (v1.z() * v2.y()),
+                  (v1.z() * v2.x()) - (v1.x() * v2.z()),
+                  (v1.x() * v2.y()) - (v1.y() * v2.x())};  // clang-format on
 }
 
 /**

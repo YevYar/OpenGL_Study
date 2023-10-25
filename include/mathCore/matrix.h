@@ -555,13 +555,18 @@ class Matrix : public BaseMatrix
         {
             OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, calculateDeterminant);
 
+            if constexpr (N == 3)
+            {
+                return (m11() * m22() * m33()) + (m12() * m23() * m31()) + (m13() * m21() * m32())
+                       - (m13() * m22() * m31()) - (m12() * m21() * m33()) - (m11() * m23() * m32());
+            }
             if constexpr (N == 2)
             {
-                return (getValue(0, 0) * getValue(1, 1)) - (getValue(0, 1) * getValue(1, 0));
+                return (m11() * m22()) - (m12() * m21());
             }
             else if constexpr (N == 1)
             {
-                return getValue(0, 0);
+                return m11();
             }
             else
             {

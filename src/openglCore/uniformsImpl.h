@@ -79,7 +79,7 @@ class MatrixUniform<N, M>::Impl : public BaseUniform::BaseImpl
          *
          * \param data - the data, which must be set in the OpenGL uniform variable.
          */
-        void     setData(DataType data);
+        void     setData(const DataType& data);
 
     public:
         /**
@@ -129,7 +129,7 @@ class Uniform<Type, Count>::Impl : public BaseUniform::BaseImpl
          *
          * \param data - the data, which must be set in the OpenGL uniform variable.
          */
-        void setData(DataType data);
+        void setData(const DataType& data);
 
     public:
         /**
