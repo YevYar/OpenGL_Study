@@ -166,6 +166,16 @@ class MatrixException : public MathException
 
 };  // class MatrixException
 
+/**
+ * \brief VectorException is an exception to indicate error while operating on Vectors.
+ */
+class VectorException : public MathException
+{
+    public:
+        using MathException::MathException;
+
+};  // class VectorException
+
 }  // namespace ogls::exceptions
 
 #endif
