@@ -134,6 +134,7 @@ class Matrix : public BaseMatrix
                       "The dimensionality of the Matrix seems to be too big. "
                       "Check if you passed the correct N and M.");
 
+
     public:
         // The following type aliases are the conventions of STL
 

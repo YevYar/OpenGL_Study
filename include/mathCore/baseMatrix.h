@@ -328,7 +328,7 @@ class BaseMatrix
                         /**
                          * \brief Returns a std::string representation of the Element object.
                          */
-                        operator std::string() const
+                        explicit operator std::string() const
                         {
                             return std::format("Matrix::Iterator::Element({}, {}) = {}", i, j, getValue());
                         }
@@ -701,7 +701,7 @@ class BaseMatrix
                 /**
                  * \brief Returns a std::string representation of the Size object.
                  */
-                operator std::string() const
+                explicit operator std::string() const
                 {
                     return std::format("Matrix::Size(rows={}, columns={})", rows, columns);
                 }
