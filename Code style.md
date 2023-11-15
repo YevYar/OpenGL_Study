@@ -42,6 +42,7 @@
   }  // namespace
 
   using 1
+
   using 2
 
   type 1  // also can be before using-statement, if using-statement uses this type
@@ -73,7 +74,8 @@ class MyClass
 
     // TYPES
     public:
-        using
+        using 1
+        using 2
         ...
 
     protected:
@@ -178,6 +180,20 @@ class MyClass
 - 1 empty line after static fields.
 - 2 empty lines before *friends*. It's needed to emphasize, that *friends* aren't part of private section.
 - 1 empty line before closing `}`.
+- 1 empty line after using type-alias outside some class declaration:
+  ```
+  using Type = SomeType<1>;
+
+  using Type2 = SomeType<2>;
+
+  class SomeClass
+  {
+      public:
+          using T1 = int;
+          using T2 = float;
+
+  }
+  ```
 
 ## Files and folders
 - The source code of the project is separated on two parts - **app** and **core**. **Core** is a library, **app** is a demo application, which uses **core** library. 

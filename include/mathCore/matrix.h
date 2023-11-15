@@ -931,6 +931,24 @@ class Matrix : public BaseMatrix
 
 };  // class Matrix
 
+using Mat2 = Matrix<2, 2>;
+
+using Mat2x3 = Matrix<2, 3>;
+
+using Mat2x4 = Matrix<2, 4>;
+
+using Mat3 = Matrix<3, 3>;
+
+using Mat3x2 = Matrix<3, 2>;
+
+using Mat3x4 = Matrix<3, 4>;
+
+using Mat4 = Matrix<4, 4>;
+
+using Mat4x2 = Matrix<4, 2>;
+
+using Mat4x3 = Matrix<4, 3>;
+
 //------ OPERATIONS ON MATRIX
 
 /**

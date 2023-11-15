@@ -13,11 +13,13 @@ namespace
     /**
      * \brief BaseUniformGetter is a pointer to an OpenGL function to get value of uniform variable.
      */
-    using BaseUniformGetter   = void (*)(GLuint, GLint, void*);
+    using BaseUniformGetter = void (*)(GLuint, GLint, void*);
+
     /**
      * \brief BaseUniformSetter is a pointer to an OpenGL function to set value of uniform variable.
      */
-    using BaseUniformSetter   = void (*)(GLint, GLsizei, const void*);
+    using BaseUniformSetter = void (*)(GLint, GLsizei, const void*);
+
     /**
      * \brief MatrixUniformSetter is a pointer to an OpenGL function to set value of matrix uniform variable.
      */
