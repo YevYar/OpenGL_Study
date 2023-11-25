@@ -35,7 +35,7 @@ BaseUniform& ShaderProgram::findMatrixUniform(std::string name)
     return m_impl->findUniform<MatrixUniform<N, M>>(std::move(name));
 }
 
-template<typename Type, unsigned int Count>
+template<typename Type, size_t Count>
 BaseUniform& ShaderProgram::findUniform(std::string name)
 {
     return m_impl->findUniform<Uniform<Type, Count>>(std::move(name));

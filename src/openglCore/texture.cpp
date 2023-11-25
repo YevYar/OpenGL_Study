@@ -24,7 +24,7 @@ BaseTexture* BaseTexture::clone() const
     return new BaseTexture{*this};
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 Texture<DimensionsNumber>::Texture(TextureTarget target) : BaseTexture{std::make_unique<Texture::Impl>(target)}
 {
     if (impl()->dimensionsNumber == 1 && target != TextureTarget::Texture1d)
@@ -41,51 +41,51 @@ Texture<DimensionsNumber>::Texture(TextureTarget target) : BaseTexture{std::make
     }
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 Texture<DimensionsNumber>::Texture(TextureTarget target, std::shared_ptr<TextureData> textureData) : Texture{target}
 {
     setData(std::move(textureData));
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 Texture<DimensionsNumber>::Texture(const Texture& obj) : BaseTexture{std::make_unique<Texture::Impl>(*obj.impl())}
 {
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 Texture<DimensionsNumber>::~Texture() noexcept = default;
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 void Texture<DimensionsNumber>::unbindTarget(TextureTarget target)
 {
     OGLS_GLCall(glBindTexture(helpers::toUType(target), 0));
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 void Texture<DimensionsNumber>::bind() const
 {
     impl()->bind();
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 std::shared_ptr<TextureData> Texture<DimensionsNumber>::getData() const noexcept
 {
     return impl()->data;
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 TextureTarget Texture<DimensionsNumber>::getTarget() const noexcept
 {
     return m_impl->target;
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 void Texture<DimensionsNumber>::setData(std::shared_ptr<TextureData> textureData)
 {
     impl()->setData(std::move(textureData));
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 template<typename Type>
 requires std::is_same_v<GLfloat, Type> || std::is_same_v<GLint, Type>
 void Texture<DimensionsNumber>::setParameter(TexParameterName parameter, Type value)
@@ -100,7 +100,7 @@ void Texture<DimensionsNumber>::setParameter(TexParameterName parameter, Type va
     }
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 template<typename Type>
 requires std::is_same_v<GLint, Type> || std::is_same_v<GLuint, Type>
 void Texture<DimensionsNumber>::setParameterIV(TexParameterName parameter, const Type* values)
@@ -115,7 +115,7 @@ void Texture<DimensionsNumber>::setParameterIV(TexParameterName parameter, const
     }
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 template<typename Type>
 requires std::is_same_v<GLfloat, Type> || std::is_same_v<GLint, Type>
 void Texture<DimensionsNumber>::setParameterV(TexParameterName parameter, const Type* values)
@@ -130,25 +130,25 @@ void Texture<DimensionsNumber>::setParameterV(TexParameterName parameter, const 
     }
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 void Texture<DimensionsNumber>::specifyTextureStorageFormat(const std::shared_ptr<TextureData>& textureData)
 {
     impl()->specifyTextureStorageFormat(textureData);
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 void Texture<DimensionsNumber>::unbind() const
 {
     Texture::unbindTarget(m_impl->target);
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 Texture<DimensionsNumber>* Texture<DimensionsNumber>::clone() const
 {
     return new Texture{*this};
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 typename Texture<DimensionsNumber>::Impl* Texture<DimensionsNumber>::impl() const noexcept
 {
     return static_cast<Texture<DimensionsNumber>::Impl*>(m_impl.get());
@@ -237,24 +237,24 @@ void TexDimensionSpecificFunc<3>::setTexStorageFormat(GLuint textureId, const st
                                    textureData->width, textureData->height, textureData->depth));
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 Texture<DimensionsNumber>::Impl::Impl(TextureTarget t) : BaseImpl{t}
 {
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 Texture<DimensionsNumber>::Impl::Impl(const Impl& obj) : BaseImpl{obj}
 {
     setData(obj.data);
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 void Texture<DimensionsNumber>::Impl::bindToTarget(TextureTarget target, GLuint textureId)
 {
     OGLS_GLCall(glBindTexture(helpers::toUType(target), textureId));
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 TextureBindingTarget Texture<DimensionsNumber>::Impl::getTargetAssociatedGetParameter(TextureTarget target) noexcept
 {
     switch (target)
@@ -289,13 +289,13 @@ TextureBindingTarget Texture<DimensionsNumber>::Impl::getTargetAssociatedGetPara
     }
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 void Texture<DimensionsNumber>::Impl::bind() const
 {
     Impl::bindToTarget(target, rendererId);
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 void Texture<DimensionsNumber>::Impl::setData(std::shared_ptr<TextureData> textureData)
 {
     if (!isStorageFormatSpecified)
@@ -309,7 +309,7 @@ void Texture<DimensionsNumber>::Impl::setData(std::shared_ptr<TextureData> textu
     data = std::move(textureData);
 }
 
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 void Texture<DimensionsNumber>::Impl::specifyTextureStorageFormat(const std::shared_ptr<TextureData>& textureData)
 {
     OGLS_ASSERT(!isStorageFormatSpecified);

@@ -47,7 +47,7 @@ namespace
      * \param count    - the value in the range [1, 4].
      * \return pointer to the OpenGL setter-function or nullptr.
      */
-    BaseUniformSetter   getUniformSetter(const char* typeName, unsigned int count) noexcept;
+    BaseUniformSetter   getUniformSetter(const char* typeName, size_t count) noexcept;
 
 }  // namespace
 
@@ -301,7 +301,7 @@ namespace
         return nullptr;
     }
 
-    BaseUniformSetter getUniformSetter(const char* typeName, unsigned int count) noexcept
+    BaseUniformSetter getUniformSetter(const char* typeName, size_t count) noexcept
     {
         using namespace helpers;
 

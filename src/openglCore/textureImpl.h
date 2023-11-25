@@ -63,7 +63,7 @@ class BaseTexture::BaseImpl
  * \param DimensionsNumber - the integer value in the range [1, 3], which specifies a number of dimensions in the
  * texture.
  */
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 class TexDimensionSpecificFunc
 {
 };
@@ -131,7 +131,7 @@ class TexDimensionSpecificFunc<3>
  * \param DimensionsNumber - the integer value in the range [1, 3], which specifies a number of dimensions in the
  * texture.
  */
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 class Texture<DimensionsNumber>::Impl : public BaseTexture::BaseImpl
 {
     public:

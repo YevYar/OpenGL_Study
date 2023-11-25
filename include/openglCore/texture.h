@@ -80,7 +80,7 @@ class BaseTexture : public ICloneable
  * \param DimensionsNumber - the integer value in the range [1, 3], which specifies a number of dimensions in the
  * texture.
  */
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 class Texture : public BaseTexture
 {
         static_assert(DimensionsNumber >= 1 && DimensionsNumber <= 3,
@@ -240,7 +240,7 @@ class Texture : public BaseTexture
  * texture.
  * \param baseTexture      - an object to cast to Texture<DimensionsNumber>.
  */
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 auto castBaseTextureToTexture(std::shared_ptr<BaseTexture> baseTexture) noexcept
 {
     return std::dynamic_pointer_cast<Texture<DimensionsNumber>>(baseTexture);

@@ -157,7 +157,7 @@ void applyTexturesConfiguration(const TexturesConfiguration& texturesConfigurati
  * \param textureTarget    - a texture target to which the needed texture is bound.
  * \return casted object or nullptr.
  */
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 auto castBaseTextureToTexture(GLuint textureUnitIndex, TextureTarget textureTarget)
 {
     const auto tUnit = TextureUnitsManager::get(textureUnitIndex);
@@ -174,7 +174,7 @@ auto castBaseTextureToTexture(GLuint textureUnitIndex, TextureTarget textureTarg
  * \param textureTarget    - a texture target to which the needed texture is bound.
  * \return casted object or nullptr.
  */
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 auto castBaseTextureToTexture(const std::shared_ptr<TextureUnit>& textureUnit, TextureTarget textureTarget) noexcept
 {
     auto txt = textureUnit->getTexture(textureTarget);
@@ -193,7 +193,7 @@ auto castBaseTextureToTexture(const std::shared_ptr<TextureUnit>& textureUnit, T
  * \return casted object.
  * \throw std::out_of_range.
  */
-template<unsigned int DimensionsNumber>
+template<size_t DimensionsNumber>
 auto castBaseTextureToTexture(const TexturesConfiguration& texturesConfig, GLuint textureUnitIndex, size_t textureIndex)
 {
     return std::dynamic_pointer_cast<Texture<DimensionsNumber>>(texturesConfig.at(textureUnitIndex).at(textureIndex));

@@ -138,7 +138,7 @@ class ShaderProgram
          * or throws an exception if nothing is found.
          * \throw ogls::exceptions::GLRecAcquisitionException().
          */
-        template<typename Type, unsigned int Count>
+        template<typename Type, size_t Count>
         BaseUniform& findUniform(std::string name);
         /**
          * \brief Returns uniform wrapper object via reference to base class BaseUniform,
