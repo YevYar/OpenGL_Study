@@ -8,7 +8,7 @@ namespace ogls::oglCore::vertex
 /**
  * \brief Impl contains private data and methods of VertexBufferLayout.
  */
-class VertexBufferLayout::Impl
+class VertexBufferLayout::Impl final
 {
     public:
         Impl()                = default;

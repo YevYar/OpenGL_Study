@@ -171,7 +171,7 @@ class Vector
                 /**
                  * \brief Component keeps the data of the Vector component, on which the Iterator points.
                  */
-                struct Component
+                struct Component final
                 {
                     public:
                         /**

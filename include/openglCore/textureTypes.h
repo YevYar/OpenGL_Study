@@ -231,7 +231,7 @@ enum class TextureTarget : GLenum
  * \brief TextureData contains a pointer to the data of the texture, information about the loaded image
  * and about some of the texture parameters.
  */
-class TextureData
+struct TextureData
 {
     public:
         /**

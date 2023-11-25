@@ -90,6 +90,8 @@ class BaseMatrix
                 {
                 }
 
+                virtual ~BaseIterator() noexcept = default;
+
             protected:
                 /**
                  * \brief The number of columns in represented Matrix.
@@ -298,7 +300,7 @@ class BaseMatrix
                  * Element provides necessary data about the Matrix element -
                  * its row and column indexes as well as the element data.
                  */
-                struct Element
+                struct Element final
                 {
                     public:
                         /**
@@ -721,6 +723,8 @@ class BaseMatrix
         using Index = Size;
 
     public:
+        virtual ~BaseMatrix() noexcept = default;
+
         /**
          * \brief Retrieves the number of columns in the Matrix.
          *

@@ -15,6 +15,8 @@ class Renderer::Impl
             coloredRectangle = makeMulticoloredRectangle();
         }
 
+        virtual ~Impl() noexcept = default;
+
     public:
         std::unique_ptr<MulticoloredRectangle> coloredRectangle = nullptr;
         float                                  currentK         = {0.0};
