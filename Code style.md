@@ -291,7 +291,7 @@ namespace
 }  // namespace
 
 // In the end of file create template instantiations if necessary
-template class Uniform<GLfloat, 1>;
+template class VectorUniform<GLfloat, 1>;
 
 }  // namespace ogls::oglCore::shader
 
@@ -333,7 +333,7 @@ avoid possible misunderstanding between `auto lst = {1}; // lst is an initialize
 
 ## Constness
 The `const` class methods (**inspectors**) MUST mean **logical constness** of the method, not just a syntactical constness.
-For example ``Uniform::setData()`` doesn't change the internal state of the Uniform object, however it changes the state of the uniform variable inside the OpenGL state machine. That is why ``Uniform::setData()`` cannot be declared as const method.
+For example ``VectorUniform::setData()`` doesn't change the internal state of the VectorUniform object, however it changes the state of the uniform variable inside the OpenGL state machine. That is why ``VectorUniform::setData()`` cannot be declared as const method.
 
 ## Noexcept
 - Destructors must be declared as `noexcept`. If destructor calls potentially-throwing function, `try-catch` block must wrap this call.

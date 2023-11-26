@@ -90,10 +90,10 @@ class MatrixUniform<N, M>::Impl : public BaseUniform::BaseImpl
 };  // class MatrixUniform::Impl
 
 /**
- * \brief Impl contains private data and methods of Uniform.
+ * \brief Impl contains private data and methods of VectorUniform.
  */
 template<typename Type, size_t Count>
-class Uniform<Type, Count>::Impl : public BaseUniform::BaseImpl
+class VectorUniform<Type, Count>::Impl : public BaseUniform::BaseImpl
 {
     public:
         /**
@@ -141,7 +141,7 @@ class Uniform<Type, Count>::Impl : public BaseUniform::BaseImpl
          */
         const ConcreteUniformSetter setter = nullptr;
 
-};  // class Uniform::Impl
+};  // class VectorUniform::Impl
 
 }  // namespace ogls::oglCore::shader
 

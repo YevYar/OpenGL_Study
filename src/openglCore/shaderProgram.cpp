@@ -30,20 +30,20 @@ ShaderProgram::ShaderProgram(const Shader& vertexShader, const Shader& fragmentS
 ShaderProgram::~ShaderProgram() noexcept = default;
 
 template<size_t N, size_t M>
-BaseUniform& ShaderProgram::findMatrixUniform(std::string name)
+MatrixUniform<N, M>& ShaderProgram::getMatrixUniform(const std::string& name) const
 {
-    return m_impl->findUniform<MatrixUniform<N, M>>(std::move(name));
-}
-
-template<typename Type, size_t Count>
-BaseUniform& ShaderProgram::findUniform(std::string name)
-{
-    return m_impl->findUniform<Uniform<Type, Count>>(std::move(name));
+    return m_impl->getUniform<MatrixUniform<N, M>>(name);
 }
 
 BaseUniform& ShaderProgram::getUniform(const std::string& name) const
 {
     return m_impl->getUniform(name);
+}
+
+template<typename Type, size_t Count>
+VectorUniform<Type, Count>& ShaderProgram::getVectorUniform(const std::string& name) const
+{
+    return m_impl->getUniform<VectorUniform<Type, Count>>(name);
 }
 
 void ShaderProgram::use() const
@@ -159,22 +159,33 @@ ShaderProgram::Impl::~Impl() noexcept
 
 template<typename DerivedUniformType>
 requires std::derived_from<DerivedUniformType, BaseUniform>
-BaseUniform& ShaderProgram::Impl::findUniform(std::string name)
+DerivedUniformType& ShaderProgram::Impl::getUniform(const std::string& name) const
 {
     if (uniforms.contains(name))
     {
-        return getUniform(name);
+        return *(static_cast<DerivedUniformType*>(uniforms.at(name).get()));
     }
 
     const auto location = getUniformLocation(name);
     auto       uniform  = new DerivedUniformType{rendererId, location, name};
-    uniforms.insert({std::move(name), std::unique_ptr<BaseUniform>(uniform)});
+    uniforms.insert({name, std::unique_ptr<BaseUniform>(uniform)});
     return *uniform;
 }
 
 BaseUniform& ShaderProgram::Impl::getUniform(const std::string& name) const
 {
-    return *(uniforms.at(name).get());
+    if (uniforms.contains(name))
+    {
+        return *(uniforms.at(name).get());
+    }
+
+    const auto excMes = std::format(
+      "Cannot find uniform variable '{}'."
+      " Check the name and is this uniform used in the shader."
+      " Call ShaderProgram::getMatrixUniform() or ShaderProgram::getVectorUniform() before calling of"
+      " ShaderProgram::getUniform().",
+      name);
+    throw exceptions::GLRecAcquisitionException{excMes};
 }
 
 GLint ShaderProgram::Impl::getUniformLocation(const std::string& uniformName) const
@@ -216,20 +227,20 @@ namespace
 
 }  // namespace
 
-#define INSTANTIATE_FIND_UNIFORM(Type)                                         \
-    template BaseUniform& ShaderProgram::findMatrixUniform<2, 2>(std::string); \
-    template BaseUniform& ShaderProgram::findMatrixUniform<2, 3>(std::string); \
-    template BaseUniform& ShaderProgram::findMatrixUniform<2, 4>(std::string); \
-    template BaseUniform& ShaderProgram::findMatrixUniform<3, 2>(std::string); \
-    template BaseUniform& ShaderProgram::findMatrixUniform<3, 3>(std::string); \
-    template BaseUniform& ShaderProgram::findMatrixUniform<3, 4>(std::string); \
-    template BaseUniform& ShaderProgram::findMatrixUniform<4, 2>(std::string); \
-    template BaseUniform& ShaderProgram::findMatrixUniform<4, 3>(std::string); \
-    template BaseUniform& ShaderProgram::findMatrixUniform<4, 4>(std::string); \
-    template BaseUniform& ShaderProgram::findUniform<Type, 1>(std::string);    \
-    template BaseUniform& ShaderProgram::findUniform<Type, 2>(std::string);    \
-    template BaseUniform& ShaderProgram::findUniform<Type, 3>(std::string);    \
-    template BaseUniform& ShaderProgram::findUniform<Type, 4>(std::string);
+#define INSTANTIATE_FIND_UNIFORM(Type)                                                                   \
+    template MatrixUniform<2, 2>&    ShaderProgram::getMatrixUniform<2, 2>(const std::string&) const;    \
+    template MatrixUniform<2, 3>&    ShaderProgram::getMatrixUniform<2, 3>(const std::string&) const;    \
+    template MatrixUniform<2, 4>&    ShaderProgram::getMatrixUniform<2, 4>(const std::string&) const;    \
+    template MatrixUniform<3, 2>&    ShaderProgram::getMatrixUniform<3, 2>(const std::string&) const;    \
+    template MatrixUniform<3, 3>&    ShaderProgram::getMatrixUniform<3, 3>(const std::string&) const;    \
+    template MatrixUniform<3, 4>&    ShaderProgram::getMatrixUniform<3, 4>(const std::string&) const;    \
+    template MatrixUniform<4, 2>&    ShaderProgram::getMatrixUniform<4, 2>(const std::string&) const;    \
+    template MatrixUniform<4, 3>&    ShaderProgram::getMatrixUniform<4, 3>(const std::string&) const;    \
+    template MatrixUniform<4, 4>&    ShaderProgram::getMatrixUniform<4, 4>(const std::string&) const;    \
+    template VectorUniform<Type, 1>& ShaderProgram::getVectorUniform<Type, 1>(const std::string&) const; \
+    template VectorUniform<Type, 2>& ShaderProgram::getVectorUniform<Type, 2>(const std::string&) const; \
+    template VectorUniform<Type, 3>& ShaderProgram::getVectorUniform<Type, 3>(const std::string&) const; \
+    template VectorUniform<Type, 4>& ShaderProgram::getVectorUniform<Type, 4>(const std::string&) const;
 
 INSTANTIATE_FIND_UNIFORM(GLdouble);
 INSTANTIATE_FIND_UNIFORM(GLfloat);

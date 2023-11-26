@@ -88,33 +88,33 @@ auto MatrixUniform<N, M>::impl() const noexcept -> Impl*
 }
 
 template<typename Type, size_t Count>
-Uniform<Type, Count>::Uniform(GLuint shaderProgram, GLint location, std::string name) :
+VectorUniform<Type, Count>::VectorUniform(GLuint shaderProgram, GLint location, std::string name) :
     BaseUniform{std::make_unique<Impl>(shaderProgram, location, std::move(name))}
 {
 }
 
 template<typename Type, size_t Count>
-Uniform<Type, Count>::operator DataType() const
+VectorUniform<Type, Count>::operator DataType() const
 {
     return getData();
 }
 
 template<typename Type, size_t Count>
-auto Uniform<Type, Count>::getData() const -> DataType
+auto VectorUniform<Type, Count>::getData() const -> DataType
 {
     return impl()->getData();
 }
 
 template<typename Type, size_t Count>
-void Uniform<Type, Count>::setData(const DataType& data)
+void VectorUniform<Type, Count>::setData(const DataType& data)
 {
     impl()->setData(data);
 }
 
 template<typename Type, size_t Count>
-typename auto Uniform<Type, Count>::impl() const noexcept -> Impl*
+typename auto VectorUniform<Type, Count>::impl() const noexcept -> Impl*
 {
-    return static_cast<Uniform<Type, Count>::Impl*>(m_impl.get());
+    return static_cast<VectorUniform<Type, Count>::Impl*>(m_impl.get());
 }
 
 //------ IMPLEMENTATION
@@ -134,7 +134,8 @@ MatrixUniform<N, M>::Impl::Impl(GLuint shaderProgram, GLint location, std::strin
 {
     if (setter == nullptr)
     {
-        throw exceptions::GLRecAcquisitionException{"No uniform setter function for specified template arguments."};
+        throw exceptions::GLRecAcquisitionException{
+          "No matrix uniform setter function for specified template arguments."};
     }
 }
 
@@ -171,23 +172,25 @@ void MatrixUniform<N, M>::Impl::setData(const DataType& data)
 }
 
 template<typename Type, size_t Count>
-Uniform<Type, Count>::Impl::Impl(GLuint shaderProgram, GLint location, std::string name) :
+VectorUniform<Type, Count>::Impl::Impl(GLuint shaderProgram, GLint location, std::string name) :
     BaseImpl{shaderProgram, location, std::move(name)},
     getter{reinterpret_cast<ConcreteUniformGetter>(getUniformGetter(typeid(Type).name()))},
     setter{reinterpret_cast<ConcreteUniformSetter>(getUniformSetter(typeid(Type).name(), Count))}
 {
     if (getter == nullptr)
     {
-        throw exceptions::GLRecAcquisitionException{"No uniform getter function for specified template arguments."};
+        throw exceptions::GLRecAcquisitionException{
+          "No vector uniform getter function for specified template arguments."};
     }
     if (setter == nullptr)
     {
-        throw exceptions::GLRecAcquisitionException{"No uniform setter function for specified template arguments."};
+        throw exceptions::GLRecAcquisitionException{
+          "No vector uniform setter function for specified template arguments."};
     }
 }
 
 template<typename Type, size_t Count>
-auto Uniform<Type, Count>::Impl::getData() const
+auto VectorUniform<Type, Count>::Impl::getData() const
 {
     if constexpr (Count == 1)
     {
@@ -204,7 +207,7 @@ auto Uniform<Type, Count>::Impl::getData() const
 }
 
 template<typename Type, size_t Count>
-void Uniform<Type, Count>::Impl::setData(const DataType& data)
+void VectorUniform<Type, Count>::Impl::setData(const DataType& data)
 {
     if constexpr (Count == 1)
     {
@@ -389,20 +392,20 @@ namespace
 
 }  // namespace
 
-#define INSTANTIATE_UNIFORM(Type)       \
-    template class MatrixUniform<2, 2>; \
-    template class MatrixUniform<2, 3>; \
-    template class MatrixUniform<2, 4>; \
-    template class MatrixUniform<3, 2>; \
-    template class MatrixUniform<3, 3>; \
-    template class MatrixUniform<3, 4>; \
-    template class MatrixUniform<4, 2>; \
-    template class MatrixUniform<4, 3>; \
-    template class MatrixUniform<4, 4>; \
-    template class Uniform<Type, 1>;    \
-    template class Uniform<Type, 2>;    \
-    template class Uniform<Type, 3>;    \
-    template class Uniform<Type, 4>;
+#define INSTANTIATE_UNIFORM(Type)          \
+    template class MatrixUniform<2, 2>;    \
+    template class MatrixUniform<2, 3>;    \
+    template class MatrixUniform<2, 4>;    \
+    template class MatrixUniform<3, 2>;    \
+    template class MatrixUniform<3, 3>;    \
+    template class MatrixUniform<3, 4>;    \
+    template class MatrixUniform<4, 2>;    \
+    template class MatrixUniform<4, 3>;    \
+    template class MatrixUniform<4, 4>;    \
+    template class VectorUniform<Type, 1>; \
+    template class VectorUniform<Type, 2>; \
+    template class VectorUniform<Type, 3>; \
+    template class VectorUniform<Type, 4>;
 
 INSTANTIATE_UNIFORM(GLdouble);
 INSTANTIATE_UNIFORM(GLfloat);

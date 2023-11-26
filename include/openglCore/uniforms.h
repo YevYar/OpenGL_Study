@@ -130,23 +130,23 @@ class MatrixUniform : public BaseUniform
 };  // class MatrixUniform
 
 /**
- * \brief Uniform represents one dimensional uniform variable, which contains [1, 4] elements.
+ * \brief VectorUniform represents one dimensional uniform variable, which contains [1, 4] elements.
  *
  * \param Type  - one of the list: GLfloat, GLdouble, GLint, GLuint.
  * \param Count - the integer value in the range [1, 4].
  */
 template<typename Type, size_t Count>
-class Uniform : public BaseUniform
+class VectorUniform : public BaseUniform
 {
         static_assert(std::is_same_v<GLfloat, Type> || std::is_same_v<GLdouble, Type> || std::is_same_v<GLint, Type>
                         || std::is_same_v<GLuint, Type>,
-                      "A Uniform can be of the following types: GLfloat, GLdouble, GLint or GLuint.");
+                      "A VectorUniform can be of the following types: GLfloat, GLdouble, GLint or GLuint.");
         static_assert(Count >= 1 && Count <= 4, "Count must be in range [1, 4].");
 
 
     private:
         /**
-         * \brief Impl contains private data and methods of Uniform.
+         * \brief Impl contains private data and methods of VectorUniform.
          */
         class Impl;
 
@@ -157,10 +157,10 @@ class Uniform : public BaseUniform
         using DataType = std::conditional_t<Count == 1, Type, std::array<Type, Count>>;
 
     public:
-        Uniform() = delete;
+        VectorUniform() = delete;
 
         /**
-         * \brief Returns a Uniform::DataType representation of the Uniform object.
+         * \brief Returns a VectorUniform::DataType representation of the VectorUniform object.
          *
          * \see getData().
          */
@@ -188,7 +188,7 @@ class Uniform : public BaseUniform
          * \param name          - a name of the uniform variable.
          * \throw ogls::exceptions::GLRecAcquisitionException().
          */
-        Uniform(GLuint shaderProgram, GLint location, std::string name);
+        VectorUniform(GLuint shaderProgram, GLint location, std::string name);
 
     private:
         /**
@@ -199,7 +199,7 @@ class Uniform : public BaseUniform
 
         friend class ShaderProgram;
 
-};  // class Uniform
+};  // class VectorUniform
 
 }  // namespace ogls::oglCore::shader
 
