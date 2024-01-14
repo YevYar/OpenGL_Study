@@ -11,7 +11,7 @@ namespace ogls
 /**
  * \brief ArrayData contains pointer to a data and the size in bytes of the data.
  */
-struct ArrayData
+struct ArrayData final
 {
     public:
         OGLS_DEFAULT_COPYABLE(ArrayData)

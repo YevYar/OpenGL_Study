@@ -697,7 +697,7 @@ class BaseMatrix
         /**
          * \brief BaseMatrix::Size represents a dimension of the Matrix or specific index in the Matrix.
          */
-        struct Size
+        struct Size final
         {
             public:
                 /**

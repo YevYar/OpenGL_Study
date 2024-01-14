@@ -233,7 +233,7 @@ enum class TextureTarget : GLenum
  * \brief TextureData contains a pointer to the data of the texture, information about the loaded image
  * and about some of the texture parameters.
  */
-struct TextureData
+struct TextureData final
 {
     public:
         using DataType = std::unique_ptr<unsigned char, void (*)(unsigned char*)>;

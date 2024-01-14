@@ -10,7 +10,7 @@ namespace ogls::mathCore
 /**
  * \brief Point represents point in 3D (2D) space.
  */
-struct Point
+struct Point final
 {
     public:
         /**
