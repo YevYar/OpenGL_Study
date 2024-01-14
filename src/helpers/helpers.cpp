@@ -11,12 +11,6 @@
 
 namespace ogls::helpers
 {
-void freeTextureData(ogls::oglCore::texture::TextureData& textureData)
-{
-    stbi_image_free(textureData.data);
-    textureData.data = nullptr;
-}
-
 std::string readTextFromFile(std::string_view pathToFile)
 {
     using namespace ogls;
@@ -49,6 +43,7 @@ std::string readTextFromFile(std::string_view pathToFile)
 
 std::unique_ptr<ogls::oglCore::texture::TextureData> readTextureFromFile(std::string_view pathToFile)
 {
+    using namespace oglCore::texture;
     using namespace ogls;
 
 
@@ -60,7 +55,20 @@ std::unique_ptr<ogls::oglCore::texture::TextureData> readTextureFromFile(std::st
 
     stbi_set_flip_vertically_on_load(true);
     auto width = int{0}, height = int{0}, nChannels = int{0};
-    auto data = stbi_load(pathToFile.data(), &width, &height, &nChannels, 0);
+
+    const auto txtDataDeleter = [](unsigned char* textureData)
+    {
+        try
+        {
+            stbi_image_free(textureData);
+            textureData = nullptr;
+        }
+        catch (...)
+        {
+        }
+    };
+
+    auto data = TextureData::DataType{stbi_load(pathToFile.data(), &width, &height, &nChannels, 0), txtDataDeleter};
 
     if (!data)
     {
@@ -68,8 +76,7 @@ std::unique_ptr<ogls::oglCore::texture::TextureData> readTextureFromFile(std::st
         throw exceptions::FileReadingException{excMes};
     }
     // TODO: image format auto detection
-    return std::make_unique<oglCore::texture::TextureData>(data, width, height, nChannels,
-                                                           oglCore::texture::TexturePixelFormat::Rgb);
+    return std::make_unique<TextureData>(std::move(data), width, height, nChannels, TexturePixelFormat::Rgb);
 }
 
 }  // namespace ogls::helpers

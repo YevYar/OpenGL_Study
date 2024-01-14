@@ -15,16 +15,6 @@
 namespace ogls::helpers
 {
 /**
- * \brief Properly frees memory, in which the texture was written.
- *
- * If textureData.[data](\ref ogls::oglCore::texture::TextureData::data) points to a memory, which was acquired not by
- * readTextureFromFile(), program behavior is undefined.
- *
- * \param textureData - texture data object to be cleaned.
- */
-void freeTextureData(ogls::oglCore::texture::TextureData& textureData);
-
-/**
  * \brief Constructs an instance of std::array<Type, N> using the provided data.
  *
  * \param Type - the type of the array data.

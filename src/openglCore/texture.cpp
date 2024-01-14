@@ -198,7 +198,7 @@ void TexDimensionSpecificFunc<1>::setTexImageInTarget(GLuint textureId, std::sha
 
 
     OGLS_GLCall(glTextureSubImage1D(textureId, 0, 0, textureData->width, toUType(textureData->format),
-                                    toUType(textureData->type), textureData->data));
+                                    toUType(textureData->type), textureData->data.get()));
 }
 
 void TexDimensionSpecificFunc<1>::setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData)
@@ -213,7 +213,7 @@ void TexDimensionSpecificFunc<2>::setTexImageInTarget(GLuint textureId, std::sha
 
 
     OGLS_GLCall(glTextureSubImage2D(textureId, 0, 0, 0, textureData->width, textureData->height,
-                                    toUType(textureData->format), toUType(textureData->type), textureData->data));
+                                    toUType(textureData->format), toUType(textureData->type), textureData->data.get()));
 }
 
 void TexDimensionSpecificFunc<2>::setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData)
@@ -228,7 +228,7 @@ void TexDimensionSpecificFunc<3>::setTexImageInTarget(GLuint textureId, std::sha
 
 
     OGLS_GLCall(glTextureSubImage3D(textureId, 0, 0, 0, 0, textureData->width, textureData->height, textureData->depth,
-                                    toUType(textureData->format), toUType(textureData->type), textureData->data));
+                                    toUType(textureData->format), toUType(textureData->type), textureData->data.get()));
 }
 
 void TexDimensionSpecificFunc<3>::setTexStorageFormat(GLuint textureId, const std::shared_ptr<TextureData>& textureData)
