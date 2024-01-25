@@ -77,7 +77,7 @@ concept MatrixConstFunctor = requires(Functor obj) {
 };
 
 /**
- * \brief <b>VectorIntoMatrixInsertionOrder</b> defines in which order the Vector components are inserted into the Matrix.
+ * \brief VectorIntoMatrixInsertionOrder defines in which order the Vector components are inserted into the Matrix.
  */
 enum class VectorIntoMatrixInsertionOrder
 {
@@ -1263,6 +1263,74 @@ constexpr auto operator*(const Matrix<N1, M1>& m1, const Matrix<N2, M2>& m2) noe
 
             result.setValue(i, j, resultElement);
         }
+    }
+
+    return result;
+}
+
+/**
+ * \brief Multiplies Vector by Matrix.
+ *
+ * The Vector is interpreted as Matrix of the size 1 x VectorDimensionality.
+ *
+ * \note The dimensionality of the Vector must be equal to the number of rows of the Matrix.
+ * \return Matrix, which is the result of multiplication of Vector by Matrix.
+ */
+// clang-format off
+template<size_t VectorDimensionality, size_t N, size_t M,
+         typename = IsNotNullMatrix<N, M>,
+         typename = std::enable_if_t<VectorDimensionality == N>>
+// clang-format on
+constexpr auto operator*(const Vector<VectorDimensionality>& v, const Matrix<N, M>& m) noexcept
+{
+    auto result = Matrix<1, M>{};
+
+    for (auto j = size_t{0}; j < M; ++j)
+    {
+        auto resultElement = float{0.0};
+        auto iInner        = size_t{0};
+
+        for (const auto& el : v)
+        {
+            resultElement += el.getValue() * m.getValue(iInner, j);
+            ++iInner;
+        }
+
+        result.setValue(0, j, resultElement);
+    }
+
+    return result;
+}
+
+/**
+ * \brief Multiplies Matrix by Vector.
+ *
+ * The Vector is interpreted as Matrix of the size VectorDimensionality x 1.
+ *
+ * \note The dimensionality of the Vector must be equal to the number of columns of the Matrix.
+ * \return Matrix, which is the result of multiplication of Matrix by Vector.
+ */
+// clang-format off
+template<size_t N, size_t M, size_t VectorDimensionality,
+         typename = IsNotNullMatrix<N, M>,
+         typename = std::enable_if_t<M == VectorDimensionality>>
+// clang-format on
+constexpr auto operator*(const Matrix<N, M>& m, const Vector<VectorDimensionality>& v) noexcept
+{
+    auto result = Matrix<N, 1>{};
+
+    for (auto i = size_t{0}; i < N; ++i)
+    {
+        auto resultElement = float{0.0};
+        auto j             = size_t{0};
+
+        for (const auto& el : v)
+        {
+            resultElement += m.getValue(i, j) * el.getValue();
+            ++j;
+        }
+
+        result.setValue(i, 0, resultElement);
     }
 
     return result;
