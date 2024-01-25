@@ -719,6 +719,8 @@ class BaseMatrix
 
         /**
          * \brief BaseMatrix::Index represents an index (position) of the element in the Matrix.
+         *
+         * The position is counted starting from 0.
          */
         using Index = Size;
 

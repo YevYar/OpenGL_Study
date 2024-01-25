@@ -9,6 +9,7 @@
 #include "exceptions.h"
 #include "floats.h"
 #include "mathCore/baseMatrix.h"
+#include "mathCore/vector.h"
 
 /**
  * \brief Adds a getter/setter pair for the Matrix element on the position.
@@ -73,6 +74,16 @@ template<typename Functor>
 concept MatrixConstFunctor = requires(Functor obj) {
     // clang-format off
     {obj(std::declval<BaseMatrix::Index>(), 0.0f)};  // clang-format on
+};
+
+/**
+ * \brief <b>VectorIntoMatrixInsertionOrder</b> defines in which order the Vector components are inserted into the Matrix.
+ */
+enum class VectorIntoMatrixInsertionOrder
+{
+    ColumnMajor,
+    DiagonalMajor,
+    RowMajor
 };
 
 /**
@@ -198,6 +209,167 @@ class Matrix : public BaseMatrix
         template<typename = IsNotNullMatrix<N, M>>
         constexpr Matrix(const std::array<float, N * M>& values) noexcept : BaseMatrix{N, M}, m_data{values}
         {
+        }
+
+        /**
+         * \brief Constructs a Matrix filled from the range of elements of another Matrix.
+         *
+         * If an invalid range is defined, the defaultValue is used for all elements.
+         *
+         * Usage example:
+         * \code{.cpp}
+         * const auto m1 = Matrix<3, 3>{{0, 1, 2, 3, 4, 5, 6, 7, 8}};
+         * const auto m2 = Matrix<4, 4>{m1, 0.05f, Index{0, 0}, Index{2, 2}, Index{1, 1}};
+         * std::cout << "m2 = " << m2.toFullString() << std::endl;
+         * \endcode
+         *
+         * The output of the provided code:
+         * \verbatim
+         * m2 = Matrix 4x4:
+         *   | 0.05  , 0.05  , 0.05  , 0.05   |
+         *   | 0.05  , 0     , 1     , 2      |
+         *   | 0.05  , 3     , 4     , 5      |
+         *   | 0.05  , 6     , 7     , 8      |
+         * \endverbatim
+         *
+         * \param m                  - another Matrix.
+         * \param defaultValue       - a default value of Matrix elements, which are out of the filling range.
+         * \param topLeft            - a starting index of the source range of the Matrix m.
+         * \param bottomRight        - an end index of the source range of the Matrix m.
+         * \param destinationTopLeft - a starting index of this Matrix to insert elements.
+         */
+        template<size_t N2, size_t M2, typename = IsNotNullMatrix<N, M>, typename = IsNotNullMatrix<N2, M2>>
+        constexpr explicit Matrix(const Matrix<N2, M2>& m, float defaultValue = {0.0f}, Index topLeft = Index{0, 0},
+                                  Index bottomRight        = Index{N2 - 1, M2 - 1},
+                                  Index destinationTopLeft = Index{0, 0}) noexcept :
+            BaseMatrix{N, M}
+        {
+            bool useDefaultValue = false;
+
+            if (topLeft.rows >= N2 || topLeft.columns >= M2 || bottomRight.rows >= N2 || bottomRight.columns >= M2
+                || topLeft.rows > bottomRight.rows || topLeft.columns > bottomRight.columns
+                || destinationTopLeft.rows >= N || destinationTopLeft.columns >= M)
+            {
+                useDefaultValue = true;
+            }
+
+            const auto xOffsetFromFirst = topLeft.rows - destinationTopLeft.rows,
+                       yOffsetFromFirst = topLeft.columns - destinationTopLeft.columns;
+
+            for (auto el : *this)
+            {
+                // clang-format off
+                if (!useDefaultValue
+                    && (el.i >= destinationTopLeft.rows && el.j >= destinationTopLeft.columns)
+                    && ((el.i + xOffsetFromFirst) >= topLeft.rows && (el.i + xOffsetFromFirst) <= bottomRight.rows)
+                    && ((el.j + yOffsetFromFirst) >= topLeft.columns
+                        && (el.j + yOffsetFromFirst) <= bottomRight.columns))
+                // clang-format on
+                {
+                    el.setValue(m.getValue(el.i + xOffsetFromFirst, el.j + yOffsetFromFirst));
+                }
+                else
+                {
+                    el.setValue(defaultValue);
+                }
+            }
+        }
+
+        /**
+         * \brief Constructs a Matrix filled by elements of the Vector object.
+         *
+         * Usage example:
+         * \code{.cpp}
+         * const auto v = Vector<3>{1, 2, 3};
+         * const auto m = Matrix<4, 4>{v, VectorIntoMatrixInsertionOrder::RowMajor, 0.02f, Index{1, 1}};
+         * std::cout << "m = " << m.toFullString() << std::endl;
+         * \endcode
+         *
+         * The output of the provided code:
+         * \verbatim
+         * m = Matrix 4x4:
+         *   | 0.02  , 0.02  , 0.02  , 0.02   |
+         *   | 0.02  , 1     , 2     , 3      |
+         *   | 0.02  , 0.02  , 0.02  , 0.02   |
+         *   | 0.02  , 0.02  , 0.02  , 0.02   |
+         * \endverbatim
+         *
+         * \param v                  - the Vector object, source of elements.
+         * \param order              - an order, in which elements of the Vector are inserted into the Matrix.
+         * \param defaultValue       - a default value of Matrix elements, which are out of the filling range.
+         * \param position           - a starting index of this Matrix to insert elements.
+         * If the position is out of the Matrix boundaries, the defaultValue is used.
+         * If the order is VectorIntoMatrixInsertionOrder::DiagonalMajor,
+         * position.rows and position.columns must be equal.
+         */
+        template<size_t VectorDimensionality, typename = IsNotNullMatrix<N, M>>
+        constexpr explicit Matrix(const Vector<VectorDimensionality>& v,
+                                  VectorIntoMatrixInsertionOrder order = VectorIntoMatrixInsertionOrder::DiagonalMajor,
+                                  float defaultValue = {0.0f}, Index position = Index{0, 0}) noexcept :
+            BaseMatrix{N, M}
+        {
+            bool useDefaultValue = false;
+
+            if (position.rows >= N || position.columns >= M)
+            {
+                useDefaultValue = true;
+            }
+
+            const auto getCorrespondingValue = [=](Vector<VectorDimensionality>::const_iterator& i)
+            {
+                const auto valueToReturn = (!useDefaultValue && i.isValid()) ? (*i).getValue() : defaultValue;
+                ++i;
+                return valueToReturn;
+            };
+
+            auto vectorIterator = v.cbegin();
+
+            switch (order)
+            {
+                case VectorIntoMatrixInsertionOrder::ColumnMajor:
+                    for (auto i = beginColumn(); i != endColumn(); ++i)
+                    {
+                        if ((*i).j == position.columns && (*i).i >= position.rows)
+                        {
+                            (*i).setValue(getCorrespondingValue(vectorIterator));
+                        }
+                        else
+                        {
+                            (*i).setValue(defaultValue);
+                        }
+                    }
+                    break;
+                case VectorIntoMatrixInsertionOrder::DiagonalMajor:
+                    for (auto i : *this)
+                    {
+                        if (position.rows != position.columns)
+                        {
+                            i.setValue(defaultValue);
+                        }
+                        else if (i.i >= position.rows && i.i == i.j)
+                        {
+                            i.setValue(getCorrespondingValue(vectorIterator));
+                        }
+                        else
+                        {
+                            i.setValue(defaultValue);
+                        }
+                    }
+                    break;
+                case VectorIntoMatrixInsertionOrder::RowMajor:
+                    for (auto i : *this)
+                    {
+                        if (i.i == position.rows && i.j >= position.columns)
+                        {
+                            i.setValue(getCorrespondingValue(vectorIterator));
+                        }
+                        else
+                        {
+                            i.setValue(defaultValue);
+                        }
+                    }
+                    break;
+            }
         }
 
         //------ SOME UNARY OPERATIONS

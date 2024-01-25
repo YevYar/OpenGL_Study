@@ -4,7 +4,6 @@
 #include <functional>
 
 #include "exceptions.h"
-#include "mathCore/matrix.h"
 #include "mathCore/point.h"
 
 namespace ogls::mathCore
@@ -584,6 +583,22 @@ class Vector
         constexpr explicit Vector(const Vector<3>& v) noexcept
         {
             impl.setCoordinates(v.x(), v.y(), v.z());
+        }
+
+        /**
+         * \brief Constructs Vector from the passed Vector of the bigger dimensionality.
+         */
+        template<size_t VectorDimensionality, typename = std::enable_if_t<(VectorDimensionality > N)>>
+        constexpr explicit Vector(const Vector<VectorDimensionality>& v) noexcept
+        {
+            if constexpr (N == 2)
+            {
+                impl.setCoordinates(v.x(), v.y(), 0);
+            }
+            else if constexpr (N == 3)
+            {
+                impl.setCoordinates(v.x(), v.y(), v.z());
+            }
         }
 
         //------ SOME UNARY OPERATIONS
