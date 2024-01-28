@@ -18,6 +18,18 @@ concept FunctorOnVectors = requires(Operator f) {
     {f(0.0f, 0.0f)} -> std::convertible_to<float>;  // clang-format on
 };
 
+/**
+ * \brief IsVec3OrVec4 checks if the dimensionality of the Vector is 3 or 4.
+ */
+template<size_t Dimensionality>
+concept IsVec3OrVec4 = (Dimensionality >= 3);
+
+/**
+ * \brief IsVec4 checks if the dimensionality of the Vector is 4.
+ */
+template<size_t Dimensionality>
+concept IsVec4 = (Dimensionality == 4);
+
 template<typename OtherIterator>
 concept OtherVectorIterator = requires(OtherIterator obj) {
     // clang-format off
@@ -178,8 +190,8 @@ class Vector
                          *
                          * Changes the referenced Vector component. Makes it possible to use algorithms like std::fill().
                          */
-                        template<typename = std::enable_if_t<!std::is_const_v<ComponentType>>>
                         constexpr Component& operator=(ComponentType newValue) noexcept
+                        requires IsNotConstType<ComponentType>
                         {
                             setValue(newValue);
                             return *this;
@@ -254,8 +266,8 @@ class Vector
                          *
                          * Changes the referenced Vector component.
                          */
-                        template<typename = std::enable_if_t<!std::is_const_v<ComponentType>>>
                         constexpr void setValue(ComponentType newValue) noexcept
+                        requires IsNotConstType<ComponentType>
                         {
                             getValue() = newValue;
                         }
@@ -528,8 +540,8 @@ class Vector
         /**
          * \brief Constructs Vector with passed Vector coordinates X, Y and Z.
          */
-        template<typename = std::enable_if_t<(N >= 3)>>
         constexpr Vector(float x, float y, float z) noexcept
+        requires IsVec3OrVec4<N>
         {
             impl.setCoordinates(x, y, z);
         }
@@ -539,8 +551,8 @@ class Vector
          *
          * \see [Homogeneous coordinates](https://en.wikipedia.org/wiki/Homogeneous_coordinates).
          */
-        template<typename = std::enable_if_t<N == 4>>
         constexpr Vector(float x, float y, float z, float w) noexcept
+        requires IsVec4<N>
         {
             impl.setCoordinates(x, y, z);
             impl.m_w = w;
@@ -570,8 +582,8 @@ class Vector
         /**
          * \brief Constructs Vector<3>/Vector<4> from the passed Vector<2>.
          */
-        template<typename = std::enable_if_t<(N >= 3)>>
         constexpr explicit Vector(const Vector<2>& v) noexcept
+        requires IsVec3OrVec4<N>
         {
             impl.setCoordinates(v.x(), v.y(), 0.0f);
         }
@@ -579,8 +591,8 @@ class Vector
         /**
          * \brief Constructs Vector<4> from the passed Vector<3>.
          */
-        template<typename = std::enable_if_t<N == 4>>
         constexpr explicit Vector(const Vector<3>& v) noexcept
+        requires IsVec4<N>
         {
             impl.setCoordinates(v.x(), v.y(), v.z());
         }
@@ -588,7 +600,8 @@ class Vector
         /**
          * \brief Constructs Vector from the passed Vector of the bigger dimensionality.
          */
-        template<size_t VectorDimensionality, typename = std::enable_if_t<(VectorDimensionality > N)>>
+        template<size_t VectorDimensionality>
+        requires(VectorDimensionality > N)
         constexpr explicit Vector(const Vector<VectorDimensionality>& v) noexcept
         {
             if constexpr (N == 2)
@@ -862,8 +875,8 @@ class Vector
          *
          * \param w - value to set.
          */
-        template<typename = std::enable_if_t<N == 4>>
         constexpr void setW(float w) noexcept
+        requires IsVec4<N>
         {
             impl.m_w = w;
         }
@@ -893,8 +906,8 @@ class Vector
          *
          * \param z - value to set.
          */
-        template<typename = std::enable_if_t<(N >= 3)>>
         constexpr void setZ(float z) noexcept
+        requires IsVec3OrVec4<N>
         {
             impl.m_z = z;
         }
@@ -914,8 +927,8 @@ class Vector
          *
          * \param x, y, z - values to set.
          */
-        template<typename = std::enable_if_t<(N >= 3)>>
         constexpr void setCoordinates(float x, float y, float z) noexcept
+        requires IsVec3OrVec4<N>
         {
             impl.setCoordinates(x, y, z);
         }
@@ -941,8 +954,8 @@ class Vector
         /**
          * \brief Returns W-component of the Vector.
          */
-        template<typename = std::enable_if_t<N == 4>>
         constexpr float w() const noexcept
+        requires IsVec4<N>
         {
             return impl.m_w;
         }
@@ -966,8 +979,8 @@ class Vector
         /**
          * \brief Returns Z coordinate of the Vector.
          */
-        template<typename = std::enable_if_t<(N >= 3)>>
         constexpr float z() const noexcept
+        requires IsVec3OrVec4<N>
         {
             return impl.m_z;
         }
@@ -1126,7 +1139,8 @@ inline float angleBetweenVectors(const Vector<N>& v1, const Vector<N>& v2)
  * \param v2 - Vector 2.
  * \return the cross product of two Vector.
  */
-template<size_t N, typename = std::enable_if_t<(N >= 3)>>
+template<size_t N>
+requires IsVec3OrVec4<N>
 constexpr Vector<N> crossProduct(const Vector<N>& v1, const Vector<N>& v2) noexcept
 {
     // clang-format off

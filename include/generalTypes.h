@@ -1,6 +1,8 @@
 #ifndef OGLS_GENERAL_TYPES_H
 #define OGLS_GENERAL_TYPES_H
 
+#include <type_traits>
+
 #include "helpers/macros.h"
 
 /**
@@ -8,6 +10,14 @@
  */
 namespace ogls
 {
+/**
+ * \brief IsNotConstType checks if the type has no const specifier.
+ *
+ * \param ElementType - a type to check constraints.
+ */
+template<typename ElementType>
+concept IsNotConstType = not std::is_const_v<ElementType>;
+
 /**
  * \brief ArrayData contains pointer to a data and the size in bytes of the data.
  */

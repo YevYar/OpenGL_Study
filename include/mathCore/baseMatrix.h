@@ -5,6 +5,7 @@
 #include <string>
 
 #include "exceptions.h"
+#include "generalTypes.h"
 #include "helpers/debugHelpers.h"
 #include "helpers/macros.h"
 
@@ -308,8 +309,8 @@ class BaseMatrix
                          *
                          * Changes the referenced Matrix element. Makes it possible to use algorithms like std::fill().
                          */
-                        template<typename = std::enable_if_t<!std::is_const_v<ElementType>>>
                         constexpr Element& operator=(ElementType newValue) noexcept
+                        requires IsNotConstType<ElementType>
                         {
                             setValue(newValue);
                             return *this;
@@ -351,8 +352,8 @@ class BaseMatrix
                          *
                          * Changes the referenced Matrix element.
                          */
-                        template<typename = std::enable_if_t<!std::is_const_v<ElementType>>>
                         constexpr void setValue(ElementType newValue) noexcept
+                        requires IsNotConstType<ElementType>
                         {
                             getValue() = newValue;
                         }
