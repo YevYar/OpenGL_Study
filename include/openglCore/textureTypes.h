@@ -1,6 +1,8 @@
 #ifndef OGLS_OGLCORE_TEXTURE_TEXTURE_TYPES_H
 #define OGLS_OGLCORE_TEXTURE_TEXTURE_TYPES_H
 
+#include <memory>
+
 #include <glad/glad.h>
 
 #include "helpers/macros.h"
@@ -231,13 +233,14 @@ enum class TextureTarget : GLenum
  * \brief TextureData contains a pointer to the data of the texture, information about the loaded image
  * and about some of the texture parameters.
  */
-class TextureData
+struct TextureData final
 {
+    public:
+        using DataType = std::unique_ptr<unsigned char, void (*)(unsigned char*)>;
+
     public:
         /**
          * \brief Constructs new object.
-         *
-         * TextureData takes an ownership of the data.
          *
          * \param textureData - pointer to the data.
          * \param width       - width of the texture in pixels.
@@ -245,12 +248,10 @@ class TextureData
          * \param nChannels   - a number of color channels of the image.
          * \param format      - the format of image data.
          */
-        TextureData(unsigned char* textureData, GLsizei width, GLsizei height, int nChannels,
+        TextureData(DataType textureData, GLsizei width, GLsizei height, int nChannels,
                     TexturePixelFormat format) noexcept;
         /**
          * \brief Constructs new object.
-         *
-         * TextureData takes an ownership of the data.
          *
          * \param textureData    - pointer to the data.
          * \param width          - width of the texture in pixels.
@@ -262,23 +263,17 @@ class TextureData
          * \param internalFormat - specify how the texture shall be stored in the GPU.
          * \param pixelType      - the type of the pixel data.
          */
-        TextureData(unsigned char* textureData, GLsizei width, GLsizei height, GLsizei depth, int nChannels,
-                    GLint level, TexturePixelFormat format, TextureInternalFormat internalFormat,
+        TextureData(DataType textureData, GLsizei width, GLsizei height, GLsizei depth, int nChannels, GLint level,
+                    TexturePixelFormat format, TextureInternalFormat internalFormat,
                     TexturePixelType pixelType) noexcept;
         TextureData() = delete;
         OGLS_NOT_COPYABLE_MOVABLE(TextureData)
-        /**
-         * \brief Deletes the object and cleans the data by calling helpers::freeTextureData().
-         */
-        ~TextureData() noexcept;
 
     public:
         /**
          * \brief The data of the texture.
-         *
-         * DON'T delete, TextureData takes an ownership of the data.
          */
-        unsigned char*        data           = nullptr;
+        DataType              data;
         /**
          * \brief The depth in pixels of the 3D texture.
          */

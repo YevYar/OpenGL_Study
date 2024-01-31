@@ -9,6 +9,7 @@
 #include "exceptions.h"
 #include "floats.h"
 #include "mathCore/baseMatrix.h"
+#include "mathCore/vector.h"
 
 /**
  * \brief Adds a getter/setter pair for the Matrix element on the position.
@@ -17,8 +18,8 @@
     /**                                                                                                   \
      * \brief Returns the element of the Matrix on the position [RequiredI][RequiredJ].                   \
      */                                                                                                   \
-    template<typename = EnableElementAccessor<RequiredN, RequiredM, PassedN, PassedM>>                    \
     constexpr float m##RequiredN##RequiredM() const noexcept                                              \
+    requires EnableElementAccessor<RequiredN, RequiredM, PassedN, PassedM>                                \
     {                                                                                                     \
         return m_data[RequiredI * m_columnsNumber + RequiredJ];                                           \
     }                                                                                                     \
@@ -28,8 +29,8 @@
      *                                                                                                    \
      * \param value - the value to set.                                                                   \
      */                                                                                                   \
-    template<typename = EnableElementAccessor<RequiredN, RequiredM, PassedN, PassedM>>                    \
     constexpr void setM##RequiredN##RequiredM(float value) noexcept                                       \
+    requires EnableElementAccessor<RequiredN, RequiredM, PassedN, PassedM>                                \
     {                                                                                                     \
         m_data[RequiredI * m_columnsNumber + RequiredJ] = value;                                          \
     }
@@ -49,13 +50,13 @@ namespace ogls::mathCore
  * dimensionality.
  */
 template<size_t RequiredN, size_t RequiredM, size_t PassedN, size_t PassedM>
-using EnableElementAccessor = std::enable_if_t<(PassedN >= RequiredN) && (PassedM >= RequiredM)>;
+concept EnableElementAccessor = (PassedN >= RequiredN) && (PassedM >= RequiredM);
 
 /**
  * \brief IsNotNullMatrix checks if the both dimensions of the Matrix are greater than 0.
  */
 template<size_t N, size_t M>
-using IsNotNullMatrix = std::enable_if_t<(N > 0) && (M > 0)>;
+concept IsNotNullMatrix = (N > 0) && (M > 0);
 
 /**
  * \brief MatrixFunctor checks if the provided functor can be used with Matrix::performOnEvery().
@@ -73,6 +74,16 @@ template<typename Functor>
 concept MatrixConstFunctor = requires(Functor obj) {
     // clang-format off
     {obj(std::declval<BaseMatrix::Index>(), 0.0f)};  // clang-format on
+};
+
+/**
+ * \brief VectorIntoMatrixInsertionOrder defines in which order the Vector components are inserted into the Matrix.
+ */
+enum class VectorIntoMatrixInsertionOrder
+{
+    ColumnMajor,
+    DiagonalMajor,
+    RowMajor
 };
 
 /**
@@ -134,6 +145,7 @@ class Matrix : public BaseMatrix
                       "The dimensionality of the Matrix seems to be too big. "
                       "Check if you passed the correct N and M.");
 
+
     public:
         // The following type aliases are the conventions of STL
 
@@ -150,6 +162,16 @@ class Matrix : public BaseMatrix
 
         // Non-conventional iterator aliases
 
+        /**
+         * \brief Iterates over Matrix elements in column-major order from element (0, 0) to element (N-1, M-1)
+         * without providing ability to change the referenced Matrix element.
+         */
+        using const_column_iterator =
+          Iterator<const float, typename std::array<float, N * M>::const_iterator, ColumnMajorIteratorImpl>;
+        /**
+         * \brief Iterates over Matrix elements in column-major order from element (0, 0) to element (N-1, M-1).
+         */
+        using column_iterator = Iterator<float, typename std::array<float, N * M>::iterator, ColumnMajorIteratorImpl>;
         /**
          * \brief Iterates over Matrix elements, which belong to the main diagonal of the Matrix ((0, 0), (1, 1) etc.)
          * without providing ability to change the referenced Matrix element.
@@ -184,9 +206,173 @@ class Matrix : public BaseMatrix
          *
          * \param values - the elements of the Matrix.
          */
-        template<typename = IsNotNullMatrix<N, M>>
-        constexpr Matrix(const std::array<float, N * M>& values) noexcept : BaseMatrix{N, M}, m_data{values}
+        constexpr Matrix(const std::array<float, N * M>& values) noexcept
+        requires IsNotNullMatrix<N, M>
+            : BaseMatrix{N, M}, m_data{values}
         {
+        }
+
+        /**
+         * \brief Constructs a Matrix filled from the range of elements of another Matrix.
+         *
+         * If an invalid range is defined, the defaultValue is used for all elements.
+         *
+         * Usage example:
+         * \code{.cpp}
+         * const auto m1 = Matrix<3, 3>{{0, 1, 2, 3, 4, 5, 6, 7, 8}};
+         * const auto m2 = Matrix<4, 4>{m1, 0.05f, Index{0, 0}, Index{2, 2}, Index{1, 1}};
+         * std::cout << "m2 = " << m2.toFullString() << std::endl;
+         * \endcode
+         *
+         * The output of the provided code:
+         * \verbatim
+         * m2 = Matrix 4x4:
+         *   | 0.05  , 0.05  , 0.05  , 0.05   |
+         *   | 0.05  , 0     , 1     , 2      |
+         *   | 0.05  , 3     , 4     , 5      |
+         *   | 0.05  , 6     , 7     , 8      |
+         * \endverbatim
+         *
+         * \param m                  - another Matrix.
+         * \param defaultValue       - a default value of Matrix elements, which are out of the filling range.
+         * \param topLeft            - a starting index of the source range of the Matrix m.
+         * \param bottomRight        - an end index of the source range of the Matrix m.
+         * \param destinationTopLeft - a starting index of this Matrix to insert elements.
+         */
+        template<size_t N2, size_t M2>
+        requires IsNotNullMatrix<N, M> && IsNotNullMatrix<N2, M2>
+        constexpr explicit Matrix(const Matrix<N2, M2>& m, float defaultValue = {0.0f}, Index topLeft = Index{0, 0},
+                                  Index bottomRight        = Index{N2 - 1, M2 - 1},
+                                  Index destinationTopLeft = Index{0, 0}) noexcept :
+            BaseMatrix{N, M}
+        {
+            bool useDefaultValue = false;
+
+            if (topLeft.rows >= N2 || topLeft.columns >= M2 || bottomRight.rows >= N2 || bottomRight.columns >= M2
+                || topLeft.rows > bottomRight.rows || topLeft.columns > bottomRight.columns
+                || destinationTopLeft.rows >= N || destinationTopLeft.columns >= M)
+            {
+                useDefaultValue = true;
+            }
+
+            const auto xOffsetFromFirst = topLeft.rows - destinationTopLeft.rows,
+                       yOffsetFromFirst = topLeft.columns - destinationTopLeft.columns;
+
+            for (auto el : *this)
+            {
+                // clang-format off
+                if (!useDefaultValue
+                    && (el.i >= destinationTopLeft.rows && el.j >= destinationTopLeft.columns)
+                    && ((el.i + xOffsetFromFirst) >= topLeft.rows && (el.i + xOffsetFromFirst) <= bottomRight.rows)
+                    && ((el.j + yOffsetFromFirst) >= topLeft.columns
+                        && (el.j + yOffsetFromFirst) <= bottomRight.columns))
+                // clang-format on
+                {
+                    el.setValue(m.getValue(el.i + xOffsetFromFirst, el.j + yOffsetFromFirst));
+                }
+                else
+                {
+                    el.setValue(defaultValue);
+                }
+            }
+        }
+
+        /**
+         * \brief Constructs a Matrix filled by elements of the Vector object.
+         *
+         * Usage example:
+         * \code{.cpp}
+         * const auto v = Vector<3>{1, 2, 3};
+         * const auto m = Matrix<4, 4>{v, VectorIntoMatrixInsertionOrder::RowMajor, 0.02f, Index{1, 1}};
+         * std::cout << "m = " << m.toFullString() << std::endl;
+         * \endcode
+         *
+         * The output of the provided code:
+         * \verbatim
+         * m = Matrix 4x4:
+         *   | 0.02  , 0.02  , 0.02  , 0.02   |
+         *   | 0.02  , 1     , 2     , 3      |
+         *   | 0.02  , 0.02  , 0.02  , 0.02   |
+         *   | 0.02  , 0.02  , 0.02  , 0.02   |
+         * \endverbatim
+         *
+         * \param v                  - the Vector object, source of elements.
+         * \param order              - an order, in which elements of the Vector are inserted into the Matrix.
+         * \param defaultValue       - a default value of Matrix elements, which are out of the filling range.
+         * \param position           - a starting index of this Matrix to insert elements.
+         * If the position is out of the Matrix boundaries, the defaultValue is used.
+         * If the order is VectorIntoMatrixInsertionOrder::DiagonalMajor,
+         * position.rows and position.columns must be equal.
+         */
+        template<size_t VectorDimensionality>
+        constexpr explicit Matrix(const Vector<VectorDimensionality>& v,
+                                  VectorIntoMatrixInsertionOrder order = VectorIntoMatrixInsertionOrder::DiagonalMajor,
+                                  float defaultValue = {0.0f}, Index position = Index{0, 0}) noexcept
+        requires IsNotNullMatrix<N, M>
+            : BaseMatrix{N, M}
+        {
+            bool useDefaultValue = false;
+
+            if (position.rows >= N || position.columns >= M)
+            {
+                useDefaultValue = true;
+            }
+
+            const auto getCorrespondingValue = [=](Vector<VectorDimensionality>::const_iterator& i)
+            {
+                const auto valueToReturn = (!useDefaultValue && i.isValid()) ? (*i).getValue() : defaultValue;
+                ++i;
+                return valueToReturn;
+            };
+
+            auto vectorIterator = v.cbegin();
+
+            switch (order)
+            {
+                case VectorIntoMatrixInsertionOrder::ColumnMajor:
+                    for (auto i = beginColumn(); i != endColumn(); ++i)
+                    {
+                        if ((*i).j == position.columns && (*i).i >= position.rows)
+                        {
+                            (*i).setValue(getCorrespondingValue(vectorIterator));
+                        }
+                        else
+                        {
+                            (*i).setValue(defaultValue);
+                        }
+                    }
+                    break;
+                case VectorIntoMatrixInsertionOrder::DiagonalMajor:
+                    for (auto i : *this)
+                    {
+                        if (position.rows != position.columns)
+                        {
+                            i.setValue(defaultValue);
+                        }
+                        else if (i.i >= position.rows && i.i == i.j)
+                        {
+                            i.setValue(getCorrespondingValue(vectorIterator));
+                        }
+                        else
+                        {
+                            i.setValue(defaultValue);
+                        }
+                    }
+                    break;
+                case VectorIntoMatrixInsertionOrder::RowMajor:
+                    for (auto i : *this)
+                    {
+                        if (i.i == position.rows && i.j >= position.columns)
+                        {
+                            i.setValue(getCorrespondingValue(vectorIterator));
+                        }
+                        else
+                        {
+                            i.setValue(defaultValue);
+                        }
+                    }
+                    break;
+            }
         }
 
         //------ SOME UNARY OPERATIONS
@@ -194,8 +380,8 @@ class Matrix : public BaseMatrix
         /**
          * \brief Returns new Matrix as the result of negation of this Matrix.
          */
-        template<typename = IsNotNullMatrix<N, M>>
         constexpr Matrix operator-() const noexcept
+        requires IsNotNullMatrix<N, M>
         {
             auto result = Matrix{*this};
             // clang-format off
@@ -223,8 +409,8 @@ class Matrix : public BaseMatrix
          * \param m - another Matrix to add to this Matrix.
          * \return this Matrix with changed elements.
          */
-        template<typename = IsNotNullMatrix<N, M>>
         constexpr Matrix& operator+=(const Matrix& m) noexcept
+        requires IsNotNullMatrix<N, M>
         {
             // clang-format off
             performOnEvery([&](Index pos, float element) { return element + m.getValue(pos); });  // clang-format on
@@ -239,8 +425,8 @@ class Matrix : public BaseMatrix
          * \param num - a number to add to all elements of this Matrix.
          * \return this Matrix with changed elements.
          */
-        template<typename = IsNotNullMatrix<N, M>>
         constexpr Matrix& operator+=(float num) noexcept
+        requires IsNotNullMatrix<N, M>
         {
             // clang-format off
             performOnEvery([=](Index, float element) { return element + num; });  // clang-format on
@@ -255,8 +441,8 @@ class Matrix : public BaseMatrix
          * \param m - another Matrix to subtract from this Matrix.
          * \return this Matrix with changed elements.
          */
-        template<typename = IsNotNullMatrix<N, M>>
         constexpr Matrix& operator-=(const Matrix& m) noexcept
+        requires IsNotNullMatrix<N, M>
         {
             // clang-format off
             performOnEvery([&](Index pos, float element) { return element - m.getValue(pos); });  // clang-format on
@@ -271,8 +457,8 @@ class Matrix : public BaseMatrix
          * \param num - a number to subtract from all elements of this Matrix.
          * \return this Matrix with changed elements.
          */
-        template<typename = IsNotNullMatrix<N, M>>
         constexpr Matrix& operator-=(float num) noexcept
+        requires IsNotNullMatrix<N, M>
         {
             // clang-format off
             performOnEvery([=](Index, float element) { return element - num; });  // clang-format on
@@ -287,8 +473,8 @@ class Matrix : public BaseMatrix
          * \param num - a number to multiply elements of this Matrix by.
          * \return this Matrix with changed elements.
          */
-        template<typename = IsNotNullMatrix<N, M>>
         constexpr Matrix& operator*=(float num) noexcept
+        requires IsNotNullMatrix<N, M>
         {
             // clang-format off
             performOnEvery([=](Index, float element) { return element * num; });  // clang-format on
@@ -304,8 +490,8 @@ class Matrix : public BaseMatrix
          * \return this Matrix with changed elements.
          * \throw ogls::exceptions::DivisionByZeroException().
          */
-        template<typename = IsNotNullMatrix<N, M>>
         constexpr Matrix& operator/=(float num)
+        requires IsNotNullMatrix<N, M>
         {
             if (num == 0.0f)
             {
@@ -366,6 +552,22 @@ class Matrix : public BaseMatrix
         }
 
         /**
+         * \brief Returns a ColumnIterator to the beginning.
+         */
+        constexpr column_iterator beginColumn() noexcept
+        {
+            return column_iterator{m_rowsNumber, m_columnsNumber, m_data.begin()};
+        }
+
+        /**
+         * \brief Returns const ColumnIterator to the beginning.
+         */
+        constexpr const_column_iterator beginColumn() const noexcept
+        {
+            return const_column_iterator{m_rowsNumber, m_columnsNumber, m_data.cbegin()};
+        }
+
+        /**
          * \brief Returns a DiagonalIterator to the beginning.
          */
         constexpr diagonal_iterator beginDiagonal() noexcept
@@ -389,6 +591,14 @@ class Matrix : public BaseMatrix
         constexpr const_iterator cbegin() const noexcept
         {
             return const_iterator{m_rowsNumber, m_columnsNumber, m_data.cbegin()};
+        }
+
+        /**
+         * \brief Returns const ColumnIterator to the beginning.
+         */
+        constexpr const_column_iterator cbeginColumn() const noexcept
+        {
+            return const_column_iterator{m_rowsNumber, m_columnsNumber, m_data.cbegin()};
         }
 
         /**
@@ -417,6 +627,22 @@ class Matrix : public BaseMatrix
         }
 
         /**
+         * \brief Returns a ColumnIterator to the end.
+         */
+        constexpr column_iterator endColumn() noexcept
+        {
+            return column_iterator{m_rowsNumber, m_columnsNumber, m_data.end(), true};
+        }
+
+        /**
+         * \brief Returns const ColumnIterator to the end.
+         */
+        constexpr const_column_iterator endColumn() const noexcept
+        {
+            return const_column_iterator{m_rowsNumber, m_columnsNumber, m_data.cend(), true};
+        }
+
+        /**
          * \brief Returns a DiagonalIterator to the end.
          */
         constexpr diagonal_iterator endDiagonal() noexcept
@@ -440,6 +666,14 @@ class Matrix : public BaseMatrix
         constexpr const_iterator cend() const noexcept
         {
             return const_iterator{m_rowsNumber, m_columnsNumber, m_data.cend(), true};
+        }
+
+        /**
+         * \brief Returns const ColumnIterator to the end.
+         */
+        constexpr const_column_iterator cendColumn() const noexcept
+        {
+            return const_column_iterator{m_rowsNumber, m_columnsNumber, m_data.cend(), true};
         }
 
         /**
@@ -497,13 +731,18 @@ class Matrix : public BaseMatrix
         {
             OGLS_SQUARE_MATRIX_STATIC_ASSERT(N, M, calculateDeterminant);
 
+            if constexpr (N == 3)
+            {
+                return (m11() * m22() * m33()) + (m12() * m23() * m31()) + (m13() * m21() * m32())
+                       - (m13() * m22() * m31()) - (m12() * m21() * m33()) - (m11() * m23() * m32());
+            }
             if constexpr (N == 2)
             {
-                return (getValue(0, 0) * getValue(1, 1)) - (getValue(0, 1) * getValue(1, 0));
+                return (m11() * m22()) - (m12() * m21());
             }
             else if constexpr (N == 1)
             {
-                return getValue(0, 0);
+                return m11();
             }
             else
             {
@@ -552,6 +791,16 @@ class Matrix : public BaseMatrix
         }
 
         /**
+         * Returns the pointer to the underlaying array, in which the Matrix data is stored.
+         *
+         * Use it with ATTENTION!
+         */
+        constexpr auto getPointerToData() const noexcept
+        {
+            return m_data.data();
+        }
+
+        /**
          * \brief Retrieves the value at the specified row and column in the Matrix.
          *
          * Indexes are counted starting from 0.
@@ -561,8 +810,8 @@ class Matrix : public BaseMatrix
          * \return the value at the specified position.
          * \throw std::out_of_range.
          */
-        template<typename = IsNotNullMatrix<N, M>>
         constexpr float getValue(size_t row, size_t column) const
+        requires IsNotNullMatrix<N, M>
         {
             if (row >= m_rowsNumber || column >= m_columnsNumber)
             {
@@ -582,8 +831,8 @@ class Matrix : public BaseMatrix
          * \return the value at the specified position.
          * \throw std::out_of_range.
          */
-        template<typename = IsNotNullMatrix<N, M>>
         constexpr float getValue(const Index& elementPosition) const
+        requires IsNotNullMatrix<N, M>
         {
             return getValue(elementPosition.rows, elementPosition.columns);
         }
@@ -663,8 +912,8 @@ class Matrix : public BaseMatrix
          *
          * \return true if the Matrix is a matrix of ones, false otherwise.
          */
-        template<typename = IsNotNullMatrix<N, M>>
         constexpr bool isMatrixOfOnes() const noexcept
+        requires IsNotNullMatrix<N, M>
         {
             for (const auto element : m_data)
             {
@@ -682,8 +931,8 @@ class Matrix : public BaseMatrix
          *
          * \return true if the Matrix is a zero-matrix, false otherwise.
          */
-        template<typename = IsNotNullMatrix<N, M>>
         constexpr bool isZeroMatrix() const noexcept
+        requires IsNotNullMatrix<N, M>
         {
             for (const auto element : m_data)
             {
@@ -705,7 +954,8 @@ class Matrix : public BaseMatrix
          * of the current element via first argument as object of BaseMatrix::Index structure and the value of
          * the current element via second argument. Functor must return new value of the passed element.
          */
-        template<MatrixFunctor Functor, typename = IsNotNullMatrix<N, M>>
+        template<MatrixFunctor Functor>
+        requires IsNotNullMatrix<N, M>
         constexpr void performOnEvery(Functor functor)
         {
             for (auto i = size_t{0}; i < m_rowsNumber; ++i)
@@ -730,7 +980,8 @@ class Matrix : public BaseMatrix
          * of the current element via first argument as object of BaseMatrix::Index structure and the value of
          * the current element via second argument.
          */
-        template<MatrixConstFunctor Functor, typename = IsNotNullMatrix<N, M>>
+        template<MatrixConstFunctor Functor>
+        requires IsNotNullMatrix<N, M>
         constexpr void performOnEvery(Functor functor) const
         {
             for (auto i = size_t{0}; i < m_rowsNumber; ++i)
@@ -752,8 +1003,8 @@ class Matrix : public BaseMatrix
          * \param value  - the value to set.
          * \throw std::out_of_range.
          */
-        template<typename = IsNotNullMatrix<N, M>>
         constexpr void setValue(size_t row, size_t column, float value)
+        requires IsNotNullMatrix<N, M>
         {
             if (row >= m_rowsNumber || column >= m_columnsNumber)
             {
@@ -773,8 +1024,8 @@ class Matrix : public BaseMatrix
          * \param value           - the value to set.
          * \throw std::out_of_range.
          */
-        template<typename = IsNotNullMatrix<N, M>>
         constexpr void setValue(const Index& elementPosition, float value)
+        requires IsNotNullMatrix<N, M>
         {
             setValue(elementPosition.rows, elementPosition.columns, value);
         }
@@ -826,8 +1077,8 @@ class Matrix : public BaseMatrix
         /**
          * \brief Returns new Matrix as the result of transpose of this Matrix.
          */
-        template<typename = IsNotNullMatrix<N, M>>
         constexpr auto transpose() const noexcept
+        requires IsNotNullMatrix<N, M>
         {
             auto result = Matrix<M, N>{};
 
@@ -840,9 +1091,9 @@ class Matrix : public BaseMatrix
         }
 
     private:
-        template<typename = IsNotNullMatrix<N, M>>
         static std::string formatInvalidElementPositionErrorMessage(size_t rowsNumber, size_t columnsNumber,
                                                                     const Index& position)
+        requires IsNotNullMatrix<N, M>
         {
             return std::format("Matrix size is {}x{}, but passed element position is [{}][{}]", rowsNumber,
                                columnsNumber, position.rows, position.columns);
@@ -856,6 +1107,24 @@ class Matrix : public BaseMatrix
         std::array<float, N * M> m_data = std::array<float, N * M>{};  // clang-format on
 
 };  // class Matrix
+
+using Mat2 = Matrix<2, 2>;
+
+using Mat2x3 = Matrix<2, 3>;
+
+using Mat2x4 = Matrix<2, 4>;
+
+using Mat3 = Matrix<3, 3>;
+
+using Mat3x2 = Matrix<3, 2>;
+
+using Mat3x4 = Matrix<3, 4>;
+
+using Mat4 = Matrix<4, 4>;
+
+using Mat4x2 = Matrix<4, 2>;
+
+using Mat4x3 = Matrix<4, 3>;
 
 //------ OPERATIONS ON MATRIX
 
@@ -904,7 +1173,8 @@ constexpr bool operator!=(const Matrix<N, M>& m1, const Matrix<N, M>& m2) noexce
  *
  * \return Matrix, which is the result of addition of two Matrix.
  */
-template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+template<size_t N, size_t M>
+requires IsNotNullMatrix<N, M>
 constexpr auto operator+(const Matrix<N, M>& m1, const Matrix<N, M>& m2) noexcept
 {
     auto result = Matrix{m1};
@@ -920,7 +1190,8 @@ constexpr auto operator+(const Matrix<N, M>& m1, const Matrix<N, M>& m2) noexcep
  * \param m   - a source Matrix.
  * \return new Matrix, which is a result of addition of the number to every element of Matrix m.
  */
-template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+template<size_t N, size_t M>
+requires IsNotNullMatrix<N, M>
 constexpr auto operator+(float num, const Matrix<N, M>& m) noexcept
 {
     auto result  = Matrix{m};
@@ -935,7 +1206,8 @@ constexpr auto operator+(float num, const Matrix<N, M>& m) noexcept
  * \param num - a number to add to every element of the Matrix.
  * \return new Matrix, which is a result of addition of the number to every element of Matrix m.
  */
-template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+template<size_t N, size_t M>
+requires IsNotNullMatrix<N, M>
 constexpr auto operator+(const Matrix<N, M>& m, float num) noexcept
 {
     return num + m;
@@ -946,7 +1218,8 @@ constexpr auto operator+(const Matrix<N, M>& m, float num) noexcept
  *
  * \return Matrix, which is the result of subtraction of two Matrix.
  */
-template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+template<size_t N, size_t M>
+requires IsNotNullMatrix<N, M>
 constexpr auto operator-(const Matrix<N, M>& m1, const Matrix<N, M>& m2) noexcept
 {
     auto result = Matrix{m1};
@@ -962,7 +1235,8 @@ constexpr auto operator-(const Matrix<N, M>& m1, const Matrix<N, M>& m2) noexcep
  * \param num - a number to subtract from every element of the Matrix.
  * \return new Matrix, which is a result of subtraction of the number from every element of Matrix m.
  */
-template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+template<size_t N, size_t M>
+requires IsNotNullMatrix<N, M>
 constexpr auto operator-(const Matrix<N, M>& m, float num) noexcept
 {
     auto result  = Matrix{m};
@@ -976,12 +1250,8 @@ constexpr auto operator-(const Matrix<N, M>& m, float num) noexcept
  * \note The number of columns of the Matrix m1 must be equal to the number of rows of the Matrix m2.
  * \return Matrix, which is the result of multiplication of two Matrix.
  */
-// clang-format off
-template<size_t N1, size_t M1, size_t N2, size_t M2,
-         typename = IsNotNullMatrix<N1, M1>,
-         typename = IsNotNullMatrix<N2, M2>,
-         typename = std::enable_if_t<M1 == N2>>
-// clang-format on
+template<size_t N1, size_t M1, size_t N2, size_t M2>
+requires IsNotNullMatrix<N1, M1> && IsNotNullMatrix<N2, M2> && (M1 == N2)
 constexpr auto operator*(const Matrix<N1, M1>& m1, const Matrix<N2, M2>& m2) noexcept
 {
     auto result = Matrix<N1, M2>{};
@@ -1005,13 +1275,76 @@ constexpr auto operator*(const Matrix<N1, M1>& m1, const Matrix<N2, M2>& m2) noe
 }
 
 /**
+ * \brief Multiplies Vector by Matrix.
+ *
+ * The Vector is interpreted as Matrix of the size 1 x VectorDimensionality.
+ *
+ * \note The dimensionality of the Vector must be equal to the number of rows of the Matrix.
+ * \return Matrix, which is the result of multiplication of Vector by Matrix.
+ */
+template<size_t VectorDimensionality, size_t N, size_t M>
+requires IsNotNullMatrix<N, M> && (VectorDimensionality == N)
+constexpr auto operator*(const Vector<VectorDimensionality>& v, const Matrix<N, M>& m) noexcept
+{
+    auto result = Matrix<1, M>{};
+
+    for (auto j = size_t{0}; j < M; ++j)
+    {
+        auto resultElement = float{0.0};
+        auto iInner        = size_t{0};
+
+        for (const auto& el : v)
+        {
+            resultElement += el.getValue() * m.getValue(iInner, j);
+            ++iInner;
+        }
+
+        result.setValue(0, j, resultElement);
+    }
+
+    return result;
+}
+
+/**
+ * \brief Multiplies Matrix by Vector.
+ *
+ * The Vector is interpreted as Matrix of the size VectorDimensionality x 1.
+ *
+ * \note The dimensionality of the Vector must be equal to the number of columns of the Matrix.
+ * \return Matrix, which is the result of multiplication of Matrix by Vector.
+ */
+template<size_t N, size_t M, size_t VectorDimensionality>
+requires IsNotNullMatrix<N, M> && (M == VectorDimensionality)
+constexpr auto operator*(const Matrix<N, M>& m, const Vector<VectorDimensionality>& v) noexcept
+{
+    auto result = Matrix<N, 1>{};
+
+    for (auto i = size_t{0}; i < N; ++i)
+    {
+        auto resultElement = float{0.0};
+        auto j             = size_t{0};
+
+        for (const auto& el : v)
+        {
+            resultElement += m.getValue(i, j) * el.getValue();
+            ++j;
+        }
+
+        result.setValue(i, 0, resultElement);
+    }
+
+    return result;
+}
+
+/**
  * \brief Multiplies all elements of the Matrix by number.
  *
  * \param num - a number to multiply elements of the Matrix by.
  * \param m   - a source Matrix.
  * \return new Matrix, which is a result of multiplication of every element of Matrix m by number.
  */
-template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+template<size_t N, size_t M>
+requires IsNotNullMatrix<N, M>
 constexpr auto operator*(float num, const Matrix<N, M>& m) noexcept
 {
     auto result  = Matrix{m};
@@ -1026,7 +1359,8 @@ constexpr auto operator*(float num, const Matrix<N, M>& m) noexcept
  * \param num - a number to multiply elements of the Matrix by.
  * \return new Matrix, which is a result of multiplication of every element of Matrix m by number.
  */
-template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+template<size_t N, size_t M>
+requires IsNotNullMatrix<N, M>
 constexpr auto operator*(const Matrix<N, M>& m, float num) noexcept
 {
     return num * m;
@@ -1040,7 +1374,8 @@ constexpr auto operator*(const Matrix<N, M>& m, float num) noexcept
  * \return new Matrix, which is a result of division of every element of Matrix m by number.
  * \throw ogls::exceptions::DivisionByZeroException().
  */
-template<size_t N, size_t M, typename = IsNotNullMatrix<N, M>>
+template<size_t N, size_t M>
+requires IsNotNullMatrix<N, M>
 constexpr auto operator/(const Matrix<N, M>& m, float num)
 {
     if (num == 0.0f)

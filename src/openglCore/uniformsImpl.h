@@ -3,6 +3,9 @@
 
 #include "uniforms.h"
 
+#include "helpers/debugHelpers.h"
+#include "helpers/helpers.h"
+
 namespace ogls::oglCore::shader
 {
 /**
@@ -25,13 +28,6 @@ class BaseUniform::BaseImpl
         OGLS_NOT_COPYABLE_MOVABLE(BaseImpl)
         virtual ~BaseImpl() noexcept = default;
 
-        /**
-         * \brief Sets the data of OpenGL uniform variable.
-         *
-         * \param data - pointer to a data, which must be set in the uniform.
-         */
-        virtual void setData(const void* data) = 0;
-
     public:
         /**
          * \brief Location (ID) of the referenced OpenGL uniform variable in a shader program.
@@ -49,10 +45,55 @@ class BaseUniform::BaseImpl
 };  // class BaseUniform::BaseImpl
 
 /**
- * \brief Impl contains private data and methods of Uniform.
+ * \brief Impl contains private data and methods of MatrixUniform.
  */
-template<typename Type, unsigned int Count>
-class Uniform<Type, Count>::Impl : public BaseUniform::BaseImpl
+template<size_t N, size_t M>
+class MatrixUniform<N, M>::Impl : public BaseUniform::BaseImpl
+{
+    public:
+        /**
+         * \brief MatrixUniformSetter is a signature of OpenGL function, which is used by setData() to set the data
+         * of this uniform variable.
+         */
+        using MatrixUniformSetter = void (*)(GLint, GLsizei, GLboolean, const GLfloat*);
+
+    public:
+        /**
+         * \brief Constructs new object.
+         *
+         * \param shaderProgram - an ID of parent shader program.
+         * \param location      - a location of the uniform in a shader program.
+         * \param name          - a name of the uniform variable.
+         * \see BaseUniform::BaseImpl().
+         * \throw ogls::exceptions::GLRecAcquisitionException().
+         */
+        Impl(GLuint shaderProgram, GLint location, std::string name);
+        OGLS_NOT_COPYABLE_MOVABLE(Impl)
+
+        /**
+         * \brief Returns current data, which is stored in OpenGL uniform variable inside the OpenGL state machine.
+         */
+        DataType getData() const;
+        /**
+         * \brief Updates the data, which is stored in OpenGL uniform variable inside the OpenGL state machine.
+         *
+         * \param data - the data, which must be set in the OpenGL uniform variable.
+         */
+        void     setData(const DataType& data);
+
+    public:
+        /**
+         * \brief The pointer to OpenGL function to set value of this uniform in OpenGL state machine.
+         */
+        const MatrixUniformSetter setter = nullptr;
+
+};  // class MatrixUniform::Impl
+
+/**
+ * \brief Impl contains private data and methods of VectorUniform.
+ */
+template<typename Type, size_t Count>
+class VectorUniform<Type, Count>::Impl : public BaseUniform::BaseImpl
 {
     public:
         /**
@@ -80,17 +121,17 @@ class Uniform<Type, Count>::Impl : public BaseUniform::BaseImpl
         OGLS_NOT_COPYABLE_MOVABLE(Impl)
 
         /**
-         * \brief Returns current value, which is stored in OpenGL uniform variable inside OpenGL state machine.
+         * \brief Returns current data, which is stored in OpenGL uniform variable inside the OpenGL state machine.
          */
-        Type getValue() const;
-
-        void setData(const void* data) override;
+        auto getData() const;
+        /**
+         * \brief Updates the data, which is stored in OpenGL uniform variable inside the OpenGL state machine.
+         *
+         * \param data - the data, which must be set in the OpenGL uniform variable.
+         */
+        void setData(const DataType& data);
 
     public:
-        /**
-         * \brief The number of elements in the uniform variable.
-         */
-        const unsigned int          count  = {Count};
         /**
          * \brief The pointer to OpenGL function to get value of this uniform in OpenGL state machine.
          */
@@ -100,7 +141,7 @@ class Uniform<Type, Count>::Impl : public BaseUniform::BaseImpl
          */
         const ConcreteUniformSetter setter = nullptr;
 
-};  // class Uniform::Impl
+};  // class VectorUniform::Impl
 
 }  // namespace ogls::oglCore::shader
 

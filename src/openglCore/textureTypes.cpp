@@ -5,8 +5,8 @@
 
 namespace ogls::oglCore::texture
 {
-TextureData::TextureData(unsigned char* textureData, GLsizei w, GLsizei h, int nCh, TexturePixelFormat f) noexcept :
-    data{textureData}, height{h > 0 ? h : 0}, width{w > 0 ? w : 0}, nChannels{nCh > 0 ? nCh : 0}, format{f}
+TextureData::TextureData(DataType textureData, GLsizei w, GLsizei h, int nCh, TexturePixelFormat f) noexcept :
+    data{std::move(textureData)}, height{h > 0 ? h : 0}, width{w > 0 ? w : 0}, nChannels{nCh > 0 ? nCh : 0}, format{f}
 {
     OGLS_ASSERT(data);
     OGLS_ASSERT(h > 0);
@@ -14,9 +14,9 @@ TextureData::TextureData(unsigned char* textureData, GLsizei w, GLsizei h, int n
     OGLS_ASSERT(nCh > 0);
 }
 
-TextureData::TextureData(unsigned char* textureData, GLsizei w, GLsizei h, GLsizei d, int nCh, GLint l,
-                         TexturePixelFormat f, TextureInternalFormat iF, TexturePixelType pixelType) noexcept :
-    data{textureData},
+TextureData::TextureData(DataType textureData, GLsizei w, GLsizei h, GLsizei d, int nCh, GLint l, TexturePixelFormat f,
+                         TextureInternalFormat iF, TexturePixelType pixelType) noexcept :
+    data{std::move(textureData)},
     depth{d > 0 ? d : 0}, height{h > 0 ? h : 0}, width{w > 0 ? w : 0}, nChannels{nCh > 0 ? nCh : 0},
     level{l > 0 ? l : 0}, format{f}, internalFormat{iF}, type{pixelType}
 {
@@ -26,17 +26,6 @@ TextureData::TextureData(unsigned char* textureData, GLsizei w, GLsizei h, GLsiz
     OGLS_ASSERT(w > 0);
     OGLS_ASSERT(nCh > 0);
     OGLS_ASSERT(l > 0);
-}
-
-TextureData::~TextureData() noexcept
-{
-    try
-    {
-        helpers::freeTextureData(*this);
-    }
-    catch (...)
-    {
-    }
 }
 
 }  // namespace ogls::oglCore::texture

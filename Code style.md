@@ -42,6 +42,7 @@
   }  // namespace
 
   using 1
+
   using 2
 
   type 1  // also can be before using-statement, if using-statement uses this type
@@ -73,7 +74,8 @@ class MyClass
 
     // TYPES
     public:
-        using
+        using 1
+        using 2
         ...
 
     protected:
@@ -178,6 +180,20 @@ class MyClass
 - 1 empty line after static fields.
 - 2 empty lines before *friends*. It's needed to emphasize, that *friends* aren't part of private section.
 - 1 empty line before closing `}`.
+- 1 empty line after using type-alias outside some class declaration:
+  ```
+  using Type = SomeType<1>;
+
+  using Type2 = SomeType<2>;
+
+  class SomeClass
+  {
+      public:
+          using T1 = int;
+          using T2 = float;
+
+  }
+  ```
 
 ## Files and folders
 - The source code of the project is separated on two parts - **app** and **core**. **Core** is a library, **app** is a demo application, which uses **core** library. 
@@ -275,7 +291,7 @@ namespace
 }  // namespace
 
 // In the end of file create template instantiations if necessary
-template class Uniform<GLfloat, 1>;
+template class VectorUniform<GLfloat, 1>;
 
 }  // namespace ogls::oglCore::shader
 
@@ -314,6 +330,10 @@ avoid possible misunderstanding between `auto lst = {1}; // lst is an initialize
 - Before closing `}` of namespace.
 - Before `#endif`.
 - Between functions (except methods in type declaration) and between function and type declaration.
+
+## Constness
+The `const` class methods (**inspectors**) MUST mean **logical constness** of the method, not just a syntactical constness.
+For example ``VectorUniform::setData()`` doesn't change the internal state of the VectorUniform object, however it changes the state of the uniform variable inside the OpenGL state machine. That is why ``VectorUniform::setData()`` cannot be declared as const method.
 
 ## Noexcept
 - Destructors must be declared as `noexcept`. If destructor calls potentially-throwing function, `try-catch` block must wrap this call.

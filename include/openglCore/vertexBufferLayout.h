@@ -13,7 +13,7 @@ namespace ogls::oglCore::vertex
  * \brief VertexAttribute represents one vertex attribute and contains all arguments,
  * which are needed to call function [glVertexAttribPointer()](https://docs.gl/gl4/glVertexAttribPointer).
  */
-struct VertexAttribute
+struct VertexAttribute final
 {
         /**
          * \brief The 'pointer' parameter of the function. Specifies an offset in bytes of the first component
@@ -49,7 +49,7 @@ struct VertexAttribute
  *
  * \see ogls::oglCore::vertex::VertexArray::addBuffer().
  */
-class VertexBufferLayout
+class VertexBufferLayout final
 {
     private:
         /**

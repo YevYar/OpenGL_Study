@@ -109,37 +109,61 @@ class ShaderProgram
         ~ShaderProgram() noexcept;
 
         /**
-         * \brief Finds uniform location and creates Uniform<Type, Count> object,
-         * which wraps the OpenGL uniform variable with specified name.
+         * \brief Returns the reference to the MatrixUniform<N, M> object,
+         * which wraps the OpenGL matrix uniform variable with the specified name.
+         *
+         * If the location of the specified matrix uniform was found previously and the wrapper object was created
+         * before, returns the cached object. If not, finds matrix uniform location and creates MatrixUniform<N, M>
+         * object, which wraps the OpenGL matrix uniform variable with the specified name.
+         *
+         * Uses [glGetUniformLocation()](https://docs.gl/gl4/glGetUniformLocation).
+         *
+         * \param N    - a number of rows in the Matrix in range [2, 4].
+         * \param M    - a number of columns in the Matrix in range [2, 4].
+         * \param name - a name of the matrix uniform variable, which is used in OpenGL shader program.
+         * \see MatrixUniform.
+         * \return MatrixUniform<N, M> object or throws an exception if nothing is found.
+         * \throw ogls::exceptions::GLRecAcquisitionException().
+         */
+        template<size_t N, size_t M>
+        MatrixUniform<N, M>& getMatrixUniform(const std::string& name) const;
+        /**
+         * \brief Returns uniform wrapper object via reference to base class BaseUniform,
+         * which wraps the OpenGL uniform variable with the specified name.
+         *
+         * If the location of the specified uniform was found previously and the wrapper object was created before
+         * by calling getMatrixUniform() or getVectorUniform(), returns the cached object.
+         * If not, the exception is thrown.
+         *
+         * \param name - a name of the uniform variable, which is used in OpenGL shader program.
+         * \see getMatrixUniform(), getVectorUniform().
+         * \return BaseUniform object or throws an exception if nothing is found.
+         * \throw ogls::exceptions::GLRecAcquisitionException().
+         */
+        BaseUniform&         getUniform(const std::string& name) const;
+        /**
+         * \brief Returns the reference to the VectorUniform<Type, Count> object,
+         * which wraps the OpenGL uniform variable with the specified name.
+         *
+         * If the location of the specified uniform was found previously and the wrapper object was created before,
+         * returns the cached object. If not, finds uniform location and creates VectorUniform<Type, Count> object,
+         * which wraps the OpenGL uniform variable with the specified name.
          *
          * Uses [glGetUniformLocation()](https://docs.gl/gl4/glGetUniformLocation).
          *
          * \param Type  - one of the list: GLfloat, GLdouble, GLint, GLuint.
          * \param Count - the integer value in the range [1, 4].
-         * \param name  - a name of uniform variable, which is used in OpenGL shader program.
-         * \return created Uniform<Type, Count> object via reference to base class BaseUniform
-         * or throws an exception if nothing is found.
+         * \param name  - a name of the uniform variable, which is used in OpenGL shader program.
+         * \see VectorUniform.
+         * \return VectorUniform<Type, Count> object or throws an exception if nothing is found.
          * \throw ogls::exceptions::GLRecAcquisitionException().
          */
-        template<typename Type, unsigned int Count>
-        BaseUniform& findUniform(std::string name);
-        /**
-         * \brief Returns Uniform object via reference to base class BaseUniform,
-         * which wraps the OpenGL uniform variable with specified name.
-         *
-         * To get Uniform for specified uniform variable this uniform must be previously found and created
-         * by calling findUniform().
-         *
-         * \param name - a name of uniform variable, which is used in OpenGL shader program.
-         * \see findUniform().
-         * \return found BaseUniform object or throws an exception if nothing is found.
-         * \throw std::out_of_range.
-         */
-        BaseUniform& getUniform(const std::string& name) const;
+        template<typename Type, size_t Count>
+        VectorUniform<Type, Count>& getVectorUniform(const std::string& name) const;
         /**
          * \brief Wraps [glUseProgram()](https://docs.gl/gl4/glUseProgram).
          */
-        void         use() const;
+        void                        use() const;
 
     private:
         /**

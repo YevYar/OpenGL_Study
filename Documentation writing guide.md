@@ -25,6 +25,7 @@
  *
  * Detailed description.
  *
+ * \note
  * \param <b>param name</b> - description.
  * \see reference.
  * \return description.

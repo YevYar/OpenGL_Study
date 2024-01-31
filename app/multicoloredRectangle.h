@@ -3,13 +3,6 @@
 
 #include "sceneObject.h"
 
-namespace ogls::oglCore::shader
-{
-template<typename Type, unsigned int Count>
-class Uniform;
-
-}
-
 namespace app
 {
 /**
@@ -48,11 +41,11 @@ class MulticoloredRectangle : public renderer::SceneObject
         /**
          * \brief Coefficient, which is used to change the color while blinking.
          */
-        ogls::oglCore::shader::Uniform<float, 1>& m_colorCoefficient;
+        ogls::oglCore::shader::VectorUniform<float, 1>& m_colorCoefficient;
         /**
          * \brief Counter to count a number of rendering iterations.
          */
-        int                                       m_counter = {0};
+        int                                             m_counter = {0};
 
 
         friend std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle();

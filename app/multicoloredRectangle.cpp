@@ -20,7 +20,7 @@ namespace app
 MulticoloredRectangle::MulticoloredRectangle(std::shared_ptr<ogls::oglCore::vertex::VertexArray>   vao,
                                              std::shared_ptr<ogls::oglCore::shader::ShaderProgram> shaderProgram) :
     SceneObject{std::move(vao), shaderProgram},
-    m_colorCoefficient{static_cast<decltype(m_colorCoefficient)>(shaderProgram->findUniform<float, 1>("k"))}
+    m_colorCoefficient{shaderProgram->getVectorUniform<float, 1>("k")}
 {
 }
 
@@ -30,7 +30,7 @@ void MulticoloredRectangle::setColorCoefficient(float k)
     if (k >= 0.0 && !isgreater(k, 1.0))
     {
         m_shaderProgram->use();
-        m_colorCoefficient.setData(&k);
+        m_colorCoefficient.setData(k);
         return;
     }
     // throw std::out_of_range{"k must be in the range [0; 1]."};

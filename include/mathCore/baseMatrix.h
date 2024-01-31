@@ -5,6 +5,7 @@
 #include <string>
 
 #include "exceptions.h"
+#include "generalTypes.h"
 #include "helpers/debugHelpers.h"
 #include "helpers/macros.h"
 
@@ -90,6 +91,8 @@ class BaseMatrix
                 {
                 }
 
+                virtual ~BaseIterator() noexcept = default;
+
             protected:
                 /**
                  * \brief The number of columns in represented Matrix.
@@ -113,6 +116,77 @@ class BaseMatrix
                 const size_t m_rowsNumber    = {0};
 
         };  // class BaseIterator
+
+        /**
+         * \brief BaseMatrix::ColumnMajorIteratorImpl provides an implementation of necessary methods for Iterator
+         * to iterate over Matrix elements in column-major order from element (0, 0) to element (N-1, M-1).
+         *
+         * \see Iterator.
+         */
+        class ColumnMajorIteratorImpl : public BaseIterator
+        {
+            public:
+                using typename BaseIterator::difference_type;
+
+            public:
+                /**
+                 * \see ogls::mathCore::IteratorImpl.
+                 */
+                constexpr difference_type calculateOffset(difference_type iteratorN) const noexcept
+                {
+                    if ((m_currentI == m_rowsNumber - 1) && (m_currentJ == m_columnsNumber - 1) && (iteratorN > 0))
+                    {
+                        return 1;
+                    }
+
+                    auto currentI = m_currentI, currentJ = m_currentJ;
+                    if ((currentI == m_rowsNumber) && (iteratorN < 0))
+                    {
+                        iteratorN += 1;
+                        --currentI;
+                        currentJ = m_columnsNumber - 1;
+                    }
+
+                    const auto iOffset = iteratorN % static_cast<difference_type>(m_rowsNumber);
+                    const auto jOffset = iteratorN / static_cast<difference_type>(m_rowsNumber);
+                    auto       newI    = static_cast<difference_type>(currentI) + iOffset;
+                    auto       newJ    = static_cast<difference_type>(currentJ) + jOffset;
+
+                    if (newI < 0)
+                    {
+                        --newJ;
+                        newI = m_rowsNumber + newI;
+                    }
+                    if (newI >= m_rowsNumber)
+                    {
+                        ++newJ;
+                        newI -= m_rowsNumber;
+                    }
+
+                    const auto thisPosition = static_cast<difference_type>(m_currentI * m_columnsNumber + m_currentJ);
+                    const auto newPosition  = static_cast<difference_type>(newI * m_columnsNumber + newJ);
+                    return newPosition - thisPosition;
+                }
+
+                /**
+                 * \see ogls::mathCore::IteratorImpl.
+                 */
+                constexpr difference_type distanceTo(const ColumnMajorIteratorImpl& j) const noexcept
+                {
+                    return calculateStepsFromBegin() - j.calculateStepsFromBegin();
+                }
+
+            protected:
+                using BaseIterator::BaseIterator;
+
+            private:
+                constexpr size_t calculateStepsFromBegin() const noexcept
+                {
+                    return m_currentI == m_rowsNumber ? m_rowsNumber * m_columnsNumber
+                                                      : m_currentJ * m_rowsNumber + m_currentI;
+                }
+
+        };  // class ColumnMajorIteratorImpl
 
         /**
          * \brief BaseMatrix::DiagonalIteratorImpl provides an implementation of necessary methods for Iterator
@@ -227,7 +301,7 @@ class BaseMatrix
                  * Element provides necessary data about the Matrix element -
                  * its row and column indexes as well as the element data.
                  */
-                struct Element
+                struct Element final
                 {
                     public:
                         /**
@@ -235,8 +309,8 @@ class BaseMatrix
                          *
                          * Changes the referenced Matrix element. Makes it possible to use algorithms like std::fill().
                          */
-                        template<typename = std::enable_if_t<!std::is_const_v<ElementType>>>
                         constexpr Element& operator=(ElementType newValue) noexcept
+                        requires IsNotConstType<ElementType>
                         {
                             setValue(newValue);
                             return *this;
@@ -257,7 +331,7 @@ class BaseMatrix
                         /**
                          * \brief Returns a std::string representation of the Element object.
                          */
-                        operator std::string() const
+                        explicit operator std::string() const
                         {
                             return std::format("Matrix::Iterator::Element({}, {}) = {}", i, j, getValue());
                         }
@@ -278,8 +352,8 @@ class BaseMatrix
                          *
                          * Changes the referenced Matrix element.
                          */
-                        template<typename = std::enable_if_t<!std::is_const_v<ElementType>>>
                         constexpr void setValue(ElementType newValue) noexcept
+                        requires IsNotConstType<ElementType>
                         {
                             getValue() = newValue;
                         }
@@ -624,13 +698,13 @@ class BaseMatrix
         /**
          * \brief BaseMatrix::Size represents a dimension of the Matrix or specific index in the Matrix.
          */
-        struct Size
+        struct Size final
         {
             public:
                 /**
                  * \brief Returns a std::string representation of the Size object.
                  */
-                operator std::string() const
+                explicit operator std::string() const
                 {
                     return std::format("Matrix::Size(rows={}, columns={})", rows, columns);
                 }
@@ -646,10 +720,14 @@ class BaseMatrix
 
         /**
          * \brief BaseMatrix::Index represents an index (position) of the element in the Matrix.
+         *
+         * The position is counted starting from 0.
          */
         using Index = Size;
 
     public:
+        virtual ~BaseMatrix() noexcept = default;
+
         /**
          * \brief Retrieves the number of columns in the Matrix.
          *
