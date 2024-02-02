@@ -8,7 +8,7 @@ namespace ogls::helpers
 /**
  * \brief The precision of float-type calculations.
  */
-constexpr inline auto FLOAT_EPSILON = float{1.0E-6};
+constexpr inline auto OGLS_FLOAT_EPSILON = float{1.0E-6};
 
 /**
  * \brief Returns the absolute value of x: |x|.
@@ -31,7 +31,7 @@ constexpr Type absolute(Type x) noexcept
  * between two floating-point numbers to consider them equal.
  * \return true if a == b, false otherwise.
  */
-constexpr bool isFloatsEqual(float a, float b, float precision = FLOAT_EPSILON) noexcept
+constexpr bool isFloatsEqual(float a, float b, float precision = OGLS_FLOAT_EPSILON) noexcept
 {
     return absolute(a - b) < precision;
 }
@@ -43,7 +43,7 @@ constexpr bool isFloatsEqual(float a, float b, float precision = FLOAT_EPSILON) 
  * between two floating-point numbers to consider them equal.
  * \return true if a != b, false otherwise.
  */
-constexpr bool isFloatsNotEqual(float a, float b, float precision = FLOAT_EPSILON) noexcept
+constexpr bool isFloatsNotEqual(float a, float b, float precision = OGLS_FLOAT_EPSILON) noexcept
 {
     return !isFloatsEqual(a, b, precision);
 }
