@@ -10,6 +10,23 @@ project(OpenGL_Study
 # === SET OPTIONS
 option(BUILD_DOC "Build documentation" ON)
 
+# Define an option for selecting the graphics API
+option(USE_OPENGL "Use OpenGL as the graphics API" ON)
+option(USE_VULKAN "Use Vulkan as the graphics API" OFF)
+
+if(NOT USE_OPENGL AND NOT USE_VULKAN)
+    message(FATAL_ERROR "Please select at least one graphics API.")
+endif()
+
+# Set the appropriate compile definitions based on user's choice
+if(USE_OPENGL)
+    add_definitions(-DTREAT_VECTORS_AS_COLUMNS)
+elseif(USE_VULKAN)
+    add_definitions(-DTREATE_VECTORS_AS_ROWS)
+else()
+    add_definitions(-DTREAT_VECTORS_AS_COLUMNS)
+endif()
+
 
 # === CREATE GENERAL INTERFACE LIBRARY TO SET NECESSARY FLAGS TO ALL TARGETS
 add_library(OpenGL_Study_compiler_flags INTERFACE)
