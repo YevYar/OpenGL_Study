@@ -793,7 +793,7 @@ class Matrix : public BaseMatrix
         /**
          * Returns the pointer to the underlaying array, in which the Matrix data is stored.
          *
-         * Use it with ATTENTION!
+         * \warning Use it with ATTENTION!
          */
         constexpr auto getPointerToData() const noexcept
         {
@@ -1072,6 +1072,23 @@ class Matrix : public BaseMatrix
             ss << " |";
 
             return ss.str();
+        }
+
+        /**
+         * \brief Returns a Vector representation of the Matrix object, if the Matrix is a row- or column-matrix.
+         */
+        constexpr auto toVector() const noexcept
+        requires IsNotNullMatrix<N, M> && ((N > 1 && N < 5 && M == 1) || (M > 1 && M < 5 && N == 1))
+        {
+            auto vec   = Vector<(N == 1 ? M : N)>{};
+            auto vecIt = vec.begin();
+
+            for (const auto& el : *this)
+            {
+                (*vecIt++).setValue(el.getValue());
+            }
+
+            return vec;
         }
 
         /**
