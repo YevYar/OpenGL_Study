@@ -91,7 +91,7 @@ class BaseMatrix
                 {
                 }
 
-                virtual ~BaseIterator() noexcept = default;
+                constexpr virtual ~BaseIterator() noexcept = default;
 
             protected:
                 /**
@@ -438,7 +438,7 @@ class BaseMatrix
                  *
                  * \throw ogls::exceptions::MatrixException().
                  */
-                constexpr Iterator(Iterator&&)  // it's required by iterator concept
+                Iterator(Iterator&&)  // it's required by iterator concept
                 {
                     throwUnexpectedUsageExceptionWithHint("Iterator(Iterator&&)");
                 }
@@ -451,7 +451,7 @@ class BaseMatrix
                  *
                  * \throw ogls::exceptions::MatrixException().
                  */
-                constexpr Iterator& operator=(const Iterator&)  // it's required by iterator concept
+                Iterator& operator=(const Iterator&)  // it's required by iterator concept
                 {
                     throwUnexpectedUsageExceptionWithHint("operator=(const Iterator&)");
                     return *this;
@@ -465,7 +465,7 @@ class BaseMatrix
                  *
                  * \throw ogls::exceptions::MatrixException().
                  */
-                constexpr Iterator& operator=(Iterator&&)  // it's required by iterator concept
+                Iterator& operator=(Iterator&&)  // it's required by iterator concept
                 {
                     throwUnexpectedUsageExceptionWithHint("operator=(Iterator&&)");
                     return *this;
@@ -489,7 +489,7 @@ class BaseMatrix
                 {
                     auto temp = Iterator{*this};
                     ++*this;
-                    return temp;
+                    return Iterator{temp};  // hack to avoid RVO and calling of non-constexpr move-constructor
                 }
 
                 /**
@@ -527,7 +527,7 @@ class BaseMatrix
                 {
                     auto temp = Iterator{*this};
                     --*this;
-                    return temp;
+                    return Iterator{temp};  // hack to avoid RVO and calling of non-constexpr move-constructor
                 }
 
                 // concept random_access_iterator
@@ -559,7 +559,7 @@ class BaseMatrix
                 {
                     auto temp  = Iterator{i};
                     temp      += n;
-                    return temp;
+                    return Iterator{temp};  // hack to avoid RVO and calling of non-constexpr move-constructor
                 }
 
                 friend constexpr Iterator operator+(difference_type n, const Iterator& i) noexcept
@@ -571,7 +571,7 @@ class BaseMatrix
                 {
                     auto temp  = Iterator{i};
                     temp      -= n;
-                    return temp;
+                    return Iterator{temp};  // hack to avoid RVO and calling of non-constexpr move-constructor
                 }
 
                 friend constexpr difference_type operator-(const Iterator& i, const Iterator& j) noexcept
@@ -726,7 +726,7 @@ class BaseMatrix
         using Index = Size;
 
     public:
-        virtual ~BaseMatrix() noexcept = default;
+        constexpr virtual ~BaseMatrix() noexcept = default;
 
         /**
          * \brief Retrieves the number of columns in the Matrix.

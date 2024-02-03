@@ -331,7 +331,7 @@ class Vector
                  *
                  * \throw ogls::exceptions::VectorException().
                  */
-                constexpr Iterator(Iterator&&)  // it's required by iterator concept
+                Iterator(Iterator&&)  // it's required by iterator concept
                 {
                     throwUnexpectedUsageExceptionWithHint("Iterator(Iterator&&)");
                 }
@@ -341,7 +341,7 @@ class Vector
                  *
                  * \throw ogls::exceptions::VectorException().
                  */
-                constexpr Iterator& operator=(const Iterator&)  // it's required by iterator concept
+                Iterator& operator=(const Iterator&)  // it's required by iterator concept
                 {
                     throwUnexpectedUsageExceptionWithHint("operator=(const Iterator&)");
                     return *this;
@@ -352,7 +352,7 @@ class Vector
                  *
                  * \throw ogls::exceptions::VectorException().
                  */
-                constexpr Iterator& operator=(Iterator&&)  // it's required by iterator concept
+                Iterator& operator=(Iterator&&)  // it's required by iterator concept
                 {
                     throwUnexpectedUsageExceptionWithHint("operator=(Iterator&&)");
                     return *this;
@@ -409,7 +409,7 @@ class Vector
                 {
                     auto temp = Iterator{*this};
                     ++*this;
-                    return temp;
+                    return Iterator{temp};  // hack to avoid RVO and calling of non-constexpr move-constructor
                 }
 
                 /**
