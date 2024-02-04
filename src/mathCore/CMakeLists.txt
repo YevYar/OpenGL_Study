@@ -4,6 +4,7 @@ set(PUBLIC_HEADERS ${PATH_TO_PUBLIC_INCLUDE}/mathCore/base.h
     ${PATH_TO_PUBLIC_INCLUDE}/mathCore/baseMatrix.h
     ${PATH_TO_PUBLIC_INCLUDE}/mathCore/matrix.h
     ${PATH_TO_PUBLIC_INCLUDE}/mathCore/point.h
+    ${PATH_TO_PUBLIC_INCLUDE}/mathCore/transformMatrix.h
 	${PATH_TO_PUBLIC_INCLUDE}/mathCore/vector.h)
 	
 set(PRIVATE_HEADERS "")
