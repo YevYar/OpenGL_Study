@@ -523,16 +523,6 @@ class Matrix : public BaseMatrix
             }
         }
 
-        /**
-         * \brief Returns std::string representation of the Matrix object.
-         *
-         * \see toFullString().
-         */
-        explicit operator std::string() const
-        {
-            return toFullString();
-        }
-
         //------ RANGE STUFF
 
         /**
@@ -1144,6 +1134,18 @@ using Mat4x2 = Matrix<4, 2>;
 using Mat4x3 = Matrix<4, 3>;
 
 //------ OPERATIONS ON MATRIX
+
+/**
+ * \brief Prints into the stream a std::string representation of the Matrix object.
+ *
+ * \see Matrix::toFullString().
+ */
+template<size_t N, size_t M>
+inline std::ostream& operator<<(std::ostream& out, const Matrix<N, M>& m)
+{
+    out << m.toFullString();
+    return out;
+}
 
 /**
  * \brief Checks equality of two Matrix.

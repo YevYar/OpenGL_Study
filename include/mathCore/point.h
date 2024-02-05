@@ -58,14 +58,6 @@ struct Point final
         }
 
         /**
-         * \brief Returns a std::string representation of the Point object.
-         */
-        explicit operator std::string() const
-        {
-            return std::format("Point(x={}, y={}, z={})", x, y, z);
-        }
-
-        /**
          * \brief Checks if the Point is zero-point (origin).
          *
          * \return true if the Point is zero-point (origin), false otherwise.
@@ -104,13 +96,22 @@ struct Point final
          */
         std::string toString() const
         {
-            return static_cast<std::string>(*this);
+            return std::format("Point(x={}, y={}, z={})", x, y, z);
         }
 
     public:
         float x = {0.0f}, y = {0.0f}, z = {0.0f};
 
 };  // struct Point
+
+/**
+ * \brief Prints into the stream a std::string representation of the Point object.
+ */
+inline std::ostream& operator<<(std::ostream& out, const Point& p)
+{
+    out << p.toString();
+    return out;
+}
 
 /**
  * \brief Checks equality of two Point.

@@ -329,14 +329,6 @@ class BaseMatrix
                         }
 
                         /**
-                         * \brief Returns a std::string representation of the Element object.
-                         */
-                        explicit operator std::string() const
-                        {
-                            return std::format("Matrix::Iterator::Element({}, {}) = {}", i, j, getValue());
-                        }
-
-                        /**
                          * \brief Returns the reference on the referenced Matrix element.
                          *
                          * Use it to change the referenced Matrix element: getValue() = newValue;
@@ -358,6 +350,14 @@ class BaseMatrix
                             getValue() = newValue;
                         }
 
+                        /**
+                         * \brief Returns a std::string representation of the Element object.
+                         */
+                        std::string toString() const
+                        {
+                            return std::format("Matrix::Iterator::Element({}, {}) = {}", i, j, getValue());
+                        }
+
                     public:
                         /**
                          * \brief The index of the Matrix row of this Element (counts from 0).
@@ -375,6 +375,15 @@ class BaseMatrix
                          * \brief The pointer to the value of the Element.
                          */
                         ElementType* value = nullptr;
+
+                        /**
+                         * \brief Prints into the stream a std::string representation of the Element object.
+                         */
+                        friend inline std::ostream& operator<<(std::ostream& out, const Element& element)
+                        {
+                            out << element.toString();
+                            return out;
+                        }
 
                 };  // struct Element
 
@@ -704,7 +713,7 @@ class BaseMatrix
                 /**
                  * \brief Returns a std::string representation of the Size object.
                  */
-                explicit operator std::string() const
+                std::string toString() const
                 {
                     return std::format("Matrix::Size(rows={}, columns={})", rows, columns);
                 }
@@ -818,6 +827,15 @@ class BaseMatrix
         size_t m_rowsNumber    = {0};
 
 };  // class BaseMatrix
+
+/**
+ * \brief Prints into the stream a std::string representation of the BaseMatrix::Size object.
+ */
+inline std::ostream& operator<<(std::ostream& out, const BaseMatrix::Size& size)
+{
+    out << size.toString();
+    return out;
+}
 
 }  // namespace ogls::mathCore
 

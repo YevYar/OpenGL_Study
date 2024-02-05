@@ -221,16 +221,6 @@ class TransformMatrix final
         }
 
         /**
-         * \brief Returns std::string representation of the TransformMatrix object.
-         *
-         * \see toString().
-         */
-        operator std::string() const
-        {
-            return toString();
-        }
-
-        /**
          * Returns a wrapped Matrix<4, 4>.
          */
         constexpr Mat4 getMatrix() const noexcept
@@ -276,6 +266,15 @@ class TransformMatrix final
         Mat4 m_matrix;
 
 };  // class TransformMatrix
+
+/**
+ * \brief Prints into the stream a std::string representation of the TransformMatrix object.
+ */
+inline std::ostream& operator<<(std::ostream& out, const TransformMatrix& tm)
+{
+    out << tm.toString();
+    return out;
+}
 
 /**
  * \brief Checks equality of two TransformMatrix.
