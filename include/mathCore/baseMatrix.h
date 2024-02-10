@@ -636,7 +636,6 @@ class BaseMatrix
                            && this->m_currentJ < this->m_columnsNumber;
                 }
 
-            private:
                 /**
                  * \brief Sets the invalid state of the Iterator.
                  *
@@ -647,6 +646,7 @@ class BaseMatrix
                     updateCurrentPosition(this->m_rowsNumber, 0);
                 }
 
+            private:
                 /**
                  * \brief Updates the position (row and column indexes) on which Iterator points.
                  *
