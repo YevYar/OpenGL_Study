@@ -1,34 +1,18 @@
 #ifndef OGLS_MATHCORE_TRANSFORM_MATRIX_H
 #define OGLS_MATHCORE_TRANSFORM_MATRIX_H
 
-#include <algorithm>
-
 #include "mathCore/matrix.h"
 #include "mathCore/vector.h"
 
+namespace ogls::mathCore
+{
 #ifdef TREAT_VECTORS_AS_COLUMNS
-#    define OGLS_BEGIN_IT  begin
-#    define OGLS_CBEGIN_IT cbegin
-#    define OGLS_CEND_IT   cend
-#    define OGLS_END_IT    end
 constexpr inline auto OGLS_VECTOR_IS_COLUMN = true;
 #elif TREATE_VECTORS_AS_ROWS
-#    define OGLS_BEGIN_IT  beginColumn
-#    define OGLS_CBEGIN_IT cbeginColumn
-#    define OGLS_CEND_IT   cendColumn
-#    define OGLS_END_IT    endColumn
 constexpr inline auto OGLS_VECTOR_IS_COLUMN = false;
 #else
 #    error "Please select a graphics API (USE_OPENGL or USE_VULKAN)"
 #endif
-
-namespace ogls::mathCore
-{
-class TransformMatrix;
-
-bool            operator==(const TransformMatrix&, const TransformMatrix&) noexcept;
-bool            operator!=(const TransformMatrix&, const TransformMatrix&) noexcept;
-TransformMatrix operator*(const TransformMatrix&, const TransformMatrix&) noexcept;
 
 /**
  * \brief TransformMatrix represents a non-linear transformation Matrix in 3D-space.
@@ -146,18 +130,7 @@ class TransformMatrix final
          *
          * \return the Vector<4> with the applied transformation.
          */
-        static Vec4 applyTransformationToVector(const Vec4& v, const TransformMatrix& transformation) noexcept
-        {
-            if constexpr (OGLS_VECTOR_IS_COLUMN)
-            {
-                return (transformation.getResultMatrix() * v).toVector();
-            }
-            else
-            {
-                return (v * transformation.getResultMatrix()).toVector();
-            }
-        }
-
+        static Vec4 applyTransformationToVector(const Vec4& v, const TransformMatrix& transformation) noexcept;
         /**
          * \brief Creates combined TransfromMatrix from the TransformMatrix of the model, view and projection.
          *
@@ -170,18 +143,7 @@ class TransformMatrix final
          * \return the combined TransformMatrix of the model, view and projection.
          */
         static TransformMatrix createCombinedTransformMatrix(const TransformMatrix& model, const TransformMatrix& view,
-                                                             const TransformMatrix& projection) noexcept
-        {
-            if constexpr (OGLS_VECTOR_IS_COLUMN)
-            {
-                return projection * view * model;
-            }
-            else
-            {
-                return model * view * projection;
-            }
-        }
-
+                                                             const TransformMatrix& projection) noexcept;
         /**
          * \brief Creates an orthographic projection.
          *
@@ -194,11 +156,7 @@ class TransformMatrix final
          * \see [section Orthographic projection](https://learnopengl.com/Getting-started/Coordinate-Systems).
          * \return the orthographic projection TransformMatrix.
          */
-        static constexpr TransformMatrix createOrthographicProjection() noexcept
-        {
-            return TransformMatrix{};
-        }
-
+        static TransformMatrix createOrthographicProjection() noexcept;
         /**
          * \brief Creates a perspective projection.
          *
@@ -210,19 +168,7 @@ class TransformMatrix final
          * \see [section Perspective projection](https://learnopengl.com/Getting-started/Coordinate-Systems).
          * \return the perspective projection TransformMatrix.
          */
-        static inline TransformMatrix createPerspectiveProjection(float fovy, float aspect, float zNear,
-                                                                  float zFar) noexcept
-        {
-            // Implemented only for OpenGL
-            const auto tanHalfFovy = std::tan(fovy / 2.0f);
-            auto       result      = Mat4{};
-            result[0][0]           = 1.0f / (aspect * tanHalfFovy);
-            result[1][1]           = 1.0f / tanHalfFovy;
-            result[2][2]           = -(zFar + zNear) / (zFar - zNear);
-            result[2][3]           = -1.0f;
-            result[3][2]           = -(2.0f * zFar * zNear) / (zFar - zNear);
-            return TransformMatrix{result};
-        }
+        static TransformMatrix createPerspectiveProjection(float fovy, float aspect, float zNear, float zFar) noexcept;
 
         OGLS_DEFAULT_MOVABLE(TransformMatrix)
 
@@ -233,16 +179,7 @@ class TransformMatrix final
          * \param w                    - the value of W-component
          * (see [Homogeneous coordinates](https://en.wikipedia.org/wiki/Homogeneous_coordinates)).
          */
-        // clang-format off
-        constexpr explicit TransformMatrix(float defaultDiagonalValue = {1.0f}, float w = {1.0f}) noexcept :
-            m_matrix{{defaultDiagonalValue, 0.0f, 0.0f, 0.0f,
-                      0.0f, defaultDiagonalValue, 0.0f, 0.0f,
-                      0.0f, 0.0f, defaultDiagonalValue, 0.0f,
-                      0.0f, 0.0f, 0.0f, w}}, m_lastResultMatrix{m_matrix}
-        // clang-format on
-        {
-        }
-
+        explicit TransformMatrix(float defaultDiagonalValue = {1.0f}, float w = {1.0f}) noexcept;
         /**
          * \brief Constructs a TransformMatrix with provided values of elements of the main diagonal and 0 elsewhere.
          *
@@ -252,16 +189,7 @@ class TransformMatrix final
          * \param w     - the value of W-component
          * (see [Homogeneous coordinates](https://en.wikipedia.org/wiki/Homogeneous_coordinates)).
          */
-        // clang-format off
-        constexpr TransformMatrix(float xCoef, float yCoef, float zCoef, float w = {1.0f}) noexcept :
-            m_matrix{{xCoef, 0.0f, 0.0f, 0.0f,
-                      0.0f, yCoef, 0.0f, 0.0f,
-                      0.0f, 0.0f, zCoef, 0.0f,
-                      0.0f, 0.0f, 0.0f, w}}, m_lastResultMatrix{m_matrix}
-        // clang-format on
-        {
-        }
-
+        TransformMatrix(float xCoef, float yCoef, float zCoef, float w = {1.0f}) noexcept;
         /**
          * \brief Constructs a TransformMatrix from the provided basis Vector.
          *
@@ -271,87 +199,29 @@ class TransformMatrix final
          * \param w      - the value of W-component
          * (see [Homogeneous coordinates](https://en.wikipedia.org/wiki/Homogeneous_coordinates)).
          */
-        constexpr TransformMatrix(const Vec3& xBasis, const Vec3& yBasis, const Vec3& zBasis, float w = {1.0f}) noexcept
-        {
-            auto i = m_matrix.OGLS_BEGIN_IT();
-
-            const auto fillMatrixFromVec = [&](const Vec3& v)
-            {
-                for (const auto& el : v)
-                {
-                    (*i++).setValue(el.getValue());
-                }
-                (*i++).setValue(0.0f);
-            };
-
-            fillMatrixFromVec(xBasis);
-            fillMatrixFromVec(yBasis);
-            fillMatrixFromVec(zBasis);
-
-            for (auto j = 0; j < 3; ++j)
-            {
-                (*i++).setValue(0.0f);
-            }
-            (*i++).setValue(w);
-
-            m_lastResultMatrix = m_matrix;
-        }
-
+        TransformMatrix(const Vec3& xBasis, const Vec3& yBasis, const Vec3& zBasis, float w = {1.0f}) noexcept;
         /**
          * \brief Constructs a TransformMatrix from the Matrix<4, 4>.
          *
          * \warning Creating TransformMatrix from the Matrix<4, 4> should be avoided,
          * because it can lead to wrong interpretation of the Matrix data during calculations for different graphical APIs.
          */
-        constexpr explicit TransformMatrix(const Mat4& m) noexcept : m_matrix{m}, m_lastResultMatrix{m}
-        {
-        }
-
+        explicit TransformMatrix(const Mat4& m) noexcept;
         /**
          * \brief Constructs new TransformMatrix as copy of the other TransformMatrix.
          */
-        TransformMatrix(const TransformMatrix& other) :
-            m_lastOperationQueueSize{other.m_lastOperationQueueSize}, m_lastResultMatrix{other.m_lastResultMatrix},
-            m_matrix{other.m_matrix}, m_operationQueue{other.m_operationQueue.size()}
-        {
-            for (const auto& operation : other.m_operationQueue)
-            {
-                m_operationQueue.push_back(operation->clone());
-            }
-        }
+        TransformMatrix(const TransformMatrix& other);
 
         /**
          * \brief Copies the state of the other TransformMatrix.
          */
-        TransformMatrix& operator=(const TransformMatrix& other)
-        {
-            if (this != &other)
-            {
-                m_lastOperationQueueSize = other.m_lastOperationQueueSize;
-                m_lastResultMatrix       = other.m_lastResultMatrix;
-                m_matrix                 = other.m_matrix;
-
-                m_operationQueue.clear();
-                m_operationQueue.reserve(other.m_operationQueue.size());
-
-                for (const auto& operation : other.m_operationQueue)
-                {
-                    m_operationQueue.push_back(operation->clone());
-                }
-            }
-
-            return *this;
-        }
-
+        TransformMatrix& operator=(const TransformMatrix& other);
         /**
          * \brief Returns Matrix<4, 4>, which is the result of applying of transformations to the wrapped Matrix<4, 4>.
          *
          * \see getResultMatrix().
          */
-        explicit operator Mat4() const noexcept
-        {
-            return getResultMatrix();
-        }
+        explicit operator Mat4() const noexcept;
 
         /**
          * \brief Adds a Translation operation to the queue of operations on the TransformMatrix.
@@ -362,19 +232,11 @@ class TransformMatrix final
          * \param direction - the direction Vector<3> of the Translation operation.
          * \see getResultMatrix().
          */
-        void addTranslation(const Vec3& direction) const
-        {
-            m_operationQueue.push_back(std::make_unique<Translation>(direction));
-        }
-
+        void        addTranslation(const Vec3& direction);
         /**
          * \brief Returns an initial wrapped Matrix<4, 4>.
          */
-        Mat4 getInitialMatrix() const noexcept
-        {
-            return m_matrix;
-        }
-
+        Mat4        getInitialMatrix() const noexcept;
         /**
          * \brief Returns Matrix<4, 4>, which is the result of applying of transformations to the wrapped Matrix<4, 4>.
          *
@@ -391,35 +253,7 @@ class TransformMatrix final
          *
          * \return Matrix<4, 4> with all added operations applied.
          */
-        Mat4 getResultMatrix() const noexcept
-        {
-            if (m_operationQueue.size() == 0 || m_lastOperationQueueSize == m_operationQueue.size())
-            {
-                return m_lastResultMatrix;
-            }
-
-            m_lastResultMatrix = m_matrix;
-
-            if constexpr (OGLS_VECTOR_IS_COLUMN)
-            {
-                std::for_each(m_operationQueue.crbegin(), m_operationQueue.crend(),
-                              [&](const auto& operation)
-                              {
-                                  operation->execute(m_lastResultMatrix);
-                              });
-            }
-            else
-            {
-                for (const auto& operation : m_operationQueue)
-                {
-                    operation->execute(m_lastResultMatrix);
-                }
-            }
-
-            m_lastOperationQueueSize = m_operationQueue.size();
-            return m_lastResultMatrix;
-        }
-
+        Mat4        getResultMatrix() const noexcept;
         /**
          * \brief Returns a std::string representation of the TransformMatrix object with all elements.
          *
@@ -429,99 +263,49 @@ class TransformMatrix final
          * displayed.
          * \see getResultMatrix().
          */
-        std::string toString(int columnWidth = 6) const
-        {
-            auto ss = std::stringstream{};
-
-            ss << "TransformMatrix:\n";
-
-            getResultMatrix();
-
-            auto el = m_lastResultMatrix.begin();
-            ss << "  | " << std::left << std::setw(columnWidth) << (*el).getValue() << ", ";
-
-            for (++el; el != m_lastResultMatrix.end(); ++el)
-            {
-                if ((*el).j == 0)
-                {
-                    ss << " |\n  | ";
-                }
-
-                ss << std::left << std::setw(columnWidth) << (*el).getValue();
-
-                if ((*el).j != 3)
-                {
-                    ss << ", ";
-                }
-            }
-
-            ss << " |";
-
-            return ss.str();
-        }
+        std::string toString(int columnWidth = 6) const;
 
     private:
         /**
          * \brief The number of added Operation -es at the moment of the last call of getResultMatrix().
          */
-        mutable size_t                                  m_lastOperationQueueSize = {0};
+        mutable size_t                          m_lastOperationQueueSize = {0};
         /**
          * \brief Last calculated in getResultMatrix() result Matrix<4, 4>.
          */
-        mutable Mat4                                    m_lastResultMatrix;
+        mutable Mat4                            m_lastResultMatrix;
         /**
          * \brief The initial wrapped Matrix<4, 4>.
          */
-        Mat4                                            m_matrix;
+        Mat4                                    m_matrix;
         /**
          * \brief Added Operation -es.
          */
-        mutable std::vector<std::unique_ptr<Operation>> m_operationQueue;
+        std::vector<std::unique_ptr<Operation>> m_operationQueue;
 
 };  // class TransformMatrix
 
 /**
  * \brief Prints into the stream a std::string representation of the TransformMatrix object.
  */
-inline std::ostream& operator<<(std::ostream& out, const TransformMatrix& tm)
-{
-    out << tm.toString();
-    return out;
-}
-
+std::ostream&   operator<<(std::ostream& out, const TransformMatrix& tm);
 /**
  * \brief Checks equality of two TransformMatrix.
  *
  * \return true if two TransformMatrix have equal elements, false otherwise.
  */
-bool operator==(const TransformMatrix& tm1, const TransformMatrix& tm2) noexcept
-{
-    return tm1.getResultMatrix() == tm2.getResultMatrix();
-}
-
+bool            operator==(const TransformMatrix& tm1, const TransformMatrix& tm2) noexcept;
 /**
  * \brief Checks if two TransformMatrix are not equal.
  *
  * \return true if two TransformMatrix have different elements, false otherwise.
  */
-bool operator!=(const TransformMatrix& tm1, const TransformMatrix& tm2) noexcept
-{
-    return !(tm1 == tm2);
-}
-
+bool            operator!=(const TransformMatrix& tm1, const TransformMatrix& tm2) noexcept;
 /**
  * \brief Multiplies two TransformMatrix.
  */
-TransformMatrix operator*(const TransformMatrix& tm1, const TransformMatrix& tm2) noexcept
-{
-    return TransformMatrix{tm1.getResultMatrix() * tm2.getResultMatrix()};
-}
+TransformMatrix operator*(const TransformMatrix& tm1, const TransformMatrix& tm2) noexcept;
 
 }  // namespace ogls::mathCore
-
-#undef OGLS_BEGIN_IT
-#undef OGLS_CBEGIN_IT
-#undef OGLS_CEND_IT
-#undef OGLS_END_IT
 
 #endif
