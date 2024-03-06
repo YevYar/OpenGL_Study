@@ -90,59 +90,12 @@ class TransformMatrix final
                  * \param angle - the rotation angle in degrees.
                  * \param axis  - the axis of rotation (normalized vector).
                  */
-                constexpr explicit Rotation(float angle, const Vec3& axis) noexcept : m_angle{angle}, m_axis{axis}
+                constexpr Rotation(float angle, const Vec3& axis) noexcept : m_angle{angle}, m_axis{axis}
                 {
                 }
 
-                std::unique_ptr<Operation> clone() const override
-                {
-                    return std::make_unique<Rotation>(*this);
-                }
-
-                void execute(Mat4& m) const override
-                {
-                    const auto cosA         = cos(m_angle);
-                    const auto sinA         = sin(m_angle);
-                    const auto oneMinusCosA = 1.0f - cosA;
-
-                    const auto x = m_axis.x();
-                    const auto y = m_axis.y();
-                    const auto z = m_axis.z();
-
-                    // TODO: verify it
-                    if constexpr (OGLS_VECTOR_IS_COLUMN)
-                    {
-                        // Column-vector approach
-                        m[0][0] = cosA + oneMinusCosA * x * x;
-                        m[1][0] = oneMinusCosA * x * y - sinA * z;
-                        m[2][0] = oneMinusCosA * x * z + sinA * y;
-
-                        m[0][1] = oneMinusCosA * x * y + sinA * z;
-                        m[1][1] = cosA + oneMinusCosA * y * y;
-                        m[2][1] = oneMinusCosA * y * z - sinA * x;
-
-                        m[0][2] = oneMinusCosA * x * z - sinA * y;
-                        m[1][2] = oneMinusCosA * y * z + sinA * x;
-                        m[2][2] = cosA + oneMinusCosA * z * z;
-                    }
-                    else
-                    {
-                        // Row-vector approach
-                        m[0][0] = cosA + oneMinusCosA * x * x;
-                        m[0][1] = oneMinusCosA * x * y - sinA * z;
-                        m[0][2] = oneMinusCosA * x * z + sinA * y;
-
-                        m[1][0] = oneMinusCosA * x * y + sinA * z;
-                        m[1][1] = cosA + oneMinusCosA * y * y;
-                        m[1][2] = oneMinusCosA * y * z - sinA * x;
-
-                        m[2][0] = oneMinusCosA * x * z - sinA * y;
-                        m[2][1] = oneMinusCosA * y * z + sinA * x;
-                        m[2][2] = cosA + oneMinusCosA * z * z;
-                    }
-
-                    m[3][3] = 1.0f;
-                }
+                std::unique_ptr<Operation> clone() const override;
+                void                       execute(Mat4& m) const override;
 
             private:
                 /**
@@ -172,20 +125,8 @@ class TransformMatrix final
                 {
                 }
 
-                std::unique_ptr<Operation> clone() const override
-                {
-                    return std::make_unique<Scale>(*this);
-                }
-
-                constexpr void execute(Mat4& m) const noexcept override
-                {
-                    auto mIt = m.beginDiagonal();
-
-                    for (const auto& i : m_scaling)
-                    {
-                        (*mIt++) = (*mIt).getValue() * i.getValue();
-                    }
-                }
+                std::unique_ptr<Operation> clone() const override;
+                void                       execute(Mat4& m) const noexcept override;
 
             private:
                 /**
@@ -210,27 +151,8 @@ class TransformMatrix final
                 {
                 }
 
-                std::unique_ptr<Operation> clone() const override
-                {
-                    return std::make_unique<Translation>(*this);
-                }
-
-                constexpr void execute(Mat4& m) const noexcept override
-                {
-                    auto i = size_t{0};
-
-                    for (const auto& el : m_direction)
-                    {
-                        if constexpr (OGLS_VECTOR_IS_COLUMN)
-                        {
-                            m[i++][3] = el;
-                        }
-                        else
-                        {
-                            m[3][i++] = el;
-                        }
-                    }
-                }
+                std::unique_ptr<Operation> clone() const override;
+                void                       execute(Mat4& m) const noexcept override;
 
             private:
                 /**

@@ -256,6 +256,93 @@ TransformMatrix operator*(const TransformMatrix& tm1, const TransformMatrix& tm2
     return TransformMatrix{tm1.getResultMatrix() * tm2.getResultMatrix()};
 }
 
+std::unique_ptr<TransformMatrix::Operation> TransformMatrix::Rotation::clone() const
+{
+    return std::make_unique<Rotation>(*this);
+}
+
+void TransformMatrix::Rotation::execute(Mat4& m) const
+{
+    const auto cosA         = cos(m_angle);
+    const auto sinA         = sin(m_angle);
+    const auto oneMinusCosA = 1.0f - cosA;
+
+    const auto x = m_axis.x();
+    const auto y = m_axis.y();
+    const auto z = m_axis.z();
+
+    // TODO: verify it
+    if constexpr (OGLS_VECTOR_IS_COLUMN)
+    {
+        // Column-vector approach
+        m[0][0] = cosA + oneMinusCosA * x * x;
+        m[1][0] = oneMinusCosA * x * y - sinA * z;
+        m[2][0] = oneMinusCosA * x * z + sinA * y;
+
+        m[0][1] = oneMinusCosA * x * y + sinA * z;
+        m[1][1] = cosA + oneMinusCosA * y * y;
+        m[2][1] = oneMinusCosA * y * z - sinA * x;
+
+        m[0][2] = oneMinusCosA * x * z - sinA * y;
+        m[1][2] = oneMinusCosA * y * z + sinA * x;
+        m[2][2] = cosA + oneMinusCosA * z * z;
+    }
+    else
+    {
+        // Row-vector approach
+        m[0][0] = cosA + oneMinusCosA * x * x;
+        m[0][1] = oneMinusCosA * x * y - sinA * z;
+        m[0][2] = oneMinusCosA * x * z + sinA * y;
+
+        m[1][0] = oneMinusCosA * x * y + sinA * z;
+        m[1][1] = cosA + oneMinusCosA * y * y;
+        m[1][2] = oneMinusCosA * y * z - sinA * x;
+
+        m[2][0] = oneMinusCosA * x * z - sinA * y;
+        m[2][1] = oneMinusCosA * y * z + sinA * x;
+        m[2][2] = cosA + oneMinusCosA * z * z;
+    }
+
+    m[3][3] = 1.0f;
+}
+
+std::unique_ptr<TransformMatrix::Operation> TransformMatrix::Scale::clone() const
+{
+    return std::make_unique<Scale>(*this);
+}
+
+void TransformMatrix::Scale::execute(Mat4& m) const noexcept
+{
+    auto mIt = m.beginDiagonal();
+
+    for (const auto& i : m_scaling)
+    {
+        (*mIt++) = (*mIt).getValue() * i.getValue();
+    }
+}
+
+std::unique_ptr<TransformMatrix::Operation> TransformMatrix::Translation::clone() const
+{
+    return std::make_unique<Translation>(*this);
+}
+
+void TransformMatrix::Translation::execute(Mat4& m) const noexcept
+{
+    auto i = size_t{0};
+
+    for (const auto& el : m_direction)
+    {
+        if constexpr (OGLS_VECTOR_IS_COLUMN)
+        {
+            m[i++][3] = el;
+        }
+        else
+        {
+            m[3][i++] = el;
+        }
+    }
+}
+
 #undef OGLS_BEGIN_IT
 #undef OGLS_CBEGIN_IT
 #undef OGLS_CEND_IT
