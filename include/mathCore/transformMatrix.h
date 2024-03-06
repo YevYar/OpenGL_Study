@@ -67,15 +67,133 @@ class TransformMatrix final
                 /**
                  * \brief Returns a copy of the operation.
                  */
-                virtual std::unique_ptr<Operation> clone() const                   = 0;
+                virtual std::unique_ptr<Operation> clone() const          = 0;
                 /**
                  * \brief Performs an operation on the passed Matrix<4, 4>.
                  *
                  * \param m - a Matrix<4, 4> to perform the operation on.
                  */
-                virtual void                       execute(Mat4& m) const noexcept = 0;
+                virtual void                       execute(Mat4& m) const = 0;
 
         };  // class Operation
+
+        /**
+         * \brief Rotation performs a rotation operation on the passed angle along the passed to constructor Vector<3>.
+         */
+        class Rotation final : public Operation
+        {
+            public:
+                /**
+                 * \brief Constructs a Rotation to perform a rotation operation on the passed angle along
+                 * the passed Vector<3>.
+                 *
+                 * \param angle - the rotation angle in degrees.
+                 * \param axis  - the axis of rotation (normalized vector).
+                 */
+                constexpr explicit Rotation(float angle, const Vec3& axis) noexcept : m_angle{angle}, m_axis{axis}
+                {
+                }
+
+                std::unique_ptr<Operation> clone() const override
+                {
+                    return std::make_unique<Rotation>(*this);
+                }
+
+                void execute(Mat4& m) const override
+                {
+                    const auto cosA         = cos(m_angle);
+                    const auto sinA         = sin(m_angle);
+                    const auto oneMinusCosA = 1.0f - cosA;
+
+                    const auto x = m_axis.x();
+                    const auto y = m_axis.y();
+                    const auto z = m_axis.z();
+
+                    // TODO: verify it
+                    if constexpr (OGLS_VECTOR_IS_COLUMN)
+                    {
+                        // Column-vector approach
+                        m[0][0] = cosA + oneMinusCosA * x * x;
+                        m[1][0] = oneMinusCosA * x * y - sinA * z;
+                        m[2][0] = oneMinusCosA * x * z + sinA * y;
+
+                        m[0][1] = oneMinusCosA * x * y + sinA * z;
+                        m[1][1] = cosA + oneMinusCosA * y * y;
+                        m[2][1] = oneMinusCosA * y * z - sinA * x;
+
+                        m[0][2] = oneMinusCosA * x * z - sinA * y;
+                        m[1][2] = oneMinusCosA * y * z + sinA * x;
+                        m[2][2] = cosA + oneMinusCosA * z * z;
+                    }
+                    else
+                    {
+                        // Row-vector approach
+                        m[0][0] = cosA + oneMinusCosA * x * x;
+                        m[0][1] = oneMinusCosA * x * y - sinA * z;
+                        m[0][2] = oneMinusCosA * x * z + sinA * y;
+
+                        m[1][0] = oneMinusCosA * x * y + sinA * z;
+                        m[1][1] = cosA + oneMinusCosA * y * y;
+                        m[1][2] = oneMinusCosA * y * z - sinA * x;
+
+                        m[2][0] = oneMinusCosA * x * z - sinA * y;
+                        m[2][1] = oneMinusCosA * y * z + sinA * x;
+                        m[2][2] = cosA + oneMinusCosA * z * z;
+                    }
+
+                    m[3][3] = 1.0f;
+                }
+
+            private:
+                /**
+                 * \brief The rotation angle in degrees.
+                 */
+                float m_angle;
+                /**
+                 * \brief The axis of rotation (normalized vector).
+                 */
+                Vec3  m_axis;
+
+        };  // class Rotation
+
+        /**
+         * \brief Scale performs a scale operation of X, Y and Z on value of the corresponding component
+         * of the passed Vector<3>.
+         */
+        class Scale final : public Operation
+        {
+            public:
+                /**
+                 * \brief Constructs a Scale to perform a scale operation in accordance with the passed Vector<3>.
+                 *
+                 * \param scaling - the new scale coefficients of X, Y and Z components.
+                 */
+                constexpr explicit Scale(const Vec3& scaling) noexcept : m_scaling{scaling}
+                {
+                }
+
+                std::unique_ptr<Operation> clone() const override
+                {
+                    return std::make_unique<Scale>(*this);
+                }
+
+                constexpr void execute(Mat4& m) const noexcept override
+                {
+                    auto mIt = m.beginDiagonal();
+
+                    for (const auto& i : m_scaling)
+                    {
+                        (*mIt++) = (*mIt).getValue() * i.getValue();
+                    }
+                }
+
+            private:
+                /**
+                 * \brief The new scale coefficients of X, Y and Z components.
+                 */
+                Vec3 m_scaling;
+
+        };  // class Scale
 
         /**
          * \brief Translation performs a translation operation in the direction of the passed to constructor Vector<3>.
@@ -223,6 +341,27 @@ class TransformMatrix final
          */
         explicit operator Mat4() const noexcept;
 
+        /**
+         * \brief Adds a Rotation operation to the queue of operations on the TransformMatrix.
+         *
+         * The Rotation operation is not executed at the moment. The Rotation is performed during the execution
+         * of getResultMatrix().
+         *
+         * \param angle - the rotation angle in degrees.
+         * \param axis  - the axis of rotation (normalized vector).
+         * \see getResultMatrix().
+         */
+        void        addRotation(float angle, const Vec3& axis);
+        /**
+         * \brief Adds a Scale operation to the queue of operations on the TransformMatrix.
+         *
+         * The Scale operation is not executed at the moment. The Scale is performed during the execution
+         * of getResultMatrix().
+         *
+         * \param scaling - the new scale coefficients of X, Y and Z components.
+         * \see getResultMatrix().
+         */
+        void        addScale(const Vec3& scaling);
         /**
          * \brief Adds a Translation operation to the queue of operations on the TransformMatrix.
          *

@@ -155,6 +155,16 @@ TransformMatrix::operator Mat4() const noexcept
     return getResultMatrix();
 }
 
+void TransformMatrix::addRotation(float angle, const Vec3& axis)
+{
+    m_operationQueue.push_back(std::make_unique<Rotation>(angle, axis));
+}
+
+void TransformMatrix::addScale(const Vec3& scaling)
+{
+    m_operationQueue.push_back(std::make_unique<Scale>(scaling));
+}
+
 void TransformMatrix::addTranslation(const Vec3& direction)
 {
     m_operationQueue.push_back(std::make_unique<Translation>(direction));
