@@ -91,7 +91,7 @@ class BaseMatrix
                 {
                 }
 
-                virtual ~BaseIterator() noexcept = default;
+                constexpr virtual ~BaseIterator() noexcept = default;
 
             protected:
                 /**
@@ -329,14 +329,6 @@ class BaseMatrix
                         }
 
                         /**
-                         * \brief Returns a std::string representation of the Element object.
-                         */
-                        explicit operator std::string() const
-                        {
-                            return std::format("Matrix::Iterator::Element({}, {}) = {}", i, j, getValue());
-                        }
-
-                        /**
                          * \brief Returns the reference on the referenced Matrix element.
                          *
                          * Use it to change the referenced Matrix element: getValue() = newValue;
@@ -358,6 +350,14 @@ class BaseMatrix
                             getValue() = newValue;
                         }
 
+                        /**
+                         * \brief Returns a std::string representation of the Element object.
+                         */
+                        std::string toString() const
+                        {
+                            return std::format("Matrix::Iterator::Element({}, {}) = {}", i, j, getValue());
+                        }
+
                     public:
                         /**
                          * \brief The index of the Matrix row of this Element (counts from 0).
@@ -375,6 +375,15 @@ class BaseMatrix
                          * \brief The pointer to the value of the Element.
                          */
                         ElementType* value = nullptr;
+
+                        /**
+                         * \brief Prints into the stream a std::string representation of the Element object.
+                         */
+                        friend inline std::ostream& operator<<(std::ostream& out, const Element& element)
+                        {
+                            out << element.toString();
+                            return out;
+                        }
 
                 };  // struct Element
 
@@ -438,7 +447,7 @@ class BaseMatrix
                  *
                  * \throw ogls::exceptions::MatrixException().
                  */
-                constexpr Iterator(Iterator&&)  // it's required by iterator concept
+                Iterator(Iterator&&)  // it's required by iterator concept
                 {
                     throwUnexpectedUsageExceptionWithHint("Iterator(Iterator&&)");
                 }
@@ -451,7 +460,7 @@ class BaseMatrix
                  *
                  * \throw ogls::exceptions::MatrixException().
                  */
-                constexpr Iterator& operator=(const Iterator&)  // it's required by iterator concept
+                Iterator& operator=(const Iterator&)  // it's required by iterator concept
                 {
                     throwUnexpectedUsageExceptionWithHint("operator=(const Iterator&)");
                     return *this;
@@ -465,7 +474,7 @@ class BaseMatrix
                  *
                  * \throw ogls::exceptions::MatrixException().
                  */
-                constexpr Iterator& operator=(Iterator&&)  // it's required by iterator concept
+                Iterator& operator=(Iterator&&)  // it's required by iterator concept
                 {
                     throwUnexpectedUsageExceptionWithHint("operator=(Iterator&&)");
                     return *this;
@@ -489,7 +498,7 @@ class BaseMatrix
                 {
                     auto temp = Iterator{*this};
                     ++*this;
-                    return temp;
+                    return Iterator{temp};  // hack to avoid RVO and calling of non-constexpr move-constructor
                 }
 
                 /**
@@ -527,7 +536,7 @@ class BaseMatrix
                 {
                     auto temp = Iterator{*this};
                     --*this;
-                    return temp;
+                    return Iterator{temp};  // hack to avoid RVO and calling of non-constexpr move-constructor
                 }
 
                 // concept random_access_iterator
@@ -559,7 +568,7 @@ class BaseMatrix
                 {
                     auto temp  = Iterator{i};
                     temp      += n;
-                    return temp;
+                    return Iterator{temp};  // hack to avoid RVO and calling of non-constexpr move-constructor
                 }
 
                 friend constexpr Iterator operator+(difference_type n, const Iterator& i) noexcept
@@ -571,7 +580,7 @@ class BaseMatrix
                 {
                     auto temp  = Iterator{i};
                     temp      -= n;
-                    return temp;
+                    return Iterator{temp};  // hack to avoid RVO and calling of non-constexpr move-constructor
                 }
 
                 friend constexpr difference_type operator-(const Iterator& i, const Iterator& j) noexcept
@@ -627,7 +636,6 @@ class BaseMatrix
                            && this->m_currentJ < this->m_columnsNumber;
                 }
 
-            private:
                 /**
                  * \brief Sets the invalid state of the Iterator.
                  *
@@ -638,6 +646,7 @@ class BaseMatrix
                     updateCurrentPosition(this->m_rowsNumber, 0);
                 }
 
+            private:
                 /**
                  * \brief Updates the position (row and column indexes) on which Iterator points.
                  *
@@ -704,7 +713,7 @@ class BaseMatrix
                 /**
                  * \brief Returns a std::string representation of the Size object.
                  */
-                explicit operator std::string() const
+                std::string toString() const
                 {
                     return std::format("Matrix::Size(rows={}, columns={})", rows, columns);
                 }
@@ -726,7 +735,7 @@ class BaseMatrix
         using Index = Size;
 
     public:
-        virtual ~BaseMatrix() noexcept = default;
+        constexpr virtual ~BaseMatrix() noexcept = default;
 
         /**
          * \brief Retrieves the number of columns in the Matrix.
@@ -818,6 +827,15 @@ class BaseMatrix
         size_t m_rowsNumber    = {0};
 
 };  // class BaseMatrix
+
+/**
+ * \brief Prints into the stream a std::string representation of the BaseMatrix::Size object.
+ */
+inline std::ostream& operator<<(std::ostream& out, const BaseMatrix::Size& size)
+{
+    out << size.toString();
+    return out;
+}
 
 }  // namespace ogls::mathCore
 

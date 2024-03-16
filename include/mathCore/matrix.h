@@ -135,6 +135,19 @@ constexpr bool isSquareMatrixCheck(size_t n, size_t m) noexcept
  *                << std::endl;
  * \endcode
  *
+ * If we have the following Matrix:
+ * \endcode
+ * \code{.cpp}
+ * auto m = Mat2{{0, 1, 2, 3}};
+ * \endcode
+ * the following lines do the same:
+ * \endcode
+ * \code{.cpp}
+ * m.setValue(1, 1, 10);
+ * m.setM22(10);
+ * m[1][1] = 10;
+ * \endcode
+ *
  * \param N - a number of rows in the Matrix.
  * \param M - a number of columns in the Matrix.
  */
@@ -182,6 +195,42 @@ class Matrix : public BaseMatrix
          * \brief Iterates over Matrix elements, which belong to the main diagonal of the Matrix ((0, 0), (1, 1) etc.).
          */
         using diagonal_iterator = Iterator<float, typename std::array<float, N * M>::iterator, DiagonalIteratorImpl>;
+
+        /**
+         * \brief RowProxy represents a row of the Matrix and can be used to iterate over elements of the Matrix row.
+         */
+        template<typename IteratorT>
+        requires std::is_same_v<IteratorT, iterator> || std::is_same_v<IteratorT, const_iterator>
+        class RowProxy final
+        {
+            public:
+                /**
+                 * \brief Returns the element of this row of the Matrix on position of the column.
+                 *
+                 * \param column - the index of the column to get the element of this row. The index is counted from 0.
+                 */
+                constexpr auto operator[](size_t column) noexcept
+                {
+                    if (column >= M)
+                    {
+                        m_it.setInvalidState();
+                    }
+
+                    return m_it[column];
+                }
+
+            private:
+                constexpr explicit RowProxy(const IteratorT& rowIterator) noexcept : m_it{rowIterator}
+                {
+                }
+
+            private:
+                IteratorT m_it;
+
+
+                friend class Matrix;
+
+        };  // class RowProxy
 
     public:
         OGLS_DEFAULT_CONSTEXPR_NOEXCEPT_COPYABLE_MOVABLE(Matrix)
@@ -523,14 +572,30 @@ class Matrix : public BaseMatrix
             }
         }
 
+        //------ SOME OTHER OPERATIONS
+
         /**
-         * \brief Returns std::string representation of the Matrix object.
+         * \brief Returns RowProxy to iterate over elements of the Matrix row.
          *
-         * \see toFullString().
+         * The elements of the Matrix can be modified via this RowProxy.
+         *
+         * \param row - the index of the row. The index is counted from 0.
          */
-        explicit operator std::string() const
+        constexpr auto operator[](size_t row) noexcept
         {
-            return toFullString();
+            return RowProxy<iterator>{begin() + (row * M)};
+        }
+
+        /**
+         * \brief Returns RowProxy to iterate over elements of the Matrix row.
+         *
+         * The elements of the Matrix cannot be modified via this RowProxy.
+         *
+         * \param row - the index of the row. The index is counted from 0.
+         */
+        constexpr auto operator[](size_t row) const noexcept
+        {
+            return RowProxy<const_iterator>{begin() + (row * M)};
         }
 
         //------ RANGE STUFF
@@ -793,7 +858,7 @@ class Matrix : public BaseMatrix
         /**
          * Returns the pointer to the underlaying array, in which the Matrix data is stored.
          *
-         * Use it with ATTENTION!
+         * \warning Use it with ATTENTION!
          */
         constexpr auto getPointerToData() const noexcept
         {
@@ -1075,6 +1140,23 @@ class Matrix : public BaseMatrix
         }
 
         /**
+         * \brief Returns a Vector representation of the Matrix object, if the Matrix is a row- or column-matrix.
+         */
+        constexpr auto toVector() const noexcept
+        requires IsNotNullMatrix<N, M> && ((N > 1 && N < 5 && M == 1) || (M > 1 && M < 5 && N == 1))
+        {
+            auto vec   = Vector<(N == 1 ? M : N)>{};
+            auto vecIt = vec.begin();
+
+            for (const auto& el : *this)
+            {
+                (*vecIt++).setValue(el.getValue());
+            }
+
+            return vec;
+        }
+
+        /**
          * \brief Returns new Matrix as the result of transpose of this Matrix.
          */
         constexpr auto transpose() const noexcept
@@ -1127,6 +1209,18 @@ using Mat4x2 = Matrix<4, 2>;
 using Mat4x3 = Matrix<4, 3>;
 
 //------ OPERATIONS ON MATRIX
+
+/**
+ * \brief Prints into the stream a std::string representation of the Matrix object.
+ *
+ * \see Matrix::toFullString().
+ */
+template<size_t N, size_t M>
+inline std::ostream& operator<<(std::ostream& out, const Matrix<N, M>& m)
+{
+    out << m.toFullString();
+    return out;
+}
 
 /**
  * \brief Checks equality of two Matrix.

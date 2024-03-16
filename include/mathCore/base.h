@@ -17,7 +17,7 @@ namespace ogls::mathCore
 /**
  * \brief The precision of float-type calculations in trigonometric functions.
  */
-constexpr inline auto FLOAT_ANGLE_EPSILON = float{1.0E-6};
+constexpr inline auto OGLS_FLOAT_ANGLE_EPSILON = float{1.0E-6};
 
 /**
  * \brief Multipliable is a concept, which specifies the types, which support operator*.
@@ -146,7 +146,7 @@ constexpr bool isAngle0(float angle) noexcept
  * \brief Checks if the angle is equal to 90 degrees.
  *
  * The value of the angle is compared with 90 degrees (or respective angle in radians) with precision
- * FLOAT_ANGLE_EPSILON.
+ * OGLS_FLOAT_ANGLE_EPSILON.
  *
  * \param angle - a value of the angle.
  * \param unit  - measurement unit of the angle.
@@ -155,14 +155,15 @@ constexpr bool isAngle0(float angle) noexcept
 constexpr bool isAngle90(float angle, AngleUnit unit = AngleUnit::Degrees) noexcept
 {
     constexpr auto radiansFor90Deg = float{std::numbers::pi / 2.0f};
-    return helpers::isFloatsEqual(angle, unit == AngleUnit::Degrees ? 90.0f : radiansFor90Deg, FLOAT_ANGLE_EPSILON);
+    return helpers::isFloatsEqual(angle, unit == AngleUnit::Degrees ? 90.0f : radiansFor90Deg,
+                                  OGLS_FLOAT_ANGLE_EPSILON);
 }
 
 /**
  * \brief Checks if the angle is equal to 180 degrees.
  *
  * The value of the angle is compared with 180 degrees (or respective angle in radians) with precision
- * FLOAT_ANGLE_EPSILON.
+ * OGLS_FLOAT_ANGLE_EPSILON.
  *
  * \param angle - a value of the angle.
  * \param unit  - measurement unit of the angle.
@@ -170,14 +171,15 @@ constexpr bool isAngle90(float angle, AngleUnit unit = AngleUnit::Degrees) noexc
  */
 constexpr bool isAngle180(float angle, AngleUnit unit = AngleUnit::Degrees) noexcept
 {
-    return helpers::isFloatsEqual(angle, unit == AngleUnit::Degrees ? 180.0f : std::numbers::pi, FLOAT_ANGLE_EPSILON);
+    return helpers::isFloatsEqual(angle, unit == AngleUnit::Degrees ? 180.0f : std::numbers::pi,
+                                  OGLS_FLOAT_ANGLE_EPSILON);
 }
 
 /**
  * \brief Checks if the angle is equal to 270 degrees.
  *
  * The value of the angle is compared with 270 degrees (or respective angle in radians) with precision
- * FLOAT_ANGLE_EPSILON.
+ * OGLS_FLOAT_ANGLE_EPSILON.
  *
  * \param angle - a value of the angle.
  * \param unit  - measurement unit of the angle.
@@ -186,7 +188,8 @@ constexpr bool isAngle180(float angle, AngleUnit unit = AngleUnit::Degrees) noex
 constexpr bool isAngle270(float angle, AngleUnit unit = AngleUnit::Degrees) noexcept
 {
     constexpr auto radiansFor270Deg = float{3.0f * std::numbers::pi / 2.0f};
-    return helpers::isFloatsEqual(angle, unit == AngleUnit::Degrees ? 270.0f : radiansFor270Deg, FLOAT_ANGLE_EPSILON);
+    return helpers::isFloatsEqual(angle, unit == AngleUnit::Degrees ? 270.0f : radiansFor270Deg,
+                                  OGLS_FLOAT_ANGLE_EPSILON);
 }
 
 /**

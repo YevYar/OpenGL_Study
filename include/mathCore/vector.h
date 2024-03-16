@@ -210,9 +210,31 @@ class Vector
                         }
 
                         /**
+                         * \brief Returns the reference on the referenced Vector component.
+                         *
+                         * Use it to change the referenced Vector component: getValue() = newValue;
+                         */
+                        constexpr ComponentType& getValue() const noexcept
+                        {
+                            OGLS_ASSERT(value != nullptr);
+                            return *value;
+                        }
+
+                        /**
+                         * \brief Sets the new value of the referenced component.
+                         *
+                         * Changes the referenced Vector component.
+                         */
+                        constexpr void setValue(ComponentType newValue) noexcept
+                        requires IsNotConstType<ComponentType>
+                        {
+                            getValue() = newValue;
+                        }
+
+                        /**
                          * \brief Returns a std::string representation of the Component object.
                          */
-                        explicit operator std::string() const
+                        std::string toString() const
                         {
                             auto component = ' ';
                             switch (i)
@@ -250,28 +272,6 @@ class Vector
                             return std::format("Vector{}::Iterator::{} = {}", N, component, getValue());
                         }
 
-                        /**
-                         * \brief Returns the reference on the referenced Vector component.
-                         *
-                         * Use it to change the referenced Vector component: getValue() = newValue;
-                         */
-                        constexpr ComponentType& getValue() const noexcept
-                        {
-                            OGLS_ASSERT(value != nullptr);
-                            return *value;
-                        }
-
-                        /**
-                         * \brief Sets the new value of the referenced component.
-                         *
-                         * Changes the referenced Vector component.
-                         */
-                        constexpr void setValue(ComponentType newValue) noexcept
-                        requires IsNotConstType<ComponentType>
-                        {
-                            getValue() = newValue;
-                        }
-
                     public:
                         /**
                          * \brief The index of the Vector component.
@@ -281,6 +281,15 @@ class Vector
                          * \brief The pointer to the value of the Component.
                          */
                         ComponentType* value = nullptr;
+
+                        /**
+                         * \brief Prints into the stream a std::string representation of the Component object.
+                         */
+                        friend inline std::ostream& operator<<(std::ostream& out, const Component& c)
+                        {
+                            out << c.toString();
+                            return out;
+                        }
 
                 };  // struct Component
 
@@ -331,7 +340,7 @@ class Vector
                  *
                  * \throw ogls::exceptions::VectorException().
                  */
-                constexpr Iterator(Iterator&&)  // it's required by iterator concept
+                Iterator(Iterator&&)  // it's required by iterator concept
                 {
                     throwUnexpectedUsageExceptionWithHint("Iterator(Iterator&&)");
                 }
@@ -341,7 +350,7 @@ class Vector
                  *
                  * \throw ogls::exceptions::VectorException().
                  */
-                constexpr Iterator& operator=(const Iterator&)  // it's required by iterator concept
+                Iterator& operator=(const Iterator&)  // it's required by iterator concept
                 {
                     throwUnexpectedUsageExceptionWithHint("operator=(const Iterator&)");
                     return *this;
@@ -352,7 +361,7 @@ class Vector
                  *
                  * \throw ogls::exceptions::VectorException().
                  */
-                constexpr Iterator& operator=(Iterator&&)  // it's required by iterator concept
+                Iterator& operator=(Iterator&&)  // it's required by iterator concept
                 {
                     throwUnexpectedUsageExceptionWithHint("operator=(Iterator&&)");
                     return *this;
@@ -409,7 +418,7 @@ class Vector
                 {
                     auto temp = Iterator{*this};
                     ++*this;
-                    return temp;
+                    return Iterator{temp};  // hack to avoid RVO and calling of non-constexpr move-constructor
                 }
 
                 /**
@@ -725,8 +734,7 @@ class Vector
         {
             if (num == 0.0f)
             {
-                throw ogls::exceptions::DivisionByZeroException{
-                  std::format("{} /= 0.0", static_cast<std::string>(*this))};
+                throw ogls::exceptions::DivisionByZeroException{std::format("{} /= 0.0", toString())};
             }
 
             return changeCoordinatesViaOperator<std::divides<float>>(num, num, num);
@@ -743,26 +751,6 @@ class Vector
         constexpr explicit operator bool() const noexcept
         {
             return !isZeroVector();
-        }
-
-        /**
-         * \brief Returns std::string representation of the Vector object.
-         */
-        explicit operator std::string() const
-        {
-            if constexpr (N == 2)
-            {
-                return std::format("Vector2(x={}, y={} | length={})", impl.m_x, impl.m_y, length());
-            }
-            else if constexpr (N == 3)
-            {
-                return std::format("Vector3(x={}, y={}, z={} | length={})", impl.m_x, impl.m_y, impl.m_z, length());
-            }
-            else
-            {
-                return std::format("Vector4(x={}, y={}, z={}, w={} | length={})", impl.m_x, impl.m_y, impl.m_z,
-                                   impl.m_w, length());
-            }
         }
 
         //------ RANGE STUFF
@@ -948,7 +936,19 @@ class Vector
          */
         std::string toString() const
         {
-            return static_cast<std::string>(*this);
+            if constexpr (N == 2)
+            {
+                return std::format("Vector2(x={}, y={} | length={})", impl.m_x, impl.m_y, length());
+            }
+            else if constexpr (N == 3)
+            {
+                return std::format("Vector3(x={}, y={}, z={} | length={})", impl.m_x, impl.m_y, impl.m_z, length());
+            }
+            else
+            {
+                return std::format("Vector4(x={}, y={}, z={}, w={} | length={})", impl.m_x, impl.m_y, impl.m_z,
+                                   impl.m_w, length());
+            }
         }
 
         /**
@@ -1060,6 +1060,16 @@ using Vec3 = Vector<3>;
 using Vec4 = Vector<4>;
 
 //------ OPERATIONS ON VECTOR
+
+/**
+ * \brief Prints into the stream a std::string representation of the Vector object.
+ */
+template<size_t N>
+inline std::ostream& operator<<(std::ostream& out, const Vector<N>& v)
+{
+    out << v.toString();
+    return out;
+}
 
 /**
  * \brief Calculates a dot product of two Vector by their coordinates.
@@ -1299,7 +1309,7 @@ constexpr Vector<N> operator/(const Vector<N>& v, float num)
 {
     if (num == 0.0f)
     {
-        throw ogls::exceptions::DivisionByZeroException{std::format("{} / {}", std::string{v}, num)};
+        throw ogls::exceptions::DivisionByZeroException{std::format("{} / {}", v.toString(), num)};
     }
 
     return makeVector<N, std::divides<float>>(v, num);
