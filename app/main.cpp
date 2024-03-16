@@ -5,8 +5,9 @@
 #include <glfw3.h>
 
 #include "exceptions.h"
-#include "renderer.h"
 #include "window.h"
+
+#include "renderer/renderer.h"
 
 namespace
 {
@@ -18,9 +19,9 @@ constexpr decltype(auto) TITLE  = "OpenGL Study Project";
 
 int main()
 {
-    using namespace app::renderer;
     using namespace ogls;
     using namespace ogls::exceptions;
+    using namespace ogls::renderer;
 
 
     auto window = std::unique_ptr<Window>{};

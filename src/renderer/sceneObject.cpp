@@ -1,6 +1,6 @@
 #include "sceneObject.h"
 
-namespace app::renderer
+namespace ogls::renderer
 {
 SceneObject::SceneObject(std::shared_ptr<ogls::oglCore::vertex::VertexArray>   vao,
                          std::shared_ptr<ogls::oglCore::shader::ShaderProgram> shaderProgram) :
@@ -19,4 +19,4 @@ void SceneObject::applyTexturesConfiguration()
     ogls::oglCore::texture::applyTexturesConfiguration(m_texturesConfiguration);
 }
 
-}  // namespace app::renderer
+}  // namespace ogls::renderer

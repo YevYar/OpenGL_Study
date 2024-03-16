@@ -1,15 +1,15 @@
-#ifndef APP_RENDERER_SCENE_OBJECT_H
-#define APP_RENDERER_SCENE_OBJECT_H
+#ifndef OGLS_RENDERER_SCENE_OBJECT_H
+#define OGLS_RENDERER_SCENE_OBJECT_H
 
 #include <memory>
 #include <vector>
 
 #include "helpers/macros.h"
-#include "shaderProgram.h"
-#include "textureUnit.h"
-#include "vertexArray.h"
+#include "openglCore/shaderProgram.h"
+#include "openglCore/textureUnit.h"
+#include "openglCore/vertexArray.h"
 
-namespace app::renderer
+namespace ogls::renderer
 {
 /**
  * \brief SceneObject is a base abstract class for all classes, which represents something, what can be rendered.
@@ -65,6 +65,6 @@ class SceneObject
 
 };  // SceneObject
 
-}  // namespace app::renderer
+}  // namespace ogls::renderer
 
 #endif

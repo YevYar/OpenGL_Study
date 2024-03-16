@@ -1,14 +1,18 @@
 #ifndef APP_MULTICOLORED_RECTANGLE_H
 #define APP_MULTICOLORED_RECTANGLE_H
 
-#include "sceneObject.h"
+#include "renderer/sceneObject.h"
 
+/**
+ * \namespace app
+ * \brief app namespace contains types and functions of demo application.
+ */
 namespace app
 {
 /**
  * \brief MulticoloredRectangle is a rectangle, the color of which can blinks by using setColorCoefficient().
  */
-class MulticoloredRectangle : public renderer::SceneObject
+class MulticoloredRectangle : public ogls::renderer::SceneObject
 {
     public:
         OGLS_DEFAULT_COPYABLE_MOVABLE(MulticoloredRectangle)

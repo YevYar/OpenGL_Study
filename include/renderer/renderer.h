@@ -1,19 +1,15 @@
-#ifndef APP_RENDERER_RENDERER_H
-#define APP_RENDERER_RENDERER_H
+#ifndef OGLS_RENDERER_RENDERER_H
+#define OGLS_RENDERER_RENDERER_H
 
 #include <memory>
 
 #include "helpers/macros.h"
 
 /**
- * \namespace app
- * \brief app namespace contains types and functions of demo application.
- */
-/**
- * \namespace app::renderer
+ * \namespace ogls::renderer
  * \brief renderer namespace contains types and functions to provide basic graphical objects or their managers.
  */
-namespace app::renderer
+namespace ogls::renderer
 {
 /**
  * \brief Renderer is a controller/script of what must be rendered per each render loop iteration.
@@ -53,6 +49,6 @@ class Renderer
 
 };  // class Renderer
 
-}  // namespace app::renderer
+}  // namespace ogls::renderer
 
 #endif
