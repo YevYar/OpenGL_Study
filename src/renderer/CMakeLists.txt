@@ -1,11 +1,13 @@
 add_library(OpenGL_Study_Renderer)
 
-set(PUBLIC_HEADERS ${PATH_TO_PUBLIC_INCLUDE}/renderer/renderer.h
+set(PUBLIC_HEADERS ${PATH_TO_PUBLIC_INCLUDE}/renderer/mesh.h 
+    ${PATH_TO_PUBLIC_INCLUDE}/renderer/renderer.h
 	${PATH_TO_PUBLIC_INCLUDE}/renderer/sceneObject.h)
 	
 set(PRIVATE_HEADERS )
 	
-set(SOURCES renderer.cpp
+set(SOURCES mesh.cpp
+    renderer.cpp
 	sceneObject.cpp)
 
 
