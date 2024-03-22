@@ -4,19 +4,30 @@
 #include <functional>
 
 #include "exceptions.h"
+#include "generalTypes.h"
+#include "helpers/debugHelpers.h"
 #include "mathCore/point.h"
 
 namespace ogls::mathCore
 {
 /**
- * \brief FunctorOnVectors checks if a provided functor can be applied to get new coordinate value based on two other
- * coordinates.
+ * \brief FunctorOnVectors checks if a provided functor can be applied to get new coordinate value based
+ * on two other coordinates.
  */
-template<typename Operator>
+template<typename Operator, typename Type>
 concept FunctorOnVectors = requires(Operator f) {
     // clang-format off
-    {f(0.0f, 0.0f)} -> std::convertible_to<float>;  // clang-format on
+    {f(Type{0}, Type{0})} -> std::convertible_to<Type>;  // clang-format on
 };
+
+/**
+ * \brief IsNotUnsigned checks that the Type isn't unsigned int.
+ *
+ * It should be used to prevent executing of operations on the Vector of type unsigned int,
+ * which can cause overflowing of unsigned.
+ */
+template<typename Type>
+concept IsNotUnsigned = not std::is_same_v<Type, unsigned int>;
 
 /**
  * \brief IsVec3OrVec4 checks if the dimensionality of the Vector is 3 or 4.
@@ -36,47 +47,31 @@ concept OtherVectorIterator = requires(OtherIterator obj) {
     {obj.equalToOtherIterator(0, nullptr)} -> std::same_as<bool>;  // clang-format on
 };
 
-template<size_t N>
+template<size_t N, typename Type>
 class VectorImpl
 {
 };  // class VectorImpl
 
-template<>
-class VectorImpl<2>
+template<typename Type>
+class VectorImpl<2, Type>
 {
     public:
-        constexpr void setCoordinates(float x, float y, float z) noexcept
+        constexpr void setCoordinates(Type x, Type y, Type z) noexcept
         {
             m_x = x;
             m_y = y;
         }
 
     public:
-        float m_x = {0.0f}, m_y = {0.0f};
+        Type m_x = Type{0}, m_y = Type{0};
 
-};  // class VectorImpl<2>
+};  // class VectorImpl<2, Type>
 
-template<>
-class VectorImpl<3>
+template<typename Type>
+class VectorImpl<3, Type>
 {
     public:
-        constexpr void setCoordinates(float x, float y, float z) noexcept
-        {
-            m_x = x;
-            m_y = y;
-            m_z = z;
-        }
-
-    public:
-        float m_x = {0.0f}, m_y = {0.0f}, m_z = {0.0f};
-
-};  // class VectorImpl<3>
-
-template<>
-class VectorImpl<4>
-{
-    public:
-        constexpr void setCoordinates(float x, float y, float z) noexcept
+        constexpr void setCoordinates(Type x, Type y, Type z) noexcept
         {
             m_x = x;
             m_y = y;
@@ -84,11 +79,27 @@ class VectorImpl<4>
         }
 
     public:
-        float m_x = {0.0f}, m_y = {0.0f}, m_z = {0.0f}, m_w = {1.0f};
+        Type m_x = Type{0}, m_y = Type{0}, m_z = Type{0};
 
-};  // class VectorImpl<4>
+};  // class VectorImpl<3, Type>
 
-template<size_t N>
+template<typename Type>
+class VectorImpl<4, Type>
+{
+    public:
+        constexpr void setCoordinates(Type x, Type y, Type z) noexcept
+        {
+            m_x = x;
+            m_y = y;
+            m_z = z;
+        }
+
+    public:
+        Type m_x = Type{0}, m_y = Type{0}, m_z = Type{0}, m_w = Type{1};
+
+};  // class VectorImpl<4, Type>
+
+template<size_t N, typename Type>
 class Vector;
 
 /**
@@ -98,21 +109,22 @@ class Vector;
  * May throw an exception, if the Operator throws.
  *
  * \param N        - a number of components in the Vector.
- * \param Operator - a functor, which accepts two float values and returns float too.
+ * \param Type     - a type of components of the Vector.
+ * \param Operator - a functor, which accepts two values of the type Type and returns Type too.
  * \return a new Vector.
  */
-template<size_t N, FunctorOnVectors Operator>
-constexpr Vector<N> makeVector(const Vector<N>& v1, const Vector<N>& v2)
+template<size_t N, typename Type, FunctorOnVectors<Type> Operator>
+constexpr Vector<N, Type> makeVector(const Vector<N, Type>& v1, const Vector<N, Type>& v2)
 {
     const auto f = Operator{};
 
     if constexpr (N == 2)
     {
-        return Vector<2>{f(v1.x(), v2.x()), f(v1.y(), v2.y())};
+        return Vector<2, Type>{f(v1.x(), v2.x()), f(v1.y(), v2.y())};
     }
     else
     {
-        return Vector<N>{f(v1.x(), v2.x()), f(v1.y(), v2.y()), f(v1.z(), v2.z())};
+        return Vector<N, Type>{f(v1.x(), v2.x()), f(v1.y(), v2.y()), f(v1.z(), v2.z())};
     }
 }
 
@@ -123,23 +135,24 @@ constexpr Vector<N> makeVector(const Vector<N>& v1, const Vector<N>& v2)
  * May throw an exception, if the Operator throws.
  *
  * \param N        - a number of components in the Vector.
- * \param Operator - a functor, which accepts two float values and returns float too.
+ * \param Type     - a type of components of the Vector.
+ * \param Operator - a functor, which accepts two Type values and returns Type too.
  * \param v        - a Vector whose coordinates are used by the Operator.
  * \param num      - a number on which the coordinates of v1 are updated.
  * \return a new Vector.
  */
-template<size_t N, FunctorOnVectors Operator>
-constexpr Vector<N> makeVector(const Vector<N>& v, float num)
+template<size_t N, typename Type, FunctorOnVectors<Type> Operator>
+constexpr Vector<N, Type> makeVector(const Vector<N, Type>& v, Type num)
 {
     const auto f = Operator{};
 
     if constexpr (N == 2)
     {
-        return Vector<2>{f(v.x(), num), f(v.y(), num)};
+        return Vector<2, Type>{f(v.x(), num), f(v.y(), num)};
     }
     else
     {
-        return Vector<N>{f(v.x(), num), f(v.y(), num), f(v.z(), num)};
+        return Vector<N, Type>{f(v.x(), num), f(v.y(), num), f(v.z(), num)};
     }
 }
 
@@ -151,14 +164,18 @@ constexpr Vector<N> makeVector(const Vector<N>& v, float num)
  * 2 - 2D vector;<br>
  * 3 - 3D vector;<br>
  * 4 - 3D vector in [Homogeneous coordinates](https://en.wikipedia.org/wiki/Homogeneous_coordinates).
- * \note The W-component of the Vector<4> is usually set to 1.0 and isn't taken into account in calculations.
- * It can only be set explicitly using Vector(float, float, float, float) and setW(float).
+ * \note The W-component of the Vector<4, Type> is usually set to 1.0 and isn't taken into account in calculations.
+ * It can only be set explicitly using Vector(Type, Type, Type, Type) and setW(Type).
  * However, operator==() takes into account W-component.
+ * \param Type - a type of components of the Vector.
  */
-template<size_t N>
+template<size_t N, typename Type = float>
 class Vector
 {
         static_assert(N >= 2 && N <= 4, "Number of components in the Vector must be in the range [2, 4].");
+        static_assert(std::is_convertible_v<Type, float> || std::is_convertible_v<Type, int>
+                        || std::is_convertible_v<Type, unsigned int> || std::is_convertible_v<Type, double>,
+                      "A Vector can be of the following types: float, double, int, unsigned int.");
 
 
     public:
@@ -172,7 +189,7 @@ class Vector
          * dereference invalid Iterator (see isValid()). However move operations as well as copy assignment
          * throw an exception to prevent unexpected usage of such algorithms as std::remove() on the Iterator.
          *
-         * \param ComponentType - the type of referenced components (float, const float).
+         * \param ComponentType - the type of referenced components (Type, const Type).
          * \see isValid().
          */
         template<typename ComponentType>
@@ -186,7 +203,7 @@ class Vector
                 {
                     public:
                         /**
-                         * \brief Allows copy assignment of the float value.
+                         * \brief Allows copy assignment of the Type value.
                          *
                          * Changes the referenced Vector component. Makes it possible to use algorithms like std::fill().
                          */
@@ -293,7 +310,8 @@ class Vector
 
                 };  // struct Component
 
-                using VectorType = std::conditional_t<std::is_const_v<ComponentType>, const Vector<N>, Vector<N>>;
+                using VectorType =
+                  std::conditional_t<std::is_const_v<ComponentType>, const Vector<N, Type>, Vector<N, Type>>;
 
                 // The following type aliases are STL conventions
                 using difference_type   = std::ptrdiff_t;
@@ -446,7 +464,7 @@ class Vector
                 /**
                  * \brief Checks equality of the own data with the data of other Iterator.
                  */
-                constexpr bool equalToOtherIterator(size_t index, const Vector<N>* vec) const noexcept
+                constexpr bool equalToOtherIterator(size_t index, const Vector<N, Type>* vec) const noexcept
                 {
                     return m_vec == vec && m_i == index;
                 }
@@ -525,11 +543,11 @@ class Vector
         /**
          * \brief Iterates over Vector components without providing ability to change the referenced Vector component.
          */
-        using const_iterator = Iterator<const float>;
+        using const_iterator = Iterator<const Type>;
         /**
          * \brief Iterates over Vector components.
          */
-        using iterator       = Iterator<float>;
+        using iterator       = Iterator<Type>;
 
     public:
         /**
@@ -541,15 +559,15 @@ class Vector
         /**
          * \brief Constructs Vector with passed Vector coordinates X and Y.
          */
-        constexpr Vector(float x, float y) noexcept
+        constexpr Vector(Type x, Type y) noexcept
         {
-            impl.setCoordinates(x, y, 0.0f);
+            impl.setCoordinates(x, y, Type{0});
         }
 
         /**
          * \brief Constructs Vector with passed Vector coordinates X, Y and Z.
          */
-        constexpr Vector(float x, float y, float z) noexcept
+        constexpr Vector(Type x, Type y, Type z) noexcept
         requires IsVec3OrVec4<N>
         {
             impl.setCoordinates(x, y, z);
@@ -560,7 +578,7 @@ class Vector
          *
          * \see [Homogeneous coordinates](https://en.wikipedia.org/wiki/Homogeneous_coordinates).
          */
-        constexpr Vector(float x, float y, float z, float w) noexcept
+        constexpr Vector(Type x, Type y, Type z, Type w) noexcept
         requires IsVec4<N>
         {
             impl.setCoordinates(x, y, z);
@@ -583,24 +601,24 @@ class Vector
          *
          * \param generalCoordinate - a value of Vector coordinates.
          */
-        constexpr explicit Vector(float generalCoordinate) noexcept
+        constexpr explicit Vector(Type generalCoordinate) noexcept
         {
             impl.setCoordinates(generalCoordinate, generalCoordinate, generalCoordinate);
         }
 
         /**
-         * \brief Constructs Vector<3>/Vector<4> from the passed Vector<2>.
+         * \brief Constructs Vector<3, Type>/Vector<4, Type> from the passed Vector<2, Type>.
          */
-        constexpr explicit Vector(const Vector<2>& v) noexcept
+        constexpr explicit Vector(const Vector<2, Type>& v) noexcept
         requires IsVec3OrVec4<N>
         {
-            impl.setCoordinates(v.x(), v.y(), 0.0f);
+            impl.setCoordinates(v.x(), v.y(), Type{0});
         }
 
         /**
-         * \brief Constructs Vector<4> from the passed Vector<3>.
+         * \brief Constructs Vector<4, Type> from the passed Vector<3, Type>.
          */
-        constexpr explicit Vector(const Vector<3>& v) noexcept
+        constexpr explicit Vector(const Vector<3, Type>& v) noexcept
         requires IsVec4<N>
         {
             impl.setCoordinates(v.x(), v.y(), v.z());
@@ -611,11 +629,11 @@ class Vector
          */
         template<size_t VectorDimensionality>
         requires(VectorDimensionality > N)
-        constexpr explicit Vector(const Vector<VectorDimensionality>& v) noexcept
+        constexpr explicit Vector(const Vector<VectorDimensionality, Type>& v) noexcept
         {
             if constexpr (N == 2)
             {
-                impl.setCoordinates(v.x(), v.y(), 0);
+                impl.setCoordinates(v.x(), v.y(), Type{0});
             }
             else if constexpr (N == 3)
             {
@@ -629,18 +647,19 @@ class Vector
          * \brief Returns new Vector as the result of negation of this Vector.
          */
         constexpr Vector operator-() const noexcept
+        requires IsNotUnsigned<Type>
         {
             if constexpr (N == 2)
             {
-                return Vector<2>{-impl.m_x, -impl.m_y};
+                return Vector<2, Type>{-impl.m_x, -impl.m_y};
             }
             else if constexpr (N == 3)
             {
-                return Vector<3>{-impl.m_x, -impl.m_y, -impl.m_z};
+                return Vector<3, Type>{-impl.m_x, -impl.m_y, -impl.m_z};
             }
             else
             {
-                return Vector<4>{-impl.m_x, -impl.m_y, -impl.m_z, impl.m_w};
+                return Vector<4, Type>{-impl.m_x, -impl.m_y, -impl.m_z, impl.m_w};
             }
         }
 
@@ -666,7 +685,7 @@ class Vector
          */
         constexpr Vector& operator+=(const Vector& v) noexcept
         {
-            return changeCoordinatesViaOperator<std::plus<float>>(v);
+            return changeCoordinatesViaOperator<std::plus<Type>>(v);
         }
 
         /**
@@ -677,9 +696,9 @@ class Vector
          * \param num - a number to add to all coordinates of this Vector.
          * \return this Vector with changed coordinates.
          */
-        constexpr Vector& operator+=(float num) noexcept
+        constexpr Vector& operator+=(Type num) noexcept
         {
-            return changeCoordinatesViaOperator<std::plus<float>>(num, num, num);
+            return changeCoordinatesViaOperator<std::plus<Type>>(num, num, num);
         }
 
         /**
@@ -691,8 +710,9 @@ class Vector
          * \return this Vector with changed coordinates.
          */
         constexpr Vector& operator-=(const Vector& v) noexcept
+        requires IsNotUnsigned<Type>
         {
-            return changeCoordinatesViaOperator<std::minus<float>>(v);
+            return changeCoordinatesViaOperator<std::minus<Type>>(v);
         }
 
         /**
@@ -703,9 +723,10 @@ class Vector
          * \param num - a number to subtract from all coordinates of this Vector.
          * \return this Vector with changed coordinates.
          */
-        constexpr Vector& operator-=(float num) noexcept
+        constexpr Vector& operator-=(Type num) noexcept
+        requires IsNotUnsigned<Type>
         {
-            return changeCoordinatesViaOperator<std::minus<float>>(num, num, num);
+            return changeCoordinatesViaOperator<std::minus<Type>>(num, num, num);
         }
 
         /**
@@ -716,9 +737,9 @@ class Vector
          * \param num - a number to multiply coordinates of this Vector by.
          * \return this Vector with changed coordinates.
          */
-        constexpr Vector& operator*=(float num) noexcept
+        constexpr Vector& operator*=(Type num) noexcept
         {
-            return changeCoordinatesViaOperator<std::multiplies<float>>(num, num, num);
+            return changeCoordinatesViaOperator<std::multiplies<Type>>(num, num, num);
         }
 
         /**
@@ -730,14 +751,14 @@ class Vector
          * \return this Vector with changed coordinates.
          * \throw ogls::exceptions::DivisionByZeroException().
          */
-        constexpr Vector& operator/=(float num)
+        constexpr Vector& operator/=(Type num)
         {
-            if (num == 0.0f)
+            if (num == Type{0})
             {
                 throw ogls::exceptions::DivisionByZeroException{std::format("{} /= 0.0", toString())};
             }
 
-            return changeCoordinatesViaOperator<std::divides<float>>(num, num, num);
+            return changeCoordinatesViaOperator<std::divides<Type>>(num, num, num);
         }
 
         //------ SOME TYPE CASTING OPERATIONS
@@ -833,11 +854,11 @@ class Vector
         {
             if constexpr (N == 2)
             {
-                return impl.m_x == 0.0f && impl.m_y == 0.0f;
+                return impl.m_x == Type{0} && impl.m_y == Type{0};
             }
             else
             {
-                return impl.m_x == 0.0f && impl.m_y == 0.0f && impl.m_z == 0.0f;
+                return impl.m_x == Type{0} && impl.m_y == Type{0} && impl.m_z == Type{0};
             }
         }
 
@@ -848,11 +869,12 @@ class Vector
         {
             if constexpr (N == 2)
             {
-                return impl.m_x == 0.0f && impl.m_y == 0.0f ? 0.0f : std::sqrtf(square(impl.m_x) + square(impl.m_y));
+                return impl.m_x == Type{0} && impl.m_y == Type{0} ? 0.0f
+                                                                  : std::sqrtf(square(impl.m_x) + square(impl.m_y));
             }
             else
             {
-                return impl.m_x == 0.0f && impl.m_y == 0.0f && impl.m_z == 0.0f
+                return impl.m_x == Type{0} && impl.m_y == Type{0} && impl.m_z == Type{0}
                          ? 0.0f
                          : std::sqrtf(square(impl.m_x) + square(impl.m_y) + square(impl.m_z));
             }
@@ -863,7 +885,7 @@ class Vector
          *
          * \param w - value to set.
          */
-        constexpr void setW(float w) noexcept
+        constexpr void setW(Type w) noexcept
         requires IsVec4<N>
         {
             impl.m_w = w;
@@ -874,7 +896,7 @@ class Vector
          *
          * \param x - value to set.
          */
-        constexpr void setX(float x) noexcept
+        constexpr void setX(Type x) noexcept
         {
             impl.m_x = x;
         }
@@ -884,7 +906,7 @@ class Vector
          *
          * \param y - value to set.
          */
-        constexpr void setY(float y) noexcept
+        constexpr void setY(Type y) noexcept
         {
             impl.m_y = y;
         }
@@ -894,7 +916,7 @@ class Vector
          *
          * \param z - value to set.
          */
-        constexpr void setZ(float z) noexcept
+        constexpr void setZ(Type z) noexcept
         requires IsVec3OrVec4<N>
         {
             impl.m_z = z;
@@ -905,9 +927,9 @@ class Vector
          *
          * \param x, y - values to set.
          */
-        constexpr void setCoordinates(float x, float y) noexcept
+        constexpr void setCoordinates(Type x, Type y) noexcept
         {
-            impl.setCoordinates(x, y, 0.0f);
+            impl.setCoordinates(x, y, Type{0});
         }
 
         /**
@@ -915,7 +937,7 @@ class Vector
          *
          * \param x, y, z - values to set.
          */
-        constexpr void setCoordinates(float x, float y, float z) noexcept
+        constexpr void setCoordinates(Type x, Type y, Type z) noexcept
         requires IsVec3OrVec4<N>
         {
             impl.setCoordinates(x, y, z);
@@ -926,7 +948,7 @@ class Vector
          *
          * \param generalCoordinate - value of X, Y and Z coordinates.
          */
-        constexpr void setCoordinates(float generalCoordinate) noexcept
+        constexpr void setCoordinates(Type generalCoordinate) noexcept
         {
             impl.setCoordinates(generalCoordinate, generalCoordinate, generalCoordinate);
         }
@@ -954,7 +976,7 @@ class Vector
         /**
          * \brief Returns W-component of the Vector.
          */
-        constexpr float w() const noexcept
+        constexpr Type w() const noexcept
         requires IsVec4<N>
         {
             return impl.m_w;
@@ -963,7 +985,7 @@ class Vector
         /**
          * \brief Returns X coordinate of the Vector.
          */
-        constexpr float x() const noexcept
+        constexpr Type x() const noexcept
         {
             return impl.m_x;
         }
@@ -971,7 +993,7 @@ class Vector
         /**
          * \brief Returns Y coordinate of the Vector.
          */
-        constexpr float y() const noexcept
+        constexpr Type y() const noexcept
         {
             return impl.m_y;
         }
@@ -979,7 +1001,7 @@ class Vector
         /**
          * \brief Returns Z coordinate of the Vector.
          */
-        constexpr float z() const noexcept
+        constexpr Type z() const noexcept
         requires IsVec3OrVec4<N>
         {
             return impl.m_z;
@@ -992,14 +1014,14 @@ class Vector
          *
          * May throw an exception, if the Operator throws.
          */
-        template<FunctorOnVectors Operator>
-        constexpr Vector& changeCoordinatesViaOperator(float x, float y, float z)
+        template<FunctorOnVectors<Type> Operator>
+        constexpr Vector& changeCoordinatesViaOperator(Type x, Type y, Type z)
         {
             const auto f = Operator{};
 
             if constexpr (N == 2)
             {
-                impl.setCoordinates(f(impl.m_x, x), f(impl.m_y, y), 0.0f);
+                impl.setCoordinates(f(impl.m_x, x), f(impl.m_y, y), Type{0});
             }
             else
             {
@@ -1015,14 +1037,14 @@ class Vector
          *
          * May throw an exception, if the Operator throws.
          */
-        template<FunctorOnVectors Operator>
+        template<FunctorOnVectors<Type> Operator>
         constexpr Vector& changeCoordinatesViaOperator(const Vector& v)
         {
             const auto f = Operator{};
 
             if constexpr (N == 2)
             {
-                impl.setCoordinates(f(impl.m_x, v.impl.m_x), f(impl.m_y, v.impl.m_y), 0.0f);
+                impl.setCoordinates(f(impl.m_x, v.impl.m_x), f(impl.m_y, v.impl.m_y), Type{0});
             }
             else
             {
@@ -1033,19 +1055,19 @@ class Vector
         }
 
     private:
-        VectorImpl<N> impl;
+        VectorImpl<N, Type> impl;
 
 };  // class Vector
 
 /**
  * \brief Vec2 represents a vector in 2D orthonormal basis.
  */
-using Vec2 = Vector<2>;
+using Vec2 = Vector<2, float>;
 
 /**
  * \brief Vec3 represents a vector in 3D orthonormal basis.
  */
-using Vec3 = Vector<3>;
+using Vec3 = Vector<3, float>;
 
 /**
  * \brief Vec4 represents a vector in 3D orthonormal basis with homogeneous coordinates.
@@ -1057,15 +1079,15 @@ using Vec3 = Vector<3>;
  *
  * \see [Homogeneous coordinates](https://en.wikipedia.org/wiki/Homogeneous_coordinates).
  */
-using Vec4 = Vector<4>;
+using Vec4 = Vector<4, float>;
 
 //------ OPERATIONS ON VECTOR
 
 /**
  * \brief Prints into the stream a std::string representation of the Vector object.
  */
-template<size_t N>
-inline std::ostream& operator<<(std::ostream& out, const Vector<N>& v)
+template<size_t N, typename Type>
+inline std::ostream& operator<<(std::ostream& out, const Vector<N, Type>& v)
 {
     out << v.toString();
     return out;
@@ -1076,8 +1098,8 @@ inline std::ostream& operator<<(std::ostream& out, const Vector<N>& v)
  *
  * \return the dot product of two Vector.
  */
-template<size_t N>
-constexpr float dotProduct(const Vector<N>& v1, const Vector<N>& v2) noexcept
+template<size_t N, typename Type>
+constexpr float dotProduct(const Vector<N, Type>& v1, const Vector<N, Type>& v2) noexcept
 {
     if constexpr (N == 2)
     {
@@ -1112,8 +1134,9 @@ inline float dotProduct(float lengthV1, float lengthV2, float angle, AngleUnit u
  * \param unit  - measurement unit of the angle.
  * \return the dot product of two Vector.
  */
-template<size_t N>
-inline float dotProduct(const Vector<N>& v1, const Vector<N>& v2, float angle, AngleUnit unit = AngleUnit::Degrees)
+template<size_t N, typename Type1, typename Type2>
+inline float dotProduct(const Vector<N, Type1>& v1, const Vector<N, Type2>& v2, float angle,
+                        AngleUnit unit = AngleUnit::Degrees)
 {
     return v1.length() * v2.length() * mathCore::cos(angle, unit);
 }
@@ -1123,8 +1146,8 @@ inline float dotProduct(const Vector<N>& v1, const Vector<N>& v2, float angle, A
  *
  * \return the value of cosine between two Vector.
  */
-template<size_t N>
-constexpr float cosBetweenVectors(const Vector<N>& v1, const Vector<N>& v2) noexcept
+template<size_t N, typename Type>
+constexpr float cosBetweenVectors(const Vector<N, Type>& v1, const Vector<N, Type>& v2) noexcept
 {
     const auto l1 = v1.length(), l2 = v2.length();
     // The angle between vector and zero-vector is 90 degrees, cos(90) = 0
@@ -1136,8 +1159,8 @@ constexpr float cosBetweenVectors(const Vector<N>& v1, const Vector<N>& v2) noex
  *
  * \return the angle in radians between two Vector.
  */
-template<size_t N>
-inline float angleBetweenVectors(const Vector<N>& v1, const Vector<N>& v2)
+template<size_t N, typename Type>
+inline float angleBetweenVectors(const Vector<N, Type>& v1, const Vector<N, Type>& v2)
 {
     return std::acosf(mapValueToUnitRange(cosBetweenVectors(v1, v2)));
 }
@@ -1149,14 +1172,14 @@ inline float angleBetweenVectors(const Vector<N>& v1, const Vector<N>& v2)
  * \param v2 - Vector 2.
  * \return the cross product of two Vector.
  */
-template<size_t N>
-requires IsVec3OrVec4<N>
-constexpr Vector<N> crossProduct(const Vector<N>& v1, const Vector<N>& v2) noexcept
+template<size_t N, typename Type>
+requires IsVec3OrVec4<N> and IsNotUnsigned<Type>
+constexpr Vector<N, Type> crossProduct(const Vector<N, Type>& v1, const Vector<N, Type>& v2) noexcept
 {
     // clang-format off
-    return Vector<N>{(v1.y() * v2.z()) - (v1.z() * v2.y()),
-                     (v1.z() * v2.x()) - (v1.x() * v2.z()),
-                     (v1.x() * v2.y()) - (v1.y() * v2.x())};  // clang-format on
+    return Vector<N, Type>{(v1.y() * v2.z()) - (v1.z() * v2.y()),
+                           (v1.z() * v2.x()) - (v1.x() * v2.z()),
+                           (v1.x() * v2.y()) - (v1.y() * v2.x())};  // clang-format on
 }
 
 /**
@@ -1165,11 +1188,11 @@ constexpr Vector<N> crossProduct(const Vector<N>& v1, const Vector<N>& v2) noexc
  * \param v - the Vector to normalize.
  * \return normalized Vector of the Vector v or zero-vector if v is zero-vector.
  */
-template<size_t N>
-constexpr Vector<N> normalize(const Vector<N>& v) noexcept
+template<size_t N, typename Type>
+constexpr Vector<N, Type> normalize(const Vector<N, Type>& v) noexcept
 {
     const auto length = v.length();
-    return length == 0.0f ? v : makeVector<N, std::divides<float>>(v, length);
+    return length == 0.0f ? v : makeVector<N, Type, std::divides<Type>>(v, length);
 }
 
 /**
@@ -1177,8 +1200,8 @@ constexpr Vector<N> normalize(const Vector<N>& v) noexcept
  *
  * \return true if two Vector have equal coordinates, false otherwise.
  */
-template<size_t N>
-constexpr bool operator==(const Vector<N>& v1, const Vector<N>& v2) noexcept
+template<size_t N, typename Type>
+constexpr bool operator==(const Vector<N, Type>& v1, const Vector<N, Type>& v2) noexcept
 {
     using ogls::helpers::isFloatsEqual;
 
@@ -1203,8 +1226,8 @@ constexpr bool operator==(const Vector<N>& v1, const Vector<N>& v2) noexcept
  *
  * \return true if two Vector have different coordinates, false otherwise.
  */
-template<size_t N>
-constexpr bool operator!=(const Vector<N>& v1, const Vector<N>& v2) noexcept
+template<size_t N, typename Type>
+constexpr bool operator!=(const Vector<N, Type>& v1, const Vector<N, Type>& v2) noexcept
 {
     return !(v1 == v2);
 }
@@ -1214,10 +1237,10 @@ constexpr bool operator!=(const Vector<N>& v1, const Vector<N>& v2) noexcept
  *
  * \return Vector, which is the result of addition of two Vector.
  */
-template<size_t N>
-constexpr Vector<N> operator+(const Vector<N>& v1, const Vector<N>& v2) noexcept
+template<size_t N, typename Type>
+constexpr Vector<N, Type> operator+(const Vector<N, Type>& v1, const Vector<N, Type>& v2) noexcept
 {
-    return makeVector<N, std::plus<float>>(v1, v2);
+    return makeVector<N, Type, std::plus<Type>>(v1, v2);
 }
 
 /**
@@ -1227,10 +1250,10 @@ constexpr Vector<N> operator+(const Vector<N>& v1, const Vector<N>& v2) noexcept
  * \param v   - a source Vector.
  * \return new Vector, which is a result of addition of the number to every coordinate of Vector v.
  */
-template<size_t N>
-constexpr Vector<N> operator+(float num, const Vector<N>& v) noexcept
+template<size_t N, typename Type>
+constexpr Vector<N, Type> operator+(Type num, const Vector<N, Type>& v) noexcept
 {
-    return makeVector<N, std::plus<float>>(v, num);
+    return makeVector<N, Type, std::plus<Type>>(v, num);
 }
 
 /**
@@ -1240,8 +1263,8 @@ constexpr Vector<N> operator+(float num, const Vector<N>& v) noexcept
  * \param num - a number to add to every coordinate of the Vector.
  * \return new Vector, which is a result of addition of the number to every coordinate of Vector v.
  */
-template<size_t N>
-constexpr Vector<N> operator+(const Vector<N>& v, float num) noexcept
+template<size_t N, typename Type>
+constexpr Vector<N, Type> operator+(const Vector<N, Type>& v, Type num) noexcept
 {
     return num + v;
 }
@@ -1251,10 +1274,11 @@ constexpr Vector<N> operator+(const Vector<N>& v, float num) noexcept
  *
  * \return Vector, which is the result of subtraction of two Vector.
  */
-template<size_t N>
-constexpr Vector<N> operator-(const Vector<N>& v1, const Vector<N>& v2) noexcept
+template<size_t N, typename Type>
+requires IsNotUnsigned<Type>
+constexpr Vector<N, Type> operator-(const Vector<N, Type>& v1, const Vector<N, Type>& v2) noexcept
 {
-    return makeVector<N, std::minus<float>>(v1, v2);
+    return makeVector<N, Type, std::minus<Type>>(v1, v2);
 }
 
 /**
@@ -1264,10 +1288,11 @@ constexpr Vector<N> operator-(const Vector<N>& v1, const Vector<N>& v2) noexcept
  * \param num - a number to subtract from every coordinate of the Vector.
  * \return new Vector, which is a result of subtraction of the number from every coordinate of Vector v.
  */
-template<size_t N>
-constexpr Vector<N> operator-(const Vector<N>& v, float num) noexcept
+template<size_t N, typename Type>
+requires IsNotUnsigned<Type>
+constexpr Vector<N, Type> operator-(const Vector<N, Type>& v, Type num) noexcept
 {
-    return makeVector<N, std::minus<float>>(v, num);
+    return makeVector<N, Type, std::minus<Type>>(v, num);
 }
 
 /**
@@ -1277,10 +1302,10 @@ constexpr Vector<N> operator-(const Vector<N>& v, float num) noexcept
  * \param v   - a source Vector.
  * \return new Vector, which is a result of multiplication of every coordinate of Vector v by number.
  */
-template<size_t N>
-constexpr Vector<N> operator*(float num, const Vector<N>& v) noexcept
+template<size_t N, typename Type>
+constexpr Vector<N, Type> operator*(Type num, const Vector<N, Type>& v) noexcept
 {
-    return makeVector<N, std::multiplies<float>>(v, num);
+    return makeVector<N, Type, std::multiplies<Type>>(v, num);
 }
 
 /**
@@ -1290,8 +1315,8 @@ constexpr Vector<N> operator*(float num, const Vector<N>& v) noexcept
  * \param num - a number to multiply coordinates of the Vector by.
  * \return new Vector, which is a result of multiplication of every coordinate of Vector v by number.
  */
-template<size_t N>
-constexpr Vector<N> operator*(const Vector<N>& v, float num) noexcept
+template<size_t N, typename Type>
+constexpr Vector<N, Type> operator*(const Vector<N, Type>& v, Type num) noexcept
 {
     return num * v;
 }
@@ -1304,15 +1329,15 @@ constexpr Vector<N> operator*(const Vector<N>& v, float num) noexcept
  * \return new Vector, which is a result of division of every coordinate of Vector v by number.
  * \throw ogls::exceptions::DivisionByZeroException().
  */
-template<size_t N>
-constexpr Vector<N> operator/(const Vector<N>& v, float num)
+template<size_t N, typename Type>
+constexpr Vector<N, Type> operator/(const Vector<N, Type>& v, Type num)
 {
-    if (num == 0.0f)
+    if (num == Type{0})
     {
         throw ogls::exceptions::DivisionByZeroException{std::format("{} / {}", v.toString(), num)};
     }
 
-    return makeVector<N, std::divides<float>>(v, num);
+    return makeVector<N, Type, std::divides<Type>>(v, num);
 }
 
 //------ CHECKERS OF VECTOR PROPERTIES
@@ -1322,8 +1347,8 @@ constexpr Vector<N> operator/(const Vector<N>& v, float num)
  *
  * \return true if co-directed, false otherwise.
  */
-template<size_t N>
-inline bool isVectorsCodirected(const Vector<N>& v1, const Vector<N>& v2)
+template<size_t N, typename Type>
+inline bool isVectorsCodirected(const Vector<N, Type>& v1, const Vector<N, Type>& v2)
 {
     return helpers::isFloatsEqual(angleBetweenVectors(v1, v2), 0.0f);
 }
@@ -1333,12 +1358,12 @@ inline bool isVectorsCodirected(const Vector<N>& v1, const Vector<N>& v2)
  *
  * \return true if collinear, false otherwise.
  */
-template<size_t N>
-constexpr bool isVectorsCollinear(const Vector<N>& v1, const Vector<N>& v2) noexcept
+template<size_t N, typename Type>
+constexpr bool isVectorsCollinear(const Vector<N, Type>& v1, const Vector<N, Type>& v2) noexcept
 {
     if constexpr (N == 2)
     {
-        return crossProduct(Vector<3>{v1}, Vector<3>{v2}).isZeroVector();
+        return crossProduct(Vector<3, Type>{v1}, Vector<3, Type>{v2}).isZeroVector();
     }
     else
     {
@@ -1351,8 +1376,8 @@ constexpr bool isVectorsCollinear(const Vector<N>& v1, const Vector<N>& v2) noex
  *
  * \return true if oppositely directed, false otherwise.
  */
-template<size_t N>
-inline bool isVectorsOppositelyDirected(const Vector<N>& v1, const Vector<N>& v2)
+template<size_t N, typename Type>
+inline bool isVectorsOppositelyDirected(const Vector<N, Type>& v1, const Vector<N, Type>& v2)
 {
     return helpers::isFloatsEqual(angleBetweenVectors(v1, v2), std::numbers::pi);
 }
@@ -1362,8 +1387,8 @@ inline bool isVectorsOppositelyDirected(const Vector<N>& v1, const Vector<N>& v2
  *
  * \return true if orthogonal, false otherwise.
  */
-template<size_t N>
-constexpr bool isVectorsOrthogonal(const Vector<N>& v1, const Vector<N>& v2) noexcept
+template<size_t N, typename Type>
+constexpr bool isVectorsOrthogonal(const Vector<N, Type>& v1, const Vector<N, Type>& v2) noexcept
 {
     return helpers::isFloatsEqual(dotProduct(v1, v2), 0.0f);
 }
