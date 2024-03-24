@@ -41,6 +41,7 @@ const std::vector<Mesh::Vertex>& Mesh::getVertices() const noexcept
 
 void Mesh::render()
 {
+    // May be used to call some specific graphics API functions to render this Mesh.
 }
 
 }  // namespace ogls::renderer

@@ -591,7 +591,7 @@ class Vector
          * \param p1 - a start point of the Vector.
          * \param p2 - an end point of the Vector.
          */
-        constexpr Vector(const Point& p1, const Point& p2) noexcept
+        constexpr Vector(const Point<Type>& p1, const Point<Type>& p2) noexcept
         {
             impl.setCoordinates(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);
         }
@@ -1203,21 +1203,21 @@ constexpr Vector<N, Type> normalize(const Vector<N, Type>& v) noexcept
 template<size_t N, typename Type>
 constexpr bool operator==(const Vector<N, Type>& v1, const Vector<N, Type>& v2) noexcept
 {
-    using ogls::helpers::isFloatsEqual;
+    using ogls::helpers::isEqual;
 
 
     if constexpr (N == 2)
     {
-        return isFloatsEqual(v1.x(), v2.x()) && isFloatsEqual(v1.y(), v2.y());
+        return isEqual<Type>(v1.x(), v2.x()) && isEqual<Type>(v1.y(), v2.y());
     }
     else if constexpr (N == 3)
     {
-        return isFloatsEqual(v1.x(), v2.x()) && isFloatsEqual(v1.y(), v2.y()) && isFloatsEqual(v1.z(), v2.z());
+        return isEqual<Type>(v1.x(), v2.x()) && isEqual<Type>(v1.y(), v2.y()) && isEqual<Type>(v1.z(), v2.z());
     }
     else
     {
-        return isFloatsEqual(v1.x(), v2.x()) && isFloatsEqual(v1.y(), v2.y()) && isFloatsEqual(v1.z(), v2.z())
-               && isFloatsEqual(v1.w(), v2.w());
+        return isEqual<Type>(v1.x(), v2.x()) && isEqual<Type>(v1.y(), v2.y()) && isEqual<Type>(v1.z(), v2.z())
+               && isEqual<Type>(v1.w(), v2.w());
     }
 }
 

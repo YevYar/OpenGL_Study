@@ -29,15 +29,15 @@ class Mesh
                 /**
                  * \brief The normal vector of the Vertex, used for lighting calculations.
                  */
-                mathCore::Vec3  normal;
+                mathCore::Vec3    normal;
                 /**
                  * \brief The position of the Vertex in 3D space.
                  */
-                mathCore::Point position;
+                mathCore::Point<> position;
                 /**
                  * \brief The texture coordinates of the Vertex, used for texture mapping.
                  */
-                mathCore::Point texCoords;
+                mathCore::Point<> texCoords;
 
         };  // struct Vertex
 

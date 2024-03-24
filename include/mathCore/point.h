@@ -1,6 +1,8 @@
 #ifndef OGLS_MATHCORE_POINT_H
 #define OGLS_MATHCORE_POINT_H
 
+#include <iostream>
+
 #include "helpers/floats.h"
 #include "helpers/macros.h"
 #include "mathCore/base.h"
@@ -9,9 +11,17 @@ namespace ogls::mathCore
 {
 /**
  * \brief Point represents point in 3D (2D) space.
+ *
+ * \param Type - a type of components of the Point.
  */
+template<typename Type = float>
 struct Point final
 {
+        static_assert(std::is_convertible_v<Type, float> || std::is_convertible_v<Type, int>
+                        || std::is_convertible_v<Type, unsigned int> || std::is_convertible_v<Type, double>,
+                      "A Point can be of the following types: float, double, int, unsigned int.");
+
+
     public:
         /**
          * \brief Constructs Point with all coordinates set to 0.
@@ -22,7 +32,7 @@ struct Point final
         /**
          * \brief Constructs Point with passed X, Y and Z coordinates.
          */
-        constexpr Point(float xCoord, float yCoord, float zCoord = {0.0f}) noexcept : x{xCoord}, y{yCoord}, z{zCoord}
+        constexpr Point(Type xCoord, Type yCoord, Type zCoord = Type{0}) noexcept : x{xCoord}, y{yCoord}, z{zCoord}
         {
         }
 
@@ -31,7 +41,7 @@ struct Point final
          *
          * \param generalCoordinate - value of X, Y and Z coordinates.
          */
-        constexpr explicit Point(float generalCoordinate) noexcept :
+        constexpr explicit Point(Type generalCoordinate) noexcept :
             x{generalCoordinate}, y{generalCoordinate}, z{generalCoordinate}
         {
         }
@@ -64,7 +74,7 @@ struct Point final
          */
         constexpr bool isOrigin() const noexcept
         {
-            return x == 0.0f && y == 0.0f && z == 0.0f;
+            return x == Type{0} && y == Type{0} && z == Type{0};
         }
 
         /**
@@ -72,7 +82,7 @@ struct Point final
          *
          * \param x, y, z - values to set.
          */
-        constexpr void setCoordinates(float xCoord, float yCoord, float zCoord = {0.0f}) noexcept
+        constexpr void setCoordinates(Type xCoord, Type yCoord, Type zCoord = Type{0}) noexcept
         {
             x = xCoord;
             y = yCoord;
@@ -84,7 +94,7 @@ struct Point final
          *
          * \param generalCoordinate - value of X, Y and Z coordinates.
          */
-        constexpr void setCoordinates(float generalCoordinate) noexcept
+        constexpr void setCoordinates(Type generalCoordinate) noexcept
         {
             x = generalCoordinate;
             y = generalCoordinate;
@@ -100,14 +110,15 @@ struct Point final
         }
 
     public:
-        float x = {0.0f}, y = {0.0f}, z = {0.0f};
+        Type x = Type{0}, y = Type{0}, z = Type{0};
 
 };  // struct Point
 
 /**
  * \brief Prints into the stream a std::string representation of the Point object.
  */
-inline std::ostream& operator<<(std::ostream& out, const Point& p)
+template<typename Type>
+inline std::ostream& operator<<(std::ostream& out, const Point<Type>& p)
 {
     out << p.toString();
     return out;
@@ -118,12 +129,13 @@ inline std::ostream& operator<<(std::ostream& out, const Point& p)
  *
  * \return true if two Point have equal coordinates, false otherwise.
  */
-constexpr bool operator==(const Point& p1, const Point& p2) noexcept
+template<typename Type>
+constexpr bool operator==(const Point<Type>& p1, const Point<Type>& p2) noexcept
 {
-    using ogls::helpers::isFloatsEqual;
+    using ogls::helpers::isEqual;
 
 
-    return isFloatsEqual(p1.x, p2.x) && isFloatsEqual(p1.y, p2.y) && isFloatsEqual(p1.z, p2.z);
+    return isEqual<Type>(p1.x, p2.x) && isEqual<Type>(p1.y, p2.y) && isEqual<Type>(p1.z, p2.z);
 }
 
 /**
@@ -131,7 +143,8 @@ constexpr bool operator==(const Point& p1, const Point& p2) noexcept
  *
  * \return true if two Point have different coordinates, false otherwise.
  */
-constexpr bool operator!=(const Point& p1, const Point& p2) noexcept
+template<typename Type>
+constexpr bool operator!=(const Point<Type>& p1, const Point<Type>& p2) noexcept
 {
     return !(p1 == p2);
 }
@@ -141,7 +154,8 @@ constexpr bool operator!=(const Point& p1, const Point& p2) noexcept
  *
  * \return distance between two Point.
  */
-inline float distanceBetweenPoints(const Point& p1, const Point& p2) noexcept
+template<typename Type>
+inline float distanceBetweenPoints(const Point<Type>& p1, const Point<Type>& p2) noexcept
 {
     return p1 == p2 ? 0.0f : std::sqrtf(square(p2.x - p1.x) + square(p2.y - p1.y) + square(p2.z - p1.z));
 }
