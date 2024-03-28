@@ -21,15 +21,6 @@ concept FunctorOnVectors = requires(Operator f) {
 };
 
 /**
- * \brief IsNotUnsigned checks that the Type isn't unsigned int.
- *
- * It should be used to prevent executing of operations on the Vector of type unsigned int,
- * which can cause overflowing of unsigned.
- */
-template<typename Type>
-concept IsNotUnsigned = not std::is_same_v<Type, unsigned int>;
-
-/**
  * \brief IsVec3OrVec4 checks if the dimensionality of the Vector is 3 or 4.
  */
 template<size_t Dimensionality>

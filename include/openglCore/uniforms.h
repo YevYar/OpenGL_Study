@@ -79,7 +79,7 @@ class MatrixUniform : public BaseUniform
          *
          * mathCore::Matrix elements must be ordered in a column-row order.
          */
-        using DataType = mathCore::Matrix<N, M>;
+        using DataType = mathCore::Matrix<N, M, float>;
 
     public:
         MatrixUniform() = delete;

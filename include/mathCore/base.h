@@ -20,6 +20,15 @@ namespace ogls::mathCore
 constexpr inline auto OGLS_FLOAT_ANGLE_EPSILON = float{1.0E-6};
 
 /**
+ * \brief IsNotUnsigned checks that the Type isn't unsigned int.
+ *
+ * It should be used to prevent executing of operations on type unsigned int,
+ * which can cause overflowing of unsigned.
+ */
+template<typename Type>
+concept IsNotUnsigned = not std::is_same_v<Type, unsigned int>;
+
+/**
  * \brief Multipliable is a concept, which specifies the types, which support operator*.
  *
  * \param Type - a type to check constraints of.

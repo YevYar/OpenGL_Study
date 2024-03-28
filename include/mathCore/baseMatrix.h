@@ -283,9 +283,9 @@ class BaseMatrix
          * throw an exception to prevent changing the number of elements of Matrix data container outside the logic
          * of Matrix class. Such algorithms as std::remove() cannot be used with Iterator.
          *
-         * \param ElementType            - the type of referenced elements (float, const float).
+         * \param ElementType            - the type of referenced elements (Type, const Type).
          * \param UnderlyingIteratorType - the type of the iterator, which is used by the data container of Matrix
-         * (std::array<float>::iterator, std::array<float>::const_iterator).
+         * (std::array<Type>::iterator, std::array<Type>::const_iterator).
          * \param ConcreteIteratorImpl   - the base class, which provides an implementation of necessary stuff
          * (see ogls::mathCore::IteratorImpl).
          * \see isValid().
@@ -305,7 +305,7 @@ class BaseMatrix
                 {
                     public:
                         /**
-                         * \brief Allows copy assignment of the float value.
+                         * \brief Allows copy assignment of the ElementType value.
                          *
                          * Changes the referenced Matrix element. Makes it possible to use algorithms like std::fill().
                          */

@@ -105,7 +105,7 @@ constexpr bool isEqual(Type a, Type b) noexcept
 template<typename Type>
 constexpr bool isNotEqual(Type a, Type b) noexcept
 {
-    return !isEqual(a, b);
+    return !isEqual<Type>(a, b);
 }
 
 }  // namespace ogls::helpers
