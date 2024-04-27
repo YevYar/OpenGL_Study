@@ -157,7 +157,21 @@ constexpr bool operator!=(const Point<Type>& p1, const Point<Type>& p2) noexcept
 template<typename Type>
 inline float distanceBetweenPoints(const Point<Type>& p1, const Point<Type>& p2) noexcept
 {
-    return p1 == p2 ? 0.0f : std::sqrtf(square(p2.x - p1.x) + square(p2.y - p1.y) + square(p2.z - p1.z));
+    if constexpr (std::is_same_v<Type, unsigned int>)
+    {
+        const auto squaredDifference = [](unsigned int a, unsigned int b)
+        {
+            return b > a ? square(b - a) : square(a - b);
+        };
+
+        return p1 == p2 ? 0.0f
+                        : std::sqrtf(squaredDifference(p1.x, p2.x) + squaredDifference(p1.y, p2.y)
+                                     + squaredDifference(p1.z, p2.z));
+    }
+    else
+    {
+        return p1 == p2 ? 0.0f : std::sqrtf(square(p2.x - p1.x) + square(p2.y - p1.y) + square(p2.z - p1.z));
+    }
 }
 
 }  // namespace ogls::mathCore

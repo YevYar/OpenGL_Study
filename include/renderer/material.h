@@ -120,13 +120,7 @@ class Material
          * \brief Returns the map of texture names and their TextureData.
          */
         const std::unordered_map<std::string, std::shared_ptr<oglCore::texture::TextureData>>&
-                     getTextures() const noexcept;
-        /**
-         * \brief May be used to call some specific graphics API functions to render this Material.
-         *
-         * It may take textures from a Renderer object to set specific texture parameters.
-         */
-        virtual void render();
+             getTextures() const noexcept;
         /**
          * \brief Sets the Ñolor associated with a shader variable.
          *
@@ -136,28 +130,36 @@ class Material
          * \param color              - the Color to set.
          * \see setShaderVariableValue().
          */
-        void         setColor(std::string_view shaderVariableName, Color color);
+        void setColor(std::string_view shaderVariableName, Color color);
         /**
          * \brief Sets the value of a shader variable.
          *
-         * \param name  - the name of the shader variable.
-         * \param value - the value to set.
+         * \param shaderVariableName - the name of the shader variable.
+         * \param value              - the value to set.
          */
-        void         setShaderVariableValue(std::string_view                         shaderVariableName,
-                                            std::variant<OGLS_SHADER_VARIABLE_TYPES> value);
+        void setShaderVariableValue(std::string_view                         shaderVariableName,
+                                    std::variant<OGLS_SHADER_VARIABLE_TYPES> value);
         /**
          * \brief Sets the data of the texture by its name.
          *
          * \param textureName - the name of the texture.
          * \param data        - the TextureData object to set.
          */
-        void         setTextureData(std::string_view textureName, std::shared_ptr<oglCore::texture::TextureData> data);
+        void setTextureData(std::string_view textureName, std::shared_ptr<oglCore::texture::TextureData> data);
 
     protected:
         /**
          * \brief Cleans the list of shader variables and textures, which must be updated by Renderer.
          */
         virtual void setUpdatedState();
+
+    private:
+        /**
+         * \brief May be used to call some specific graphics API functions to render this Material.
+         *
+         * It may take textures from a Renderer object to set specific texture parameters.
+         */
+        virtual void render();
 
     protected:
         /**
