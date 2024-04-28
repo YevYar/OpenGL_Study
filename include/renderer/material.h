@@ -56,6 +56,112 @@ class Material
 
         };  // struct Color
 
+        /**
+         * \brief Texture provides an easy access to the texture of the Material.
+         *
+         * It's a wrapper over Material::getTextureData() and Material::setTextureData()
+         * to avoid using text keys to access textures.
+         */
+        class Texture
+        {
+            public:
+                Texture() noexcept = default;
+                OGLS_DEFAULT_COPYABLE_MOVABLE(Texture)
+                virtual ~Texture() noexcept = default;
+
+                /**
+                 * \brief Retrieves the data of the texture.
+                 *
+                 * \see Material::getTextureData().
+                 * \return the TextureData of the texture.
+                 * \throw std::out_of_range.
+                 */
+                std::shared_ptr<oglCore::texture::TextureData> getData() const;
+                /**
+                 * \brief Sets the data of the texture.
+                 *
+                 * \param data - the TextureData object to set.
+                 * \see Material::setTextureData().
+                 */
+                void setData(std::shared_ptr<oglCore::texture::TextureData> data);
+
+            protected:
+                /**
+                 * \brief Constructs the new Texture.
+                 *
+                 * \param parent      - the Material object, to which the Texture belongs.
+                 * \param textureName - the name of the texture.
+                 */
+                Texture(Material* parent, std::string textureName) noexcept;
+
+            protected:
+                /**
+                 * \brief The Material object, to which the Texture belongs.
+                 */
+                Material*   m_parent = nullptr;
+                /**
+                 * \brief The name of the texture.
+                 */
+                std::string m_textureName;
+
+
+                friend class Material;
+
+        };  // class Texture
+
+        /**
+         * \brief Variable provides an easy access to the shader variable of the Material.
+         *
+         * It's a wrapper over Material::getShaderVariableValue() and Material::setShaderVariableValue()
+         * to avoid using text keys to access shader variables.
+         */
+        class Variable
+        {
+            public:
+                Variable() noexcept = default;
+                OGLS_DEFAULT_COPYABLE_MOVABLE(Variable)
+                virtual ~Variable() noexcept = default;
+
+                /**
+                 * \brief Retrieves the value of the shader variable.
+                 *
+                 * \see Material::getShaderVariableValue().
+                 * \return the shader variable's value.
+                 * \throw std::out_of_range.
+                 */
+                std::variant<OGLS_SHADER_VARIABLE_TYPES> getValue() const;
+                /**
+                 * \brief Sets the value of a shader variable.
+                 *
+                 * \param value - the value to set.
+                 * \see Material::setShaderVariableValue().
+                 */
+                void                                     setValue(std::variant<OGLS_SHADER_VARIABLE_TYPES> value);
+
+            protected:
+                /**
+                 * \brief Constructs the new Variable.
+                 *
+                 * \param parent       - the Material object, to which the Variable belongs.
+                 * \param variableName - the name of the shader variable.
+                 */
+                Variable(Material* parent, std::string variableName) noexcept;
+
+            protected:
+                /**
+                 * \brief The Material object, to which the Variable belongs.
+                 */
+                Material*   m_parent = nullptr;
+                /**
+                 * \brief The name of the shader variable.
+                 */
+                std::string m_variableName;
+
+
+                friend class Material;
+
+        };  // class Variable
+
     public:
         OGLS_DEFAULT_COPYABLE_MOVABLE(Material)
         /**
@@ -96,6 +202,13 @@ class Material
          */
         std::string_view                         getPathToVertexShader() const noexcept;
         /**
+         * \brief Creates an object of the type Variable to provide an easy access to the shader variable of the Material.
+         *
+         * \param shaderVariableName - the name of the shader variable.
+         * \return the object of the type Variable for the shader variable with the name shaderVariableName.
+         */
+        Variable                                 getShaderVariable(std::string shaderVariableName) const noexcept;
+        /**
          * \brief Retrieves the value of the shader variable by name.
          *
          * \param shaderVariableName - the name of the shader variable.
@@ -108,6 +221,13 @@ class Material
          */
         const std::unordered_map<std::string, std::variant<OGLS_SHADER_VARIABLE_TYPES>>&
                                                        getShaderVariables() const noexcept;
+        /**
+         * \brief Creates an object of the type Texture to provide an easy access to the texture of the Material.
+         *
+         * \param textureName - the name of the texture.
+         * \return the object of the type Texture for the texture with the name textureName.
+         */
+        Texture                                        getTexture(std::string textureName) const noexcept;
         /**
          * \brief Retrieves the texture by name.
          *

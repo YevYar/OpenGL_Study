@@ -34,6 +34,11 @@ std::string_view Material::getPathToVertexShader() const noexcept
     return std::string_view{m_pathToVertexShader};
 }
 
+Material::Variable Material::getShaderVariable(std::string shaderVariableName) const noexcept
+{
+    return Variable{const_cast<Material*>(this), std::move(shaderVariableName)};
+}
+
 std::variant<OGLS_SHADER_VARIABLE_TYPES> Material::getShaderVariableValue(std::string_view shaderVariableName) const
 {
     return m_shaderVariables.at(std::string{shaderVariableName});
@@ -43,6 +48,11 @@ const std::unordered_map<std::string, std::variant<OGLS_SHADER_VARIABLE_TYPES>>&
   Material::getShaderVariables() const noexcept
 {
     return m_shaderVariables;
+}
+
+Material::Texture Material::getTexture(std::string textureName) const noexcept
+{
+    return Texture{const_cast<Material*>(this), std::move(textureName)};
 }
 
 std::shared_ptr<oglCore::texture::TextureData> Material::getTextureData(std::string_view textureName) const
@@ -84,6 +94,42 @@ void Material::setUpdatedState()
 {
     m_shaderVariablesToUpdate.clear();
     m_texturesToUpdate.clear();
+}
+
+Material::Texture::Texture(Material* parent, std::string textureName) noexcept :
+    m_parent{parent}, m_textureName{std::move(textureName)}
+{
+}
+
+std::shared_ptr<oglCore::texture::TextureData> Material::Texture::getData() const
+{
+    return m_parent ? m_parent->getTextureData(m_textureName) : nullptr;
+}
+
+void Material::Texture::setData(std::shared_ptr<oglCore::texture::TextureData> data)
+{
+    if (m_parent)
+    {
+        m_parent->setTextureData(m_textureName, data);
+    }
+}
+
+Material::Variable::Variable(Material* parent, std::string variableName) noexcept :
+    m_parent{parent}, m_variableName{std::move(variableName)}
+{
+}
+
+std::variant<OGLS_SHADER_VARIABLE_TYPES> Material::Variable::getValue() const
+{
+    return m_parent ? m_parent->getShaderVariableValue(m_variableName) : std::variant<OGLS_SHADER_VARIABLE_TYPES>{};
+}
+
+void Material::Variable::setValue(std::variant<OGLS_SHADER_VARIABLE_TYPES> value)
+{
+    if (m_parent)
+    {
+        m_parent->setShaderVariableValue(m_variableName, std::move(value));
+    }
 }
 
 }  // namespace ogls::renderer
