@@ -26,6 +26,9 @@ class MulticoloredRectangle : public ogls::renderer::SceneObject
          */
         void setColorCoefficient(float k);
 
+    private:
+        using ogls::renderer::SceneObject::SceneObject;
+
         /**
          * \brief Renders multicolored rectangle on the scene.
          */
@@ -33,23 +36,17 @@ class MulticoloredRectangle : public ogls::renderer::SceneObject
 
     private:
         /**
-         * \brief Constructs an object with specified vertex array object and shader program.
-         *
-         * \param vao           - a vertex array object, which contains necessary vertex configuration.
-         * \param shaderProgram - a shader program, which is used for rendering of the rectangle.
-         */
-        MulticoloredRectangle(std::shared_ptr<ogls::oglCore::vertex::VertexArray>   vao,
-                              std::shared_ptr<ogls::oglCore::shader::ShaderProgram> shaderProgram);
-
-    private:
-        /**
          * \brief Coefficient, which is used to change the color while blinking.
          */
-        ogls::oglCore::shader::VectorUniform<float, 1>& m_colorCoefficient;
+        ogls::renderer::Material::Variable m_colorCoefficient;
         /**
          * \brief Counter to count a number of rendering iterations.
          */
-        int                                             m_counter = {0};
+        int                                m_counter = {0};
+        /**
+         * \brief The texture of the rectangle.
+         */
+        ogls::renderer::Material::Texture  m_mainTexture;
 
 
         friend std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle();
@@ -60,6 +57,7 @@ class MulticoloredRectangle : public ogls::renderer::SceneObject
  * \brief Creates new MulticoloredRectangle object.
  *
  * \return std::unique_ptr on created MulticoloredRectangle.
+ * TODO: think about the exceptions
  * \throw ogls::exceptions::GLRecAcquisitionException(), see ogls::oglCore::shader::makeShaderProgram().
  */
 std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle();

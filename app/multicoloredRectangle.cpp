@@ -17,20 +17,12 @@
 
 namespace app
 {
-MulticoloredRectangle::MulticoloredRectangle(std::shared_ptr<ogls::oglCore::vertex::VertexArray>   vao,
-                                             std::shared_ptr<ogls::oglCore::shader::ShaderProgram> shaderProgram) :
-    SceneObject{std::move(vao), shaderProgram},
-    m_colorCoefficient{shaderProgram->getVectorUniform<float, 1>("k")}
-{
-}
-
 void MulticoloredRectangle::setColorCoefficient(float k)
 {
     // TODO:
     if (k >= 0.0 && !isgreater(k, 1.0))
     {
-        m_shaderProgram->use();
-        m_colorCoefficient.setData(k);
+        m_colorCoefficient.setValue(k);
         return;
     }
     // throw std::out_of_range{"k must be in the range [0; 1]."};
@@ -42,16 +34,12 @@ void MulticoloredRectangle::render()
     using namespace ogls::oglCore;
 
 
-    m_vao->bind();
-    m_shaderProgram->use();
-    applyTexturesConfiguration();
-
     if (m_counter++ == 300)
     {
         auto textureData =
           std::shared_ptr<texture::TextureData>{readTextureFromFile("resources/textures/awesomeface.png")};
         textureData->format = texture::TexturePixelFormat::Rgba;
-        texture::castBaseTextureToTexture<2>(m_texturesConfiguration, 0, 0)->setData(textureData);
+        m_mainTexture.setData(textureData);
     }
 
     OGLS_GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
@@ -60,80 +48,78 @@ void MulticoloredRectangle::render()
 std::unique_ptr<MulticoloredRectangle> makeMulticoloredRectangle()
 {
     using namespace ogls;
-    using namespace ogls::oglCore::shader;
+    using namespace ogls::mathCore;
     using namespace ogls::oglCore::texture;
-    using namespace ogls::oglCore::vertex;
+    using namespace ogls::renderer;
 
 
     static auto callCounter = int{0};
 
-    // clang-format off
-    static const auto points  = std::array<GLfloat, 28>{
-		-0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f
-	};
-    // clang-format on
-    static const auto indices = std::array<GLuint, 6>{0, 1, 2, 2, 3, 0};
+    // Create the Mesh only once
+    static auto rectangleMesh = std::shared_ptr<Mesh>{};
 
-    // Configure VAO, VBO and EBO only once
-    static auto VAO = std::make_shared<VertexArray>();
-
-    static auto coordinateMap =
-      VertexAttribute{.byteOffset{0}, .count{2}, .index{0}, .normalized{false}, .type{VertexAttrType::Float}};
-    static auto colorMap  = VertexAttribute{.byteOffset{getByteSizeOfType(VertexAttrType::Float) * 2},
-                                            .count{3},
-                                            .index{1},
-                                            .normalized{false},
-                                            .type{VertexAttrType::Float}};
-    static auto texCoords = VertexAttribute{.byteOffset{getByteSizeOfType(VertexAttrType::Float) * 5},
-                                            .count{2},
-                                            .index{2},
-                                            .normalized{false},
-                                            .type{VertexAttrType::Float}};
-
-    static auto layout = VertexBufferLayout{};
     if (callCounter == 0)
     {
-        layout.addVertexAttribute(coordinateMap);
-        layout.addVertexAttribute(colorMap);
-        layout.addVertexAttribute(texCoords);
+        auto vertices = std::vector<Mesh::Vertex>(4);
+        {
+            auto topLeft = Mesh::Vertex{
+              .normal    = mathCore::Vec3{1.0f, 1.0f, 1.0f},
+              .otherData = {{"color", {1.0f, 1.0f, 1.0f}}},
+              .position  = mathCore::Point<float>{-0.5f, -0.5f},
+              .texCoords = mathCore::Point<float>{0.0f, 0.0f}
+            };
+            vertices[0] = std::move(topLeft);
+
+            auto topRight = Mesh::Vertex{
+              .normal    = mathCore::Vec3{1.0f, 1.0f, 1.0f},
+              .otherData = {{"color", {1.0f, 0.0f, 0.0f}}},
+              .position  = mathCore::Point<float>{-0.5f, 0.5f},
+              .texCoords = mathCore::Point<float>{0.0f, 1.0f}
+            };
+            vertices[1] = std::move(topRight);
+
+            auto bottomRight = Mesh::Vertex{
+              .normal    = mathCore::Vec3{1.0f, 1.0f, 1.0f},
+              .otherData = {{"color", {0.0f, 1.0f, 0.0f}}},
+              .position  = mathCore::Point<float>{0.5f, 0.5f},
+              .texCoords = mathCore::Point<float>{1.0f, 1.0f}
+            };
+            vertices[2] = std::move(bottomRight);
+
+            auto bottomLeft = Mesh::Vertex{
+              .normal    = mathCore::Vec3{1.0f, 1.0f, 1.0f},
+              .otherData = {{"color", {0.0f, 0.0f, 1.0f}}},
+              .position  = mathCore::Point<float>{0.5f, -0.5f},
+              .texCoords = mathCore::Point<float>{1.0f, 0.0f}
+            };
+            vertices[3] = std::move(bottomLeft);
+        }
+
+        auto indices = std::vector<unsigned int>{0, 1, 2, 2, 3, 0};
+
+        rectangleMesh = std::make_shared<Mesh>(std::move(vertices), std::move(indices));
     }
 
-    static auto data = ArrayData{reinterpret_cast<const void*>(points.data()), sizeof(points)};
-    static auto VBO  = std::make_shared<Buffer>(BufferTarget::ArrayBuffer, data, BufferDataUsage::StaticDraw, layout);
-    if (callCounter == 0)
-    {
-        VAO->addBuffer(VBO);
-    }
-
-    static auto EBO =
-      std::make_shared<Buffer>(BufferTarget::ElementArrayBuffer,
-                               ArrayData{reinterpret_cast<const void*>(indices.data()), sizeof(indices)},
-                               BufferDataUsage::StaticDraw);
-    if (callCounter == 0)
-    {
-        VAO->addBuffer(EBO);
-    }
-
-    // Create shader program only once
-    static auto shaderProgram = std::shared_ptr<ShaderProgram>{
-      makeShaderProgram("resources/shaders/vs/vertexShader.vert", "resources/shaders/fs/fragmentShader.frag")};
-
-    // Load textures only once
+    // Load the texture only once
     static auto textureData =
       std::shared_ptr<TextureData>{helpers::readTextureFromFile("resources/textures/wooden_container.jpg")};
-    static auto                  texture2D = std::make_shared<Texture<2>>(TextureTarget::Texture2d, textureData);
-    static TexturesConfiguration texturesConfig{
-      {0, std::vector<std::shared_ptr<BaseTexture>>{texture2D}}
-    };
+
+    // Create new Material
+    const auto material = Material{"resources/shaders/vs/vertexShader.vert",
+                                   "resources/shaders/fs/fragmentShader.frag",
+                                   {{"k", 0}},
+                                   {{"mainTexture", textureData}}};
 
     ++callCounter;
 
     // Create new MulticoloredRectangle
-    auto rect = new MulticoloredRectangle{VAO, shaderProgram};
-    rect->setTexturesConfiguration(texturesConfig);
+    auto rect = new MulticoloredRectangle{
+      rectangleMesh, material, SceneObject::Size{.length = 100, .height = 100}
+    };
+
+    // Set the Material variables
+    rect->m_colorCoefficient = material.getShaderVariable("k");
+    rect->m_mainTexture      = material.getTexture("mainTexture");
     return std::unique_ptr<MulticoloredRectangle>(rect);
 }
 

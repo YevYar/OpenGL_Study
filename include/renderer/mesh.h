@@ -2,6 +2,7 @@
 #define OGLS_RENDERER_MESH_H
 
 #include <string_view>
+#include <variant>
 
 #include "helpers/macros.h"
 #include "mathCore/point.h"
@@ -10,6 +11,13 @@
 
 namespace ogls::renderer
 {
+/**
+ * \brief Defines the types, which can be used as type of vertices data.
+ *
+ * \note The list may be extended in the future.
+ */
+#define OGLS_VERTICES_DATA_TYPES signed char, unsigned char, short, unsigned short, int, unsigned int, float, double
+
 /**
  * \brief Mesh is a base class for all classes, which contain the Vertex data
  * (positions, normals, texture coordinates, etc.) that define the geometry of an object
@@ -21,24 +29,25 @@ class Mesh
         /**
          * \brief Vertex represents a vertex in 3D space with position, normal, and texture coordinates.
          */
-        struct Vertex
+        struct Vertex final
         {
-            public:
-                constexpr virtual ~Vertex() noexcept = default;
-
             public:
                 /**
                  * \brief The normal vector of the Vertex, used for lighting calculations.
                  */
-                mathCore::Vec3         normal;
+                mathCore::Vec3                                                                       normal;
+                /**
+                 * \brief The other data, which must be passed to the Vertex.
+                 */
+                std::unordered_map<std::string, std::vector<std::variant<OGLS_VERTICES_DATA_TYPES>>> otherData;
                 /**
                  * \brief The position of the Vertex in 3D space.
                  */
-                mathCore::Point<float> position;
+                mathCore::Point<float>                                                               position;
                 /**
                  * \brief The texture coordinates of the Vertex, used for texture mapping.
                  */
-                mathCore::Point<float> texCoords;
+                mathCore::Point<float>                                                               texCoords;
 
         };  // struct Vertex
 
