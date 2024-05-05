@@ -1,19 +1,6 @@
 #include "multicoloredRectangle.h"
 
-#include <array>
-#include <cmath>
-#include <exception>
-#include <stdexcept>
-
-#include <glad/glad.h>
-
-#include "buffer.h"
-#include "generalTypes.h"
-#include "helpers/debugHelpers.h"
 #include "helpers/helpers.h"
-#include "shaderProgram.h"
-#include "texture.h"
-#include "uniforms.h"
 
 namespace app
 {
