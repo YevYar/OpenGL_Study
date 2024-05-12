@@ -31,8 +31,10 @@ class MulticoloredRectangle : public ogls::renderer::SceneObject
 
         /**
          * \brief Renders multicolored rectangle on the scene.
+         *
+         * \param renderer - the object, which performs a rendering operation.
          */
-        void render() override;
+        void render(std::shared_ptr<ogls::renderer::Renderer> renderer) override;
 
     private:
         /**

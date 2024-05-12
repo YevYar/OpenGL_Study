@@ -65,6 +65,9 @@ class Material
         class Texture
         {
             public:
+                /**
+                 * \brief Constructs an invalid Texture that doesn't refer to any texture of the Material.
+                 */
                 Texture() noexcept = default;
                 OGLS_DEFAULT_COPYABLE_MOVABLE(Texture)
                 virtual ~Texture() noexcept = default;
@@ -118,6 +121,9 @@ class Material
         class Variable
         {
             public:
+                /**
+                 * \brief Constructs an invalid Variable that doesn't refer to any variable of the Material.
+                 */
                 Variable() noexcept = default;
                 OGLS_DEFAULT_COPYABLE_MOVABLE(Variable)
                 virtual ~Variable() noexcept = default;
@@ -163,6 +169,10 @@ class Material
         };  // class Variable
 
     public:
+        /**
+         * \brief Constructs an invalid Material that doesn't represent any visual properties.
+         */
+        Material() = default;
         OGLS_DEFAULT_COPYABLE_MOVABLE(Material)
         /**
          * \brief Constructs a Material object.
@@ -278,8 +288,10 @@ class Material
          * \brief May be used to call some specific graphics API functions to render this Material.
          *
          * It may take textures from a Renderer object to set specific texture parameters.
+         *
+         * \param renderer - the object, which performs a rendering operation.
          */
-        virtual void render();
+        virtual void render(std::shared_ptr<Renderer> renderer);
 
     protected:
         /**

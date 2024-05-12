@@ -39,7 +39,7 @@ const std::vector<Mesh::Vertex>& Mesh::getVertices() const noexcept
     return m_vertices;
 }
 
-void Mesh::render()
+void Mesh::render(std::shared_ptr<Renderer> /*renderer*/)
 {
     // May be used to call some specific graphics API functions to render this Mesh.
 }

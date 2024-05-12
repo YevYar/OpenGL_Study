@@ -54,6 +54,9 @@ class Mesh
     public:
         static Mesh loadMeshFromFile(std::string_view fullFileName);
 
+        /**
+         * \brief Constructs an invalid Mesh that doesn't represent any geometry.
+         */
         Mesh() = default;
         OGLS_DEFAULT_COPYABLE_MOVABLE(Mesh)
         /**
@@ -83,8 +86,10 @@ class Mesh
     private:
         /**
          * \brief May be used to call some specific graphics API functions to render this Mesh.
+         *
+         * \param renderer - the object, which performs a rendering operation.
          */
-        virtual void render();
+        virtual void render(std::shared_ptr<Renderer> renderer);
 
     protected:
         /**

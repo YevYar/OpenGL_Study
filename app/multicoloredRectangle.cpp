@@ -15,7 +15,7 @@ void MulticoloredRectangle::setColorCoefficient(float k)
     // throw std::out_of_range{"k must be in the range [0; 1]."};
 }
 
-void MulticoloredRectangle::render()
+void MulticoloredRectangle::render(std::shared_ptr<ogls::renderer::Renderer> /*renderer*/)
 {
     using namespace ogls::helpers;
     using namespace ogls::oglCore;

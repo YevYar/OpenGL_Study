@@ -66,12 +66,6 @@ const std::unordered_map<std::string, std::shared_ptr<oglCore::texture::TextureD
     return m_textures;
 }
 
-void Material::render()
-{
-    // For example, take openglCore::texture::Texture by Material::m_id and the name of texture from Renderer to
-    // set some specific texture parameters.
-}
-
 void Material::setColor(std::string_view shaderVariableName, Color color)
 {
     setShaderVariableValue(shaderVariableName, color);
@@ -94,6 +88,12 @@ void Material::setUpdatedState()
 {
     m_shaderVariablesToUpdate.clear();
     m_texturesToUpdate.clear();
+}
+
+void Material::render(std::shared_ptr<Renderer> /*renderer*/)
+{
+    // For example, take openglCore::texture::Texture by Material::m_id and the name of texture from Renderer to
+    // set some specific texture parameters.
 }
 
 Material::Texture::Texture(Material* parent, std::string textureName) noexcept :

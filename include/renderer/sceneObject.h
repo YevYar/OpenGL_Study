@@ -35,6 +35,9 @@ class SceneObject
         };  // struct Size
 
     public:
+        /**
+         * \brief Constructs an invalid SceneObject without Mesh and Material.
+         */
         SceneObject() = default;
         OGLS_DEFAULT_COPYABLE_MOVABLE(SceneObject)
         /**
@@ -154,8 +157,10 @@ class SceneObject
     private:
         /**
          * \brief Renders something on the scene.
+         *
+         * \param renderer - the object, which performs a rendering operation.
          */
-        virtual void render() = 0;
+        virtual void render(std::shared_ptr<Renderer> renderer) = 0;
 
     protected:
         /**
