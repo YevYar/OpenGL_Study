@@ -1,6 +1,8 @@
 #ifndef OGLS_RENDERER_SCENE_OBJECT_H
 #define OGLS_RENDERER_SCENE_OBJECT_H
 
+#include <chrono>
+
 #include "mathCore/transformMatrix.h"
 #include "renderer/material.h"
 #include "renderer/mesh.h"
@@ -153,6 +155,16 @@ class SceneObject
          * \param mesh - the new Mesh to set.
          */
         void                  setMesh(std::shared_ptr<Mesh> mesh) noexcept;
+
+        /**
+         * \brief Updates the object.
+         *
+         * This method is responsible for updating the state of the SceneObject.
+         *
+         * \note Leave the implementation empty if no update is required.
+         * \param deltaTime - the time elapsed since the last frame, in milliseconds.
+         */
+        virtual void update(std::chrono::milliseconds deltaTime) = 0;
 
     private:
         /**

@@ -3,6 +3,7 @@ add_library(OpenGL_Study_Renderer)
 set(PUBLIC_HEADERS ${PATH_TO_PUBLIC_INCLUDE}/renderer/material.h
     ${PATH_TO_PUBLIC_INCLUDE}/renderer/mesh.h 
     ${PATH_TO_PUBLIC_INCLUDE}/renderer/renderer.h
+    ${PATH_TO_PUBLIC_INCLUDE}/renderer/scene.h
 	${PATH_TO_PUBLIC_INCLUDE}/renderer/sceneObject.h)
 	
 set(PRIVATE_HEADERS )
@@ -10,6 +11,7 @@ set(PRIVATE_HEADERS )
 set(SOURCES material.cpp
     mesh.cpp
     renderer.cpp
+    scene.cpp
 	sceneObject.cpp)
 
 
